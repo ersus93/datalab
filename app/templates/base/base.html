@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="{% block meta_description %}{{ brand_description }}{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}análisis de datos, dashboard, reportes, analytics{% endblock %}">
+    <meta name="author" content="ONIE DataLab">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="{% block og_title %}{{ brand_name }}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{{ brand_description }}{% endblock %}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.url }}">
+    
+    <!-- Title -->
+    <title>{% block title %}{{ brand_name }}{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='images/apple-touch-icon.png') }}">
+    
+    <!-- CSS Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
+    
+    <!-- Additional CSS -->
+    {% block additional_css %}{% endblock %}
+    
+    <!-- Custom CSS for specific pages -->
+    {% block page_css %}{% endblock %}
+</head>
+<body class="h-full bg-secondary" data-theme="{{ theme }}">
+    <!-- Skip to main content for accessibility -->
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-inverse p-2 rounded z-50">
+        Saltar al contenido principal
+    </a>
+    
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="fixed inset-0 bg-overlay z-50 flex items-center justify-center hidden">
+        <div class="spinner"></div>
+    </div>
+    
+    <!-- Main Application Layout -->
+    <div class="min-h-screen flex flex-col">
+        <!-- Header/Navigation -->
+        {% block header %}
+        <header class="bg-card shadow-sm border-b border-light sticky top-0 z-40">
+            <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <!-- Logo and Brand -->
+                    <div class="flex items-center">
+                        <a href="{{ url_for('core.index') }}" class="flex items-center space-x-3">
+                            <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="{{ brand_name }}" class="h-8 w-auto">
+                            <span class="text-xl font-bold text-primary">{{ brand_name }}</span>
+                        </a>
+                    </div>
+                    
+                    <!-- Desktop Navigation -->
+                    <div class="hidden md:flex items-center space-x-8">
+                        {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('dashboard.index') }}" class="nav-link {% if request.endpoint and 'dashboard' in request.endpoint %}active{% endif %}">
+                                Dashboard
+                            </a>
+                            <a href="{{ url_for('analytics.index') }}" class="nav-link {% if request.endpoint and 'analytics' in request.endpoint %}active{% endif %}">
+                                Analytics
+                            </a>
+                            <a href="{{ url_for('reports.index') }}" class="nav-link {% if request.endpoint and 'reports' in request.endpoint %}active{% endif %}">
+                                Reportes
+                            </a>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- User Menu -->
+                    <div class="flex items-center space-x-4">
+                        {% if current_user.is_authenticated %}
+                            <!-- Notifications -->
+                            <button type="button" class="btn-icon" id="notifications-btn">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5-5-5h5V3h0z"></path>
+                                </svg>
+                            </button>
+                            
+                            <!-- User Dropdown -->
+                            <div class="relative" id="user-menu">
+                                <button type="button" class="flex items-center space-x-2 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-primary" id="user-menu-button">
+                                    <img class="h-8 w-8 rounded-full" src="{{ current_user.avatar_url or url_for('static', filename='images/default-avatar.svg') }}" alt="{{ current_user.full_name }}">
+                                    <span class="hidden md:block text-secondary">{{ current_user.first_name }}</span>
+                                </button>
+                                
+                                <!-- Dropdown Menu -->
+                                <div class="dropdown-menu hidden absolute right-0 mt-2 w-48 bg-card rounded-md shadow-lg py-1 z-50" id="user-dropdown">
+                                    <a href="{{ url_for('auth.profile') }}" class="dropdown-item">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                        </svg>
+                                        Mi Perfil
+                                    </a>
+                                    <a href="{{ url_for('auth.settings') }}" class="dropdown-item">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        </svg>
+                                        Configuración
+                                    </a>
+                                    <div class="border-t border-light my-1"></div>
+                                    <a href="{{ url_for('auth.logout') }}" class="dropdown-item text-danger">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                        </svg>
+                                        Cerrar Sesión
+                                    </a>
+                                </div>
+                            </div>
+                        {% else %}
+                            <a href="{{ url_for('auth.login') }}" class="btn btn-outline">Iniciar Sesión</a>
+                            <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Registrarse</a>
+                        {% endif %}
+                        
+                        <!-- Mobile menu button -->
+                        <button type="button" class="md:hidden btn-icon" id="mobile-menu-button">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Mobile Navigation -->
+                <div class="md:hidden hidden" id="mobile-menu">
+                    <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-light">
+                        {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('dashboard.index') }}" class="mobile-nav-link">Dashboard</a>
+                            <a href="{{ url_for('analytics.index') }}" class="mobile-nav-link">Analytics</a>
+                            <a href="{{ url_for('reports.index') }}" class="mobile-nav-link">Reportes</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </nav>
+        </header>
+        {% endblock %}
+        
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible" role="alert">
+                            <span>{{ message }}</span>
+                            <button type="button" class="alert-close" data-dismiss="alert">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <!-- Main Content -->
+        <main class="flex-1" id="main-content">
+            {% block content %}{% endblock %}
+        </main>
+        
+        <!-- Footer -->
+        {% block footer %}
+        <footer class="bg-card border-t border-light mt-auto">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="flex items-center space-x-4 mb-4 md:mb-0">
+                        <span class="text-sm text-secondary">
+                            © 2024 {{ brand_name }}. Todos los derechos reservados.
+                        </span>
+                    </div>
+                    <div class="flex items-center space-x-6">
+                        <a href="#" class="text-sm text-secondary hover:text-primary transition-fast">Política de Privacidad</a>
+                        <a href="#" class="text-sm text-secondary hover:text-primary transition-fast">Términos de Uso</a>
+                        <a href="#" class="text-sm text-secondary hover:text-primary transition-fast">Soporte</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        {% endblock %}
+    </div>
+    
+    <!-- JavaScript Libraries -->
+    <script src="{{ url_for('static', filename='js/vendor/alpine.min.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/vendor/chart.min.js') }}"></script>
+    
+    <!-- Core JavaScript -->
+    <script src="{{ url_for('static', filename='js/core/utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/core/components.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/core/app.js') }}"></script>
+    
+    <!-- Additional JavaScript -->
+    {% block additional_js %}{% endblock %}
+    
+    <!-- Page-specific JavaScript -->
+    {% block page_js %}{% endblock %}
+    
+    <!-- Analytics (if configured) -->
+    {% if config.ANALYTICS_ID %}
+    <script>
+        // Google Analytics or other analytics code
+    </script>
+    {% endif %}
+</body>
+</html>

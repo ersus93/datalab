@@ -1,0 +1,131 @@
+{% extends "base/base.html" %}
+
+{% block title %}DataLab - Dashboard{% endblock %}
+
+{% block page_css %}
+<style>
+.hero-section {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 4rem 0;
+    text-align: center;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin: 3rem 0;
+}
+
+.stat-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin: 3rem 0;
+}
+
+.action-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s ease;
+}
+
+.action-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    text-decoration: none;
+    color: inherit;
+}
+
+.action-icon {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <h1>Bienvenido a DataLab</h1>
+        <p class="lead">Tu plataforma de análisis de datos y reportes</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">0</div>
+            <div class="stat-label">Reportes Generados</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">0</div>
+            <div class="stat-label">Análisis Completados</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">1</div>
+            <div class="stat-label">Usuarios Activos</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">100%</div>
+            <div class="stat-label">Sistema Operativo</div>
+        </div>
+    </div>
+
+    <h2>Acciones Rápidas</h2>
+    <div class="quick-actions">
+        <a href="{{ url_for('dashboard.index') }}" class="action-card">
+            <div class="action-icon">📊</div>
+            <h4>Dashboard</h4>
+            <p>Ver panel de control principal</p>
+        </a>
+        <a href="{{ url_for('analytics.index') }}" class="action-card">
+            <div class="action-icon">📈</div>
+            <h4>Analytics</h4>
+            <p>Análisis de datos avanzado</p>
+        </a>
+        <a href="{{ url_for('reports.index') }}" class="action-card">
+            <div class="action-icon">📋</div>
+            <h4>Reportes</h4>
+            <p>Generar y ver reportes</p>
+        </a>
+        <a href="{{ url_for('auth.profile') }}" class="action-card">
+            <div class="action-icon">👤</div>
+            <h4>Perfil</h4>
+            <p>Configurar tu cuenta</p>
+        </a>
+    </div>
+</div>
+{% endblock %}
