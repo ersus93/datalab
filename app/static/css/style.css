@@ -1,0 +1,28 @@
+/* Importación de estilos base */
+/* Base styles */
+@import 'base/variables.css';
+@import 'base/reset.css';
+@import 'base/typography.css';
+
+/* Importación de layouts */
+@import 'layouts/layout.css';
+@import 'layouts/header.css';
+@import 'layouts/footer.css';
+@import 'layouts/sidebar.css';
+
+/* Importación de componentes */
+@import 'components/buttons.css';
+@import 'components/forms.css';
+@import 'components/cards.css';
+@import 'components/tables.css';
+@import 'components/alerts.css';
+@import 'components/avatars.css';
+
+/* Importación de utilidades */
+@import 'utilities/spacing.css';
+@import 'utilities/colors.css';
+@import 'utilities/helpers.css';
+
+/* Importación de páginas específicas */
+@import 'pages/base.css';
+@import 'pages/dashboard.css';
