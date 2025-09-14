@@ -1,0 +1,1 @@
+Refactorizando la estructura del proyecto. (Mira la estructura actual es mejor y practica.)
