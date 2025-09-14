@@ -1,9 +1,11 @@
 /* Importación de estilos base */
+/* Base styles */
 @import 'base/variables.css';
 @import 'base/reset.css';
 @import 'base/typography.css';
 
 /* Importación de layouts */
+@import 'layouts/layout.css';
 @import 'layouts/header.css';
 @import 'layouts/footer.css';
 @import 'layouts/sidebar.css';
