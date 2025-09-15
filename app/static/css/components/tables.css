@@ -1,0 +1,239 @@
+/* Estilos de tablas */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--bg-primary);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.table__wrapper {
+    overflow-x: auto;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+
+.table th,
+.table td {
+    padding: var(--spacing-md);
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table th {
+    background-color: var(--bg-secondary);
+    font-weight: 600;
+    color: var(--text-dark);
+    font-size: var(--font-size-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.table td {
+    color: var(--text-dark);
+    font-size: var(--font-size-sm);
+}
+
+.table tbody tr:hover {
+    background-color: var(--bg-secondary);
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Variantes de tabla */
+.table--striped tbody tr:nth-child(even) {
+    background-color: var(--bg-secondary);
+}
+
+.table--striped tbody tr:nth-child(even):hover {
+    background-color: var(--bg-accent);
+}
+
+.table--bordered {
+    border: 1px solid var(--border-color);
+}
+
+.table--bordered th,
+.table--bordered td {
+    border: 1px solid var(--border-color);
+}
+
+.table--borderless th,
+.table--borderless td {
+    border: none;
+}
+
+.table--compact th,
+.table--compact td {
+    padding: var(--spacing-sm);
+}
+
+.table--spacious th,
+.table--spacious td {
+    padding: var(--spacing-lg);
+}
+
+/* Alineación de contenido */
+.table__cell--center {
+    text-align: center;
+}
+
+.table__cell--right {
+    text-align: right;
+}
+
+.table__cell--nowrap {
+    white-space: nowrap;
+}
+
+/* Estados de fila */
+.table__row--active {
+    background-color: rgba(37, 99, 235, 0.1);
+}
+
+.table__row--success {
+    background-color: rgba(16, 185, 129, 0.1);
+}
+
+.table__row--warning {
+    background-color: rgba(245, 158, 11, 0.1);
+}
+
+.table__row--danger {
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+/* Acciones de tabla */
+.table__actions {
+    display: flex;
+    gap: var(--spacing-xs);
+    justify-content: flex-end;
+}
+
+.table__action {
+    padding: var(--spacing-xs);
+    border: none;
+    background: none;
+    color: var(--text-medium);
+    cursor: pointer;
+    border-radius: var(--border-radius);
+    transition: all var(--transition-fast);
+}
+
+.table__action:hover {
+    background-color: var(--bg-accent);
+    color: var(--primary-color);
+}
+
+.table__action--primary {
+    color: var(--primary-color);
+}
+
+.table__action--success {
+    color: #10b981;
+}
+
+.table__action--warning {
+    color: #f59e0b;
+}
+
+.table__action--danger {
+    color: #ef4444;
+}
+
+/* Indicadores de estado */
+.table__status {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.table__status--active {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.table__status--inactive {
+    background-color: rgba(107, 114, 128, 0.1);
+    color: #6b7280;
+}
+
+.table__status--pending {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.table__status--error {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.table__status-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background-color: currentColor;
+}
+
+/* Avatar en tabla */
+.table__avatar {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* Checkbox en tabla */
+.table__checkbox {
+    width: 1rem;
+    height: 1rem;
+    cursor: pointer;
+}
+
+/* Ordenamiento */
+.table__sort {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+}
+
+.table__sort:hover {
+    background-color: var(--bg-accent);
+}
+
+.table__sort--asc::after {
+    content: '↑';
+    position: absolute;
+    right: var(--spacing-xs);
+    color: var(--primary-color);
+}
+
+.table__sort--desc::after {
+    content: '↓';
+    position: absolute;
+    right: var(--spacing-xs);
+    color: var(--primary-color);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .table th,
+    .table td {
+        padding: var(--spacing-sm);
+        font-size: var(--font-size-xs);
+    }
+    
+    .table__actions {
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+}

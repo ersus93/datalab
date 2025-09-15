@@ -1,96 +1,140 @@
-/* Estilos de tipografía base */
+/* ===== SISTEMA DE TIPOGRAFÍA ===== */
 
 /* Encabezados */
-h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-lg);
+h1, .h1 {
+    font-size: var(--font-size-4xl);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+    color: var(--gray-900);
+    margin-bottom: var(--spacing-6);
+    letter-spacing: var(--letter-spacing-tight);
 }
 
-h2 {
-    font-size: 2rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-md);
+h2, .h2 {
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+    color: var(--gray-900);
+    margin-bottom: var(--spacing-5);
+    letter-spacing: var(--letter-spacing-tight);
 }
 
-h3 {
-    font-size: 1.75rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-md);
+h3, .h3 {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-snug);
+    color: var(--gray-900);
+    margin-bottom: var(--spacing-4);
 }
 
-h4 {
-    font-size: 1.5rem;
-    font-weight: 500;
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-sm);
+h4, .h4 {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-snug);
+    color: var(--gray-900);
+    margin-bottom: var(--spacing-3);
 }
 
-h5 {
-    font-size: 1.25rem;
-    font-weight: 500;
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-sm);
+h5, .h5 {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-normal);
+    color: var(--gray-900);
+    margin-bottom: var(--spacing-3);
 }
 
-h6 {
-    font-size: 1rem;
-    font-weight: 500;
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-sm);
+h6, .h6 {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-normal);
+    color: var(--gray-900);
+    margin-bottom: var(--spacing-2);
 }
 
-/* Párrafos y texto */
-p {
-    font-size: var(--font-size-md);
-    line-height: 1.6;
-    color: var(--text-secondary);
-    margin-bottom: var(--spacing-md);
+/* Párrafos y texto base */
+p, .text-base {
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-relaxed);
+    color: var(--gray-700);
+    margin-bottom: var(--spacing-4);
+}
+
+/* Tamaños de texto */
+.text-xs {
+    font-size: var(--font-size-xs);
+    line-height: var(--line-height-normal);
 }
 
 .text-sm {
     font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
 }
 
 .text-lg {
     font-size: var(--font-size-lg);
+    line-height: var(--line-height-relaxed);
 }
 
 .text-xl {
     font-size: var(--font-size-xl);
+    line-height: var(--line-height-relaxed);
+}
+
+.text-2xl {
+    font-size: var(--font-size-2xl);
+    line-height: var(--line-height-snug);
+}
+
+.text-3xl {
+    font-size: var(--font-size-3xl);
+    line-height: var(--line-height-tight);
+}
+
+.text-4xl {
+    font-size: var(--font-size-4xl);
+    line-height: var(--line-height-tight);
 }
 
 /* Pesos de fuente */
+.font-thin {
+    font-weight: var(--font-weight-thin);
+}
+
 .font-light {
-    font-weight: 300;
+    font-weight: var(--font-weight-light);
 }
 
 .font-normal {
-    font-weight: 400;
+    font-weight: var(--font-weight-normal);
 }
 
 .font-medium {
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
 }
 
 .font-semibold {
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
 }
 
 .font-bold {
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
 }
 
-/* Estilos de texto */
-.text-center {
-    text-align: center;
+.font-extrabold {
+    font-weight: var(--font-weight-extrabold);
 }
 
+.font-black {
+    font-weight: var(--font-weight-black);
+}
+
+/* Alineación de texto */
 .text-left {
     text-align: left;
+}
+
+.text-center {
+    text-align: center;
 }
 
 .text-right {
@@ -101,66 +145,316 @@ p {
     text-align: justify;
 }
 
+/* Altura de línea */
+.leading-none {
+    line-height: var(--line-height-none);
+}
+
+.leading-tight {
+    line-height: var(--line-height-tight);
+}
+
+.leading-snug {
+    line-height: var(--line-height-snug);
+}
+
+.leading-normal {
+    line-height: var(--line-height-normal);
+}
+
+.leading-relaxed {
+    line-height: var(--line-height-relaxed);
+}
+
+.leading-loose {
+    line-height: var(--line-height-loose);
+}
+
+/* Espaciado de letras */
+.tracking-tighter {
+    letter-spacing: var(--letter-spacing-tighter);
+}
+
+.tracking-tight {
+    letter-spacing: var(--letter-spacing-tight);
+}
+
+.tracking-normal {
+    letter-spacing: var(--letter-spacing-normal);
+}
+
+.tracking-wide {
+    letter-spacing: var(--letter-spacing-wide);
+}
+
+.tracking-wider {
+    letter-spacing: var(--letter-spacing-wider);
+}
+
+.tracking-widest {
+    letter-spacing: var(--letter-spacing-widest);
+}
+
 /* Colores de texto */
 .text-primary {
-    color: var(--primary-color);
+    color: var(--primary-600);
 }
 
 .text-secondary {
-    color: var(--text-secondary);
+    color: var(--gray-600);
 }
 
-.text-light {
-    color: var(--text-light);
+.text-muted {
+    color: var(--gray-500);
+}
+
+.text-white {
+    color: var(--white);
+}
+
+.text-black {
+    color: var(--black);
 }
 
 .text-success {
-    color: var(--success-color);
+    color: var(--success-600);
 }
 
 .text-warning {
-    color: var(--warning-color);
+    color: var(--warning-600);
 }
 
-.text-error {
-    color: var(--error-color);
+.text-danger {
+    color: var(--danger-600);
 }
 
 .text-info {
-    color: var(--info-color);
+    color: var(--info-600);
 }
 
-/* Listas */
-ul.list-disc {
+/* Escalas de grises */
+.text-gray-50 { color: var(--gray-50); }
+.text-gray-100 { color: var(--gray-100); }
+.text-gray-200 { color: var(--gray-200); }
+.text-gray-300 { color: var(--gray-300); }
+.text-gray-400 { color: var(--gray-400); }
+.text-gray-500 { color: var(--gray-500); }
+.text-gray-600 { color: var(--gray-600); }
+.text-gray-700 { color: var(--gray-700); }
+.text-gray-800 { color: var(--gray-800); }
+.text-gray-900 { color: var(--gray-900); }
+
+/* Estilos de listas */
+.list-none {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.list-disc {
     list-style-type: disc;
-    padding-left: var(--spacing-lg);
-    margin-bottom: var(--spacing-md);
+    padding-left: var(--spacing-6);
+    margin-bottom: var(--spacing-4);
 }
 
-ol.list-decimal {
+.list-decimal {
     list-style-type: decimal;
-    padding-left: var(--spacing-lg);
-    margin-bottom: var(--spacing-md);
+    padding-left: var(--spacing-6);
+    margin-bottom: var(--spacing-4);
+}
+
+.list-inside {
+    list-style-position: inside;
+}
+
+.list-outside {
+    list-style-position: outside;
+}
+
+/* Elementos de lista */
+li {
+    margin-bottom: var(--spacing-1);
+}
+
+li:last-child {
+    margin-bottom: 0;
 }
 
 /* Enlaces */
 a {
-    color: var(--primary-color);
+    color: var(--primary-600);
     text-decoration: none;
-    transition: color var(--transition-fast);
+    transition: var(--transition-colors);
+    border-radius: var(--border-radius-sm);
 }
 
 a:hover {
-    color: var(--primary-dark);
+    color: var(--primary-700);
     text-decoration: underline;
 }
 
-/* Citas */
+a:focus {
+    outline: 2px solid var(--primary-500);
+    outline-offset: 2px;
+}
+
+/* Variantes de enlaces */
+.link {
+    color: var(--primary-600);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: var(--transition-colors);
+}
+
+.link:hover {
+    color: var(--primary-700);
+    text-decoration-thickness: 2px;
+}
+
+.link--muted {
+    color: var(--gray-600);
+    text-decoration: none;
+}
+
+.link--muted:hover {
+    color: var(--gray-900);
+    text-decoration: underline;
+}
+
+/* Citas y elementos especiales */
 blockquote {
     font-size: var(--font-size-lg);
     font-style: italic;
-    color: var(--text-secondary);
-    border-left: 4px solid var(--primary-color);
-    padding-left: var(--spacing-md);
-    margin: var(--spacing-lg) 0;
+    color: var(--gray-700);
+    border-left: 4px solid var(--primary-500);
+    padding-left: var(--spacing-4);
+    margin: var(--spacing-6) 0;
+    background-color: var(--gray-50);
+    padding: var(--spacing-4);
+    border-radius: var(--border-radius-md);
+}
+
+/* Código */
+code {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    color: var(--gray-800);
+    background-color: var(--gray-100);
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--border-radius-sm);
+}
+
+pre {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    color: var(--gray-800);
+    background-color: var(--gray-100);
+    padding: var(--spacing-4);
+    border-radius: var(--border-radius-md);
+    overflow-x: auto;
+    margin: var(--spacing-4) 0;
+}
+
+pre code {
+    background-color: transparent;
+    padding: 0;
+    border-radius: 0;
+}
+
+/* Texto destacado */
+mark, .highlight {
+    background-color: var(--warning-200);
+    color: var(--warning-900);
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--border-radius-sm);
+}
+
+/* Texto pequeño */
+small, .text-small {
+    font-size: var(--font-size-xs);
+    color: var(--gray-600);
+}
+
+/* Texto en mayúsculas */
+.uppercase {
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+}
+
+.lowercase {
+    text-transform: lowercase;
+}
+
+.capitalize {
+    text-transform: capitalize;
+}
+
+.normal-case {
+    text-transform: none;
+}
+
+/* Decoración de texto */
+.underline {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.line-through {
+    text-decoration: line-through;
+}
+
+.no-underline {
+    text-decoration: none;
+}
+
+/* Truncado de texto */
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.text-ellipsis {
+    text-overflow: ellipsis;
+}
+
+.text-clip {
+    text-overflow: clip;
+}
+
+/* Espaciado en blanco */
+.whitespace-normal {
+    white-space: normal;
+}
+
+.whitespace-nowrap {
+    white-space: nowrap;
+}
+
+.whitespace-pre {
+    white-space: pre;
+}
+
+.whitespace-pre-line {
+    white-space: pre-line;
+}
+
+.whitespace-pre-wrap {
+    white-space: pre-wrap;
+}
+
+/* Selección de texto */
+.select-none {
+    user-select: none;
+}
+
+.select-text {
+    user-select: text;
+}
+
+.select-all {
+    user-select: all;
+}
+
+.select-auto {
+    user-select: auto;
 }

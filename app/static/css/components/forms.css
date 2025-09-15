@@ -1,0 +1,374 @@
+/* Estilos de formularios */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-6);
+    width: 100%;
+}
+
+.form--inline {
+    flex-direction: row;
+    align-items: end;
+    flex-wrap: wrap;
+}
+
+.form__group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+    position: relative;
+}
+
+.form__group--inline {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--spacing-3);
+}
+
+.form__label {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--gray-700);
+    line-height: var(--line-height-tight);
+    margin-bottom: var(--spacing-1);
+}
+
+.form__label--required::after {
+    content: ' *';
+    color: var(--danger-500);
+    font-weight: var(--font-weight-bold);
+}
+
+/* Campos de entrada base */
+.form__input,
+.form__textarea,
+.form__select {
+    width: 100%;
+    padding: var(--spacing-3) var(--spacing-4);
+    border: 1px solid var(--gray-300);
+    border-radius: var(--border-radius-md);
+    font-size: var(--font-size-base);
+    font-family: inherit;
+    line-height: var(--line-height-normal);
+    background-color: var(--white);
+    color: var(--gray-900);
+    transition: var(--transition-all);
+    box-shadow: var(--shadow-sm);
+}
+
+.form__input::placeholder,
+.form__textarea::placeholder {
+    color: var(--gray-400);
+    opacity: 1;
+}
+
+/* Estados de focus */
+.form__input:focus,
+.form__textarea:focus,
+.form__select:focus {
+    outline: none;
+    border-color: var(--primary-500);
+    box-shadow: var(--shadow-sm), 0 0 0 3px var(--primary-100);
+    background-color: var(--white);
+}
+
+/* Estados hover */
+.form__input:hover:not(:disabled),
+.form__textarea:hover:not(:disabled),
+.form__select:hover:not(:disabled) {
+    border-color: var(--gray-400);
+}
+
+/* Estados disabled */
+.form__input:disabled,
+.form__textarea:disabled,
+.form__select:disabled {
+    background-color: var(--gray-50);
+    border-color: var(--gray-200);
+    color: var(--gray-500);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Tamaños de campos */
+.form__input--sm,
+.form__textarea--sm,
+.form__select--sm {
+    padding: var(--spacing-2) var(--spacing-3);
+    font-size: var(--font-size-sm);
+}
+
+.form__input--lg,
+.form__textarea--lg,
+.form__select--lg {
+    padding: var(--spacing-4) var(--spacing-5);
+    font-size: var(--font-size-lg);
+}
+
+/* Textarea específico */
+.form__textarea {
+    resize: vertical;
+    min-height: 120px;
+    line-height: var(--line-height-relaxed);
+}
+
+.form__textarea--fixed {
+    resize: none;
+}
+
+/* Select específico */
+.form__select {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right var(--spacing-3) center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: var(--spacing-10);
+    appearance: none;
+}
+
+.form__select:focus {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%233b82f6' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+}
+
+/* Textos de ayuda y error */
+.form__help {
+    font-size: var(--font-size-sm);
+    color: var(--gray-600);
+    line-height: var(--line-height-normal);
+    margin-top: var(--spacing-1);
+}
+
+.form__error {
+    font-size: var(--font-size-sm);
+    color: var(--danger-600);
+    line-height: var(--line-height-normal);
+    margin-top: var(--spacing-1);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-1);
+}
+
+.form__error::before {
+    content: '⚠';
+    font-size: var(--font-size-xs);
+}
+
+.form__success {
+    font-size: var(--font-size-sm);
+    color: var(--success-600);
+    line-height: var(--line-height-normal);
+    margin-top: var(--spacing-1);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-1);
+}
+
+.form__success::before {
+    content: '✓';
+    font-size: var(--font-size-xs);
+}
+
+/* Estados de error */
+.form__input--error,
+.form__textarea--error,
+.form__select--error {
+    border-color: var(--danger-500);
+    background-color: var(--danger-50);
+}
+
+.form__input--error:focus,
+.form__textarea--error:focus,
+.form__select--error:focus {
+    border-color: var(--danger-500);
+    box-shadow: var(--shadow-sm), 0 0 0 3px var(--danger-100);
+}
+
+/* Estados de éxito */
+.form__input--success,
+.form__textarea--success,
+.form__select--success {
+    border-color: var(--success-500);
+    background-color: var(--success-50);
+}
+
+.form__input--success:focus,
+.form__textarea--success:focus,
+.form__select--success:focus {
+    border-color: var(--success-500);
+    box-shadow: var(--shadow-sm), 0 0 0 3px var(--success-100);
+}
+
+/* Checkbox y Radio */
+.form__checkbox,
+.form__radio {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-3);
+    cursor: pointer;
+    position: relative;
+}
+
+.form__checkbox input,
+.form__radio input {
+    width: 1.125rem;
+    height: 1.125rem;
+    cursor: pointer;
+    margin: 0;
+    flex-shrink: 0;
+    accent-color: var(--primary-600);
+}
+
+.form__checkbox input:focus,
+.form__radio input:focus {
+    outline: 2px solid var(--primary-500);
+    outline-offset: 2px;
+}
+
+.form__checkbox label,
+.form__radio label {
+    cursor: pointer;
+    font-size: var(--font-size-base);
+    color: var(--gray-700);
+    line-height: var(--line-height-normal);
+    margin: 0;
+}
+
+.form__checkbox--disabled,
+.form__radio--disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.form__checkbox--disabled label,
+.form__radio--disabled label {
+    cursor: not-allowed;
+    color: var(--gray-500);
+}
+
+/* Grupo de checkboxes/radios */
+.form__checkbox-group,
+.form__radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+}
+
+.form__checkbox-group--inline,
+.form__radio-group--inline {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--spacing-4);
+}
+
+/* Grupo de botones */
+.form__actions {
+    display: flex;
+    gap: var(--spacing-3);
+    justify-content: flex-end;
+    margin-top: var(--spacing-8);
+    padding-top: var(--spacing-6);
+    border-top: 1px solid var(--gray-200);
+    flex-wrap: wrap;
+}
+
+.form__actions--center {
+    justify-content: center;
+}
+
+.form__actions--start {
+    justify-content: flex-start;
+}
+
+.form__actions--full {
+    justify-content: stretch;
+}
+
+.form__actions--full .btn {
+    flex: 1;
+}
+
+/* Campos de archivo */
+.form__file {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    width: 100%;
+}
+
+.form__file input[type="file"] {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+.form__file-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-3) var(--spacing-4);
+    border: 2px dashed var(--gray-300);
+    border-radius: var(--border-radius-md);
+    background-color: var(--gray-50);
+    color: var(--gray-600);
+    font-size: var(--font-size-sm);
+    transition: var(--transition-all);
+    min-height: 120px;
+    text-align: center;
+}
+
+.form__file:hover .form__file-label {
+    border-color: var(--primary-400);
+    background-color: var(--primary-50);
+    color: var(--primary-700);
+}
+
+.form__file input:focus + .form__file-label {
+    outline: 2px solid var(--primary-500);
+    outline-offset: 2px;
+}
+
+/* Campos de búsqueda */
+.form__search {
+    position: relative;
+}
+
+.form__search input {
+    padding-left: var(--spacing-10);
+}
+
+.form__search::before {
+    content: '🔍';
+    position: absolute;
+    left: var(--spacing-3);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-400);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .form--inline {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .form__group--inline {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .form__actions {
+        flex-direction: column;
+    }
+    
+    .form__checkbox-group--inline,
+    .form__radio-group--inline {
+        flex-direction: column;
+    }
+}

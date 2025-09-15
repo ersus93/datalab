@@ -1,0 +1,274 @@
+/* Componente de avatares */
+.avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: var(--bg-secondary);
+    color: var(--text-medium);
+    font-weight: 500;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* Tamaños de avatar */
+.avatar--xs {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: var(--font-size-xs);
+}
+
+.avatar--sm {
+    width: 2rem;
+    height: 2rem;
+    font-size: var(--font-size-xs);
+}
+
+.avatar--md {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: var(--font-size-sm);
+}
+
+.avatar--lg {
+    width: 3rem;
+    height: 3rem;
+    font-size: var(--font-size-base);
+}
+
+.avatar--xl {
+    width: 4rem;
+    height: 4rem;
+    font-size: var(--font-size-lg);
+}
+
+.avatar--2xl {
+    width: 5rem;
+    height: 5rem;
+    font-size: var(--font-size-xl);
+}
+
+/* Variantes de color */
+.avatar--primary {
+    background-color: var(--primary-color);
+    color: var(--text-light);
+}
+
+.avatar--secondary {
+    background-color: var(--secondary-color);
+    color: var(--text-light);
+}
+
+.avatar--success {
+    background-color: #10b981;
+    color: var(--text-light);
+}
+
+.avatar--warning {
+    background-color: #f59e0b;
+    color: var(--text-light);
+}
+
+.avatar--danger {
+    background-color: #ef4444;
+    color: var(--text-light);
+}
+
+.avatar--info {
+    background-color: #3b82f6;
+    color: var(--text-light);
+}
+
+/* Formas alternativas */
+.avatar--square {
+    border-radius: var(--border-radius);
+}
+
+.avatar--rounded {
+    border-radius: 0.5rem;
+}
+
+/* Estados */
+.avatar--online {
+    position: relative;
+}
+
+.avatar--online::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 25%;
+    height: 25%;
+    background-color: #10b981;
+    border: 2px solid var(--bg-primary);
+    border-radius: 50%;
+}
+
+.avatar--offline {
+    position: relative;
+}
+
+.avatar--offline::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 25%;
+    height: 25%;
+    background-color: #6b7280;
+    border: 2px solid var(--bg-primary);
+    border-radius: 50%;
+}
+
+.avatar--away {
+    position: relative;
+}
+
+.avatar--away::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 25%;
+    height: 25%;
+    background-color: #f59e0b;
+    border: 2px solid var(--bg-primary);
+    border-radius: 50%;
+}
+
+/* Grupo de avatares */
+.avatar-group {
+    display: flex;
+    align-items: center;
+}
+
+.avatar-group .avatar {
+    margin-left: -0.5rem;
+    border: 2px solid var(--bg-primary);
+    position: relative;
+    z-index: 1;
+}
+
+.avatar-group .avatar:first-child {
+    margin-left: 0;
+}
+
+.avatar-group .avatar:hover {
+    z-index: 2;
+    transform: scale(1.1);
+    transition: all var(--transition-fast);
+}
+
+/* Contador de avatares adicionales */
+.avatar-group__more {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-accent);
+    color: var(--text-medium);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    border: 2px solid var(--bg-primary);
+    margin-left: -0.5rem;
+    z-index: 1;
+}
+
+/* Avatar con badge */
+.avatar--badge {
+    position: relative;
+}
+
+.avatar__badge {
+    position: absolute;
+    top: -0.25rem;
+    right: -0.25rem;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    background-color: #ef4444;
+    color: var(--text-light);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    border-radius: 0.625rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.25rem;
+    border: 2px solid var(--bg-primary);
+}
+
+.avatar__badge--dot {
+    width: 0.75rem;
+    height: 0.75rem;
+    min-width: 0.75rem;
+    padding: 0;
+    top: 0;
+    right: 0;
+}
+
+/* Avatar clickeable */
+.avatar--clickable {
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.avatar--clickable:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-md);
+}
+
+/* Avatar con borde */
+.avatar--bordered {
+    border: 2px solid var(--border-color);
+}
+
+.avatar--bordered.avatar--primary {
+    border-color: var(--primary-color);
+}
+
+.avatar--bordered.avatar--success {
+    border-color: #10b981;
+}
+
+.avatar--bordered.avatar--warning {
+    border-color: #f59e0b;
+}
+
+.avatar--bordered.avatar--danger {
+    border-color: #ef4444;
+}
+
+/* Placeholder para avatar sin imagen */
+.avatar__placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-secondary);
+    color: var(--text-medium);
+}
+
+.avatar__placeholder-icon {
+    width: 60%;
+    height: 60%;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .avatar-group .avatar {
+        margin-left: -0.25rem;
+    }
+    
+    .avatar-group__more {
+        margin-left: -0.25rem;
+    }
+}

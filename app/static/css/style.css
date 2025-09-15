@@ -15,13 +15,20 @@
 @import 'components/forms.css';
 @import 'components/cards.css';
 @import 'components/tables.css';
+@import 'components/navigation.css';
+@import 'components/modals.css';
 @import 'components/alerts.css';
 @import 'components/avatars.css';
 
+/* Importar estilos responsivos */
+@import 'base/responsive.css';
+
 /* Importación de utilidades */
 @import 'utilities/spacing.css';
+@import 'utilities/animations.css';
 @import 'utilities/colors.css';
 @import 'utilities/helpers.css';
+
 
 /* Importación de páginas específicas */
 @import 'pages/base.css';

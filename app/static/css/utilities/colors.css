@@ -1,0 +1,67 @@
+/* Utilidades de colores */
+
+/* Colores de texto */
+.text-primary { color: var(--primary-color); }
+.text-secondary { color: var(--secondary-color); }
+.text-accent { color: var(--accent-color); }
+.text-dark { color: var(--text-dark); }
+.text-medium { color: var(--text-medium); }
+.text-light { color: var(--text-light); }
+.text-white { color: #ffffff; }
+.text-black { color: #000000; }
+
+/* Colores de estado */
+.text-success { color: #10b981; }
+.text-warning { color: #f59e0b; }
+.text-danger { color: #ef4444; }
+.text-info { color: #3b82f6; }
+
+/* Colores de fondo */
+.bg-primary { background-color: var(--bg-primary); }
+.bg-secondary { background-color: var(--bg-secondary); }
+.bg-accent { background-color: var(--bg-accent); }
+.bg-white { background-color: #ffffff; }
+.bg-transparent { background-color: transparent; }
+
+/* Fondos de colores principales */
+.bg-color-primary { background-color: var(--primary-color); }
+.bg-color-secondary { background-color: var(--secondary-color); }
+.bg-color-accent { background-color: var(--accent-color); }
+
+/* Fondos de estado */
+.bg-success { background-color: #10b981; }
+.bg-warning { background-color: #f59e0b; }
+.bg-danger { background-color: #ef4444; }
+.bg-info { background-color: #3b82f6; }
+
+/* Fondos de estado suaves */
+.bg-success-light { background-color: #d1fae5; }
+.bg-warning-light { background-color: #fef3c7; }
+.bg-danger-light { background-color: #fee2e2; }
+.bg-info-light { background-color: #dbeafe; }
+
+/* Colores de borde */
+.border-primary { border-color: var(--primary-color); }
+.border-secondary { border-color: var(--secondary-color); }
+.border-accent { border-color: var(--accent-color); }
+.border-default { border-color: var(--border-color); }
+.border-success { border-color: #10b981; }
+.border-warning { border-color: #f59e0b; }
+.border-danger { border-color: #ef4444; }
+.border-info { border-color: #3b82f6; }
+.border-transparent { border-color: transparent; }
+
+/* Opacidad */
+.opacity-0 { opacity: 0; }
+.opacity-25 { opacity: 0.25; }
+.opacity-50 { opacity: 0.5; }
+.opacity-75 { opacity: 0.75; }
+.opacity-100 { opacity: 1; }
+
+/* Hover states */
+.hover\:text-primary:hover { color: var(--primary-color); }
+.hover\:text-secondary:hover { color: var(--secondary-color); }
+.hover\:text-accent:hover { color: var(--accent-color); }
+.hover\:bg-primary:hover { background-color: var(--bg-primary); }
+.hover\:bg-secondary:hover { background-color: var(--bg-secondary); }
+.hover\:bg-accent:hover { background-color: var(--bg-accent); }

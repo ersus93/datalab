@@ -1,0 +1,340 @@
+{% extends "base/base.html" %}
+
+{% block title %}Dashboard - DataLab{% endblock %}
+{% block description %}Panel de control principal con métricas y análisis en tiempo real{% endblock %}
+{% block keywords %}dashboard, métricas, análisis, estadísticas, tiempo real{% endblock %}
+
+{% block body_class %}dashboard-page{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="dashboard-title-section">
+            <h1 class="dashboard-title">Dashboard</h1>
+            <p class="dashboard-subtitle">Resumen general del laboratorio</p>
+        </div>
+        <div class="dashboard-actions">
+            <button class="btn btn-secondary" id="refresh-dashboard">
+                <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                Actualizar
+            </button>
+            <button class="btn btn-primary" id="configure-dashboard">
+                <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                Configurar
+            </button>
+        </div>
+    </div>
+
+    <!-- Metrics Grid -->
+    <div class="metrics-grid">
+        <!-- Total Users Metric -->
+        <div class="metric-card metric-card-primary">
+            <div class="metric-header">
+                <div class="metric-icon metric-icon-users">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                    </svg>
+                </div>
+                <div class="metric-info">
+                    <h3 class="metric-title">Total Usuarios</h3>
+                    <p class="metric-description">Usuarios registrados</p>
+                </div>
+            </div>
+            <div class="metric-content">
+                <div class="metric-value">1,247</div>
+                <div class="metric-change metric-change-positive">
+                    <svg class="metric-change-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                    </svg>
+                    <span class="metric-change-value">+12.5%</span>
+                    <span class="metric-change-period">vs mes anterior</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenue Metric -->
+        <div class="metric-card metric-card-success">
+            <div class="metric-header">
+                <div class="metric-icon metric-icon-revenue">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div class="metric-info">
+                    <h3 class="metric-title">Ingresos</h3>
+                    <p class="metric-description">Ingresos totales</p>
+                </div>
+            </div>
+            <div class="metric-content">
+                <div class="metric-value">$45,231</div>
+                <div class="metric-change metric-change-positive">
+                    <svg class="metric-change-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                    </svg>
+                    <span class="metric-change-value">+8.2%</span>
+                    <span class="metric-change-period">vs mes anterior</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Sessions Metric -->
+        <div class="metric-card metric-card-warning">
+            <div class="metric-header">
+                <div class="metric-icon metric-icon-sessions">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364-.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                    </svg>
+                </div>
+                <div class="metric-info">
+                    <h3 class="metric-title">Sesiones Activas</h3>
+                    <p class="metric-description">Usuarios conectados</p>
+                </div>
+            </div>
+            <div class="metric-content">
+                <div class="metric-value">89</div>
+                <div class="metric-change metric-change-negative">
+                    <svg class="metric-change-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
+                    </svg>
+                    <span class="metric-change-value">-3.1%</span>
+                    <span class="metric-change-period">vs semana anterior</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conversion Rate Metric -->
+        <div class="metric-card metric-card-info">
+            <div class="metric-header">
+                <div class="metric-icon metric-icon-conversion">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                </div>
+                <div class="metric-info">
+                    <h3 class="metric-title">Tasa de Conversión</h3>
+                    <p class="metric-description">Conversión promedio</p>
+                </div>
+            </div>
+            <div class="metric-content">
+                <div class="metric-value">3.24%</div>
+                <div class="metric-change metric-change-positive">
+                    <svg class="metric-change-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                    </svg>
+                    <span class="metric-change-value">+0.8%</span>
+                    <span class="metric-change-period">vs mes anterior</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Content Grid -->
+    <div class="dashboard-grid">
+        <!-- Recent Activity -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3 class="card-title">Actividad Reciente</h3>
+                <button class="card-action" aria-label="Ver más">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="card-content">
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <div class="activity-icon activity-icon-success">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="activity-content">
+                            <p class="activity-text">Nuevo usuario registrado: <strong>María González</strong></p>
+                            <span class="activity-time">Hace 5 minutos</span>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon activity-icon-info">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </div>
+                        <div class="activity-content">
+                            <p class="activity-text">Reporte generado: <strong>Análisis Mensual</strong></p>
+                            <span class="activity-time">Hace 15 minutos</span>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon activity-icon-warning">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                        </div>
+                        <div class="activity-content">
+                            <p class="activity-text">Alerta de sistema: <strong>Uso de memoria alto</strong></p>
+                            <span class="activity-time">Hace 1 hora</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="#" class="card-link">Ver toda la actividad</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3 class="card-title">Estadísticas Rápidas</h3>
+                <div class="card-actions">
+                    <select class="select-sm" id="stats-period">
+                        <option value="today">Hoy</option>
+                        <option value="week" selected>Esta semana</option>
+                        <option value="month">Este mes</option>
+                    </select>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">Visitas</div>
+                        <div class="stat-value">2,847</div>
+                        <div class="stat-change stat-change-positive">+12%</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Páginas vistas</div>
+                        <div class="stat-value">8,392</div>
+                        <div class="stat-change stat-change-positive">+8%</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Tiempo promedio</div>
+                        <div class="stat-value">4:32</div>
+                        <div class="stat-change stat-change-negative">-2%</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Tasa de rebote</div>
+                        <div class="stat-value">34.2%</div>
+                        <div class="stat-change stat-change-positive">-5%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Chart -->
+        <div class="dashboard-card dashboard-card-wide">
+            <div class="card-header">
+                <h3 class="card-title">Rendimiento del Sistema</h3>
+                <div class="card-actions">
+                    <button class="btn btn-sm btn-secondary" id="export-chart">
+                        <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Exportar
+                    </button>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="chart-container">
+                    <div class="chart-placeholder">
+                        <div class="chart-placeholder-icon">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                        </div>
+                        <p class="chart-placeholder-text">Gráfico de rendimiento se cargará aquí</p>
+                        <p class="chart-placeholder-subtext">Los datos se actualizan cada 5 minutos</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Status -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3 class="card-title">Estado del Sistema</h3>
+                <div class="status-indicator status-indicator-online">
+                    <span class="status-dot"></span>
+                    <span class="status-text">En línea</span>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="system-metrics">
+                    <div class="system-metric">
+                        <div class="metric-label">CPU</div>
+                        <div class="metric-bar">
+                            <div class="metric-bar-fill" style="width: 45%" data-value="45"></div>
+                        </div>
+                        <div class="metric-value">45%</div>
+                    </div>
+                    <div class="system-metric">
+                        <div class="metric-label">Memoria</div>
+                        <div class="metric-bar">
+                            <div class="metric-bar-fill" style="width: 72%" data-value="72"></div>
+                        </div>
+                        <div class="metric-value">72%</div>
+                    </div>
+                    <div class="system-metric">
+                        <div class="metric-label">Disco</div>
+                        <div class="metric-bar">
+                            <div class="metric-bar-fill" style="width: 28%" data-value="28"></div>
+                        </div>
+                        <div class="metric-value">28%</div>
+                    </div>
+                    <div class="system-metric">
+                        <div class="metric-label">Red</div>
+                        <div class="metric-bar">
+                            <div class="metric-bar-fill" style="width: 15%" data-value="15"></div>
+                        </div>
+                        <div class="metric-value">15%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Dashboard specific JavaScript will be moved to separate file
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize dashboard functionality
+    initializeDashboard();
+});
+
+function initializeDashboard() {
+    // Refresh button functionality
+    const refreshBtn = document.getElementById('refresh-dashboard');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', function() {
+            // Add refresh logic here
+            console.log('Refreshing dashboard...');
+        });
+    }
+    
+    // Configure button functionality
+    const configBtn = document.getElementById('configure-dashboard');
+    if (configBtn) {
+        configBtn.addEventListener('click', function() {
+            // Add configuration logic here
+            console.log('Opening dashboard configuration...');
+        });
+    }
+    
+    // Stats period selector
+    const statsPeriod = document.getElementById('stats-period');
+    if (statsPeriod) {
+        statsPeriod.addEventListener('change', function() {
+            // Add period change logic here
+            console.log('Changing stats period to:', this.value);
+        });
+    }
+}
+</script>
+{% endblock %}
