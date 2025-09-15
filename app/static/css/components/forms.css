@@ -48,6 +48,33 @@
     border: 1px solid var(--gray-300);
     border-radius: var(--border-radius-md);
     font-size: var(--font-size-base);
+    line-height: var(--line-height-normal);
+    color: var(--gray-900);
+    background-color: var(--white);
+    transition: var(--transition-colors);
+}
+
+/* Variante pequeña para selects */
+.select-sm {
+    padding: var(--spacing-2) var(--spacing-3);
+    font-size: var(--font-size-sm);
+    border: var(--border-width) solid var(--gray-300);
+    border-radius: var(--border-radius-md);
+    background-color: var(--white);
+    color: var(--gray-700);
+    cursor: pointer;
+    transition: var(--transition-colors);
+}
+
+.select-sm:hover {
+    border-color: var(--gray-400);
+}
+
+.select-sm:focus {
+    outline: none;
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 3px var(--primary-100);
+}
     font-family: inherit;
     line-height: var(--line-height-normal);
     background-color: var(--white);

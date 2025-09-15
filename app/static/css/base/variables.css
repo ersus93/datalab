@@ -25,6 +25,18 @@
     --secondary-800: #1e293b;
     --secondary-900: #0f172a;
     
+    /* Colores grises - Escala completa */
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+    
     /* Colores de estado */
     --success-50: #f0fdf4;
     --success-500: #22c55e;
@@ -52,6 +64,12 @@
     --text-tertiary: var(--secondary-400);
     --text-inverse: #ffffff;
     
+    /* Aliases de texto adicionales */
+    --text-dark: var(--gray-900);
+    --text-medium: var(--gray-600);
+    --text-light: #ffffff;
+    --text-light-gray: var(--gray-400);
+    
     /* Colores de fondo estandarizados */
     --background-primary: #ffffff;
     --background-secondary: var(--secondary-50);
@@ -67,6 +85,7 @@
     --bg-primary: var(--background-primary);
     --bg-secondary: var(--background-secondary);
     --bg-tertiary: var(--background-tertiary);
+    --bg-accent: var(--background-accent);
     
     /* ===== SISTEMA DE ESPACIADO ESTANDARIZADO ===== */
     --spacing-0: 0;
@@ -119,6 +138,7 @@
     --font-size-xs: 0.75rem;     /* 12px */
     --font-size-sm: 0.875rem;    /* 14px */
     --font-size-base: 1rem;      /* 16px */
+    --font-size-md: 1rem;        /* 16px - alias para base */
     --font-size-lg: 1.125rem;    /* 18px */
     --font-size-xl: 1.25rem;     /* 20px */
     --font-size-2xl: 1.5rem;     /* 24px */
@@ -192,7 +212,7 @@
     
     /* Layout específico */
     --container-width: var(--container-xl);
-    --sidebar-width: 280px;
+    --sidebar-width: 220px;
     --sidebar-collapsed-width: 64px;
     --header-height: 64px;
     --footer-height: 60px;

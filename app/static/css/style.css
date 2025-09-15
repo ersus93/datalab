@@ -13,12 +13,12 @@
 /* Importación de componentes */
 @import 'components/buttons.css';
 @import 'components/forms.css';
-@import 'components/cards.css';
 @import 'components/tables.css';
-@import 'components/navigation.css';
-@import 'components/modals.css';
 @import 'components/alerts.css';
 @import 'components/avatars.css';
+@import 'components/navigation.css';
+@import 'components/modals.css';
+@import 'components/metrics-cards.css';
 
 /* Importar estilos responsivos */
 @import 'base/responsive.css';

@@ -16,6 +16,28 @@ def index():
         'active_sessions': 89,
         'total_reports': 456,
         'system_health': 'good',
+        'metrics': {
+            'total_clients': {
+                'value': '1,247',
+                'change': '+12.5%',
+                'period': 'vs mes anterior'
+            },
+            'total_orders': {
+                'value': '3,456',
+                'change': '+8.2%',
+                'period': 'vs mes anterior'
+            },
+            'total_tests': {
+                'value': '892',
+                'change': '+15.3%',
+                'period': 'vs mes anterior'
+            },
+            'work_orders': {
+                'value': '156',
+                'change': '-2.1%',
+                'period': 'vs semana anterior'
+            }
+        },
         'recent_activities': [
             {
                 'type': 'user_registered',

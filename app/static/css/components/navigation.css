@@ -1,0 +1,152 @@
+/* Estilos de navegación */
+.nav {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-4);
+}
+
+.nav-list {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: var(--spacing-2);
+}
+
+.nav-item {
+    position: relative;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-2) var(--spacing-3);
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    border-radius: var(--radius-md);
+    transition: var(--transition-colors);
+}
+
+.nav-link:hover {
+    background-color: var(--gray-100);
+    color: var(--text-primary);
+}
+
+.nav-link-active {
+    background-color: var(--primary-100);
+    color: var(--primary-600);
+}
+
+.nav-icon {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+}
+
+/* Navegación vertical */
+.nav-vertical {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.nav-vertical .nav-list {
+    flex-direction: column;
+    gap: var(--spacing-1);
+}
+
+.nav-vertical .nav-link {
+    justify-content: flex-start;
+    padding: var(--spacing-3) var(--spacing-4);
+}
+
+/* Navegación con breadcrumbs */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+}
+
+.breadcrumb-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+}
+
+.breadcrumb-item:not(:last-child)::after {
+    content: '/';
+    color: var(--text-tertiary);
+    font-weight: var(--font-weight-normal);
+}
+
+.breadcrumb-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: var(--transition-colors);
+}
+
+.breadcrumb-link:hover {
+    color: var(--primary-600);
+}
+
+.breadcrumb-current {
+    color: var(--text-primary);
+    font-weight: var(--font-weight-medium);
+}
+
+/* Navegación de tabs */
+.nav-tabs {
+    border-bottom: var(--border-width) solid var(--border-color);
+}
+
+.nav-tabs .nav-list {
+    gap: 0;
+}
+
+.nav-tabs .nav-link {
+    border-bottom: 2px solid transparent;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    margin-bottom: -1px;
+}
+
+.nav-tabs .nav-link:hover {
+    background-color: var(--gray-50);
+    border-bottom-color: var(--border-color);
+}
+
+.nav-tabs .nav-link-active {
+    background-color: var(--background-primary);
+    border-bottom-color: var(--primary-600);
+    color: var(--primary-600);
+}
+
+/* Navegación de pills */
+.nav-pills .nav-link {
+    border-radius: var(--radius-full);
+}
+
+.nav-pills .nav-link-active {
+    background-color: var(--primary-600);
+    color: var(--text-on-primary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .nav {
+        gap: var(--spacing-2);
+    }
+    
+    .nav-link {
+        padding: var(--spacing-2);
+        font-size: var(--font-size-xs);
+    }
+    
+    .breadcrumb {
+        font-size: var(--font-size-xs);
+        gap: var(--spacing-1);
+    }
+}
