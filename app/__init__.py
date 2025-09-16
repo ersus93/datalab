@@ -25,8 +25,18 @@ def create_app(config_name=None):
     db.init_app(app)
     migrate.init_app(app, db)
     
+    # Importar modelos después de inicializar db para evitar importación circular
+    from app.database.models import Cliente, Pedido, OrdenTrabajo
+    
     # Registrar blueprints
-    from app.routes import register_routes
+    from app.routes import register_routes, search
     register_routes(app)
+    app.register_blueprint(search.bp)
+    
+    # Registrar funciones helper para templates
+    from app.utils.flash_messages import flash_message_component
+    app.jinja_env.globals['flash_message_component'] = flash_message_component
+    
+    
     
     return app

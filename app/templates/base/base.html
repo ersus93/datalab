@@ -61,25 +61,15 @@
                     {% block header_actions %}
                     <!-- Search -->
                     <div class="search-container">
-                        <div class="search-input-wrapper">
+                        <button class="search-trigger" aria-label="Abrir búsqueda" onclick="DataLab.showSearchModal()">
                             <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                             </svg>
-                            <input type="text" class="search-input" placeholder="Buscar análisis, muestras, informes..." aria-label="Buscar">
-                        </div>
+                            <span class="search-placeholder">Buscar pedidos, clientes, órdenes...</span>
+                        </button>
                     </div>
-                    
-                    <!-- Notifications -->
-                    <button class="header-btn" aria-label="Notificaciones">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-                        </svg>
-                        <span class="notification-badge">3</span>
-                    </button>                  
-                                        
-                    
+                    {% endblock %}                    
                 </div>
-                {% endblock %}
             </header>
             {% endblock %}
             
@@ -87,46 +77,7 @@
             <main id="main-content" class="main-content" role="main">
                 <!-- Flash Messages -->
                 {% block flash_messages %}
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        <div class="flash-messages">
-                            {% for category, message in messages %}
-                                <div class="alert alert-{{ 'error' if category == 'error' else category }}" role="alert">
-                                    <div class="alert-content">
-                                        <div class="alert-icon">
-                                            {% if category == 'success' %}
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                                </svg>
-                                            {% elif category == 'error' %}
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                                </svg>
-                                            {% elif category == 'warning' %}
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                                                </svg>
-                                            {% else %}
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                                </svg>
-                                            {% endif %}
-                                        </div>
-                                        <div class="alert-text">
-                                            <strong>{% if category == 'error' %}Error:{% elif category == 'success' %}Éxito:{% elif category == 'warning' %}Advertencia:{% else %}Info:{% endif %}</strong>
-                                            {{ message }}
-                                        </div>
-                                    </div>
-                                    <button class="alert-close" aria-label="Cerrar alerta">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                {% endwith %}
+                {{ flash_message_component() }}
                 {% endblock %}
                 
                 <!-- Page Content -->
@@ -151,6 +102,7 @@
     <!-- JavaScript -->
     <script src="{{ url_for('static', filename='js/sidebar.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/search-modal.js') }}" defer></script>
     {% block extra_js %}{% endblock %}
     
     <!-- Additional Scripts -->
