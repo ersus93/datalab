@@ -61,10 +61,13 @@
                     {% block header_actions %}
                     <!-- Search -->
                     <div class="search-container">
-                        <button class="search-trigger" aria-label="Abrir búsqueda" onclick="DataLab.showSearchModal()">
-                            <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        <button class="search-icon-button" aria-label="Abrir búsqueda" onclick="DataLab.showSearchModal()">
+                            <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                             </svg>
+                        </button>
+                        <button class="search-trigger" aria-label="Abrir búsqueda" onclick="DataLab.showSearchModal()">
                             <span class="search-placeholder">Buscar pedidos, clientes, órdenes...</span>
                         </button>
                     </div>
@@ -93,11 +96,11 @@
         </div>
     </div>
     
-    <!-- Toast Notifications Container -->
-    <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
-    
     <!-- Modal Container -->
-    <div id="modal-container" class="modal-container"></div>
+    <div id="modal-container" class="modal-container">
+        <!-- Incluir el modal de búsqueda -->
+        {% include 'componentes/modals/search_modal.html' %}
+    </div>
     
     <!-- JavaScript -->
     <script src="{{ url_for('static', filename='js/sidebar.js') }}" defer></script>

@@ -1,0 +1,35 @@
+<!-- Modal de Búsqueda -->
+<div id="search-modal" class="modal-overlay" style="display: none;" aria-hidden="true">
+    <div class="modal modal-lg" role="dialog" aria-modal="true" aria-labelledby="search-modal-title">
+        <div class="modal-header">
+            <h2 class="modal-title" id="search-modal-title">Búsqueda</h2>
+            <button type="button" class="modal-close" data-modal-close aria-label="Cerrar búsqueda">
+                <svg class="modal-close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="search-modal">
+                <div class="search-modal__input-wrapper">
+                    <svg class="search-modal__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <input type="text" 
+                           id="search-modal-input"
+                           class="search-modal__input" 
+                           placeholder="Buscar pedidos, clientes, órdenes..."
+                           autocomplete="off"
+                           autofocus
+                           aria-label="Término de búsqueda">
+                </div>
+                <div id="search-results" class="search-results">
+                    <div class="search-modal__empty">
+                        <p>Escribe para buscar...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
