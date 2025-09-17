@@ -8,9 +8,11 @@ def register_routes(app):
     
     # Importar blueprints
     from app.routes.dashboard import dashboard_bp
+    from app.routes.pedidos import bp as pedidos_bp
     
     # Registrar blueprints
     app.register_blueprint(dashboard_bp)
+    app.register_blueprint(pedidos_bp)
     
     # Ruta principal - redirigir al dashboard
     @app.route('/')

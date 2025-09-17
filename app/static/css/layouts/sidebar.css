@@ -17,6 +17,8 @@
     scrollbar-color: #cbd5e1 transparent;
     display: flex;
     flex-direction: column;
+    scroll-behavior: smooth;
+    overscroll-behavior: contain;
 }
 
 .sidebar::-webkit-scrollbar {
@@ -93,16 +95,16 @@
 .nav-link {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem;
-    color: #64748b;
-    text-decoration: none;
-    font-size: 0.875rem;
-    font-weight: 500;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0.75rem 1.5rem;
+    color: var(--text-secondary);
     border-radius: 0.5rem;
-    position: relative;
+    margin: 0.25rem 0.75rem;
+    transition: all 0.2s ease;
+    white-space: nowrap;
     overflow: hidden;
+    text-overflow: ellipsis;
+    position: relative;
+    scroll-margin: 1rem;
 }
 
 .nav-link::before {
@@ -132,10 +134,39 @@
     color: #3b82f6;
     border-left: 3px solid #3b82f6;
     transform: translateX(4px);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    z-index: 1;
+    position: relative;
 }
 
 .nav-link-active::before {
     opacity: 1;
+}
+
+/* Ensure active item is visible and scroll into view */
+.nav-item:target {
+    scroll-margin: 1rem;
+}
+
+.nav-item:target .nav-link {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(147, 51, 234, 0.15) 100%);
+    color: #3b82f6;
+    animation: highlight-active 1.5s ease-out;
+}
+
+@keyframes highlight-active {
+    0% { box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
+    50% { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3); }
+    100% { box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
+}
+
+/* Improve scroll behavior for active items */
+.sidebar:has(.nav-item:target) {
+    scroll-behavior: smooth;
+}
+
+.nav-item:target .nav-link {
+    outline: none;
 }
 
 .nav-icon {
