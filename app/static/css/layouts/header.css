@@ -2,7 +2,7 @@
 .top-header {
     height: var(--header-height);
     background-color: var(--background-primary);
-    border-bottom: var(--border-width) solid var(--border-color);
+    border-bottom: var(--border-width) solid var(--gray-100);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -61,7 +61,7 @@
 .search-input {
     width: 300px;
     padding: var(--spacing-2) var(--spacing-3) var(--spacing-2) 2.5rem;
-    border: var(--border-width) solid var(--border-color);
+    border: var(--border-width) solid var(--gray-100);
     border-radius: var(--radius-lg);
     font-size: var(--font-size-sm);
     background-color: var(--gray-50);
@@ -105,7 +105,7 @@
     text-align: center;
     line-height: 1;
 }
-}
+
 
 .header__user-name {
     color: var(--text-light);

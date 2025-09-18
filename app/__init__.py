@@ -29,9 +29,8 @@ def create_app(config_name=None):
     from app.database.models import Cliente, Pedido, OrdenTrabajo
     
     # Registrar blueprints
-    from app.routes import register_routes, search
+    from app.routes import register_routes
     register_routes(app)
-    app.register_blueprint(search.bp)
     
     # Registrar funciones helper para templates
     from app.utils.flash_messages import flash_message_component

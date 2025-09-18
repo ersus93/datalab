@@ -369,6 +369,25 @@
     transform: translateY(0);
 }
 
+.btn--info {
+    background-color: var(--info-600);
+    color: var(--white);
+    border-color: var(--info-600);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn--info:hover:not(:disabled) {
+    background-color: var(--info-700);
+    border-color: var(--info-700);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+.btn--info:active:not(:disabled) {
+    background-color: var(--info-800);
+    transform: translateY(0);
+}
+
 /* Tamaños de botones */
 .btn--xs {
     padding: var(--spacing-1) var(--spacing-2);

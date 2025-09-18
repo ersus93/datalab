@@ -72,10 +72,10 @@
                             <option value="" selected disabled>Seleccione un cliente...</option>
                             <!-- Se llenará dinámicamente con JavaScript -->
                         </select>
-                        <div class="form__error">Por favor seleccione un cliente</div>
+                        <div class="form_error">Por favor seleccione un cliente</div>
                     </div>
 
-                    <div class="form__group form__group--full">
+                    <div class="form_group form__group--full">
                         <label for="descripcion" class="form__label">Descripción</label>
                         <textarea class="form__textarea" 
                                   id="descripcion" 
@@ -95,6 +95,36 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Últimos Clientes Agregados -->
+    <div class="latest-clients-card shadow mb-4">
+        <div class="card-header card-header--has-btn">
+            <h5 class="card-title"><i class="ri-group-line"></i> <span>Últimos Clientes Agregados</span></h5>
+            <button type="button" class="btn btn-info btn-sm mt-3" onclick="window.location.href='/clientes'">
+                Gestionar Clientes
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="ultimos-clientes-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Teléfono</th>
+                            <th>Fecha Registro</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ultimos-clientes-list">
+                        <!-- Clientes cargados dinámicamente aquí -->
+                        <tr>
+                            <td colspan="4" class="text-center">Cargando últimos clientes...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

@@ -11,14 +11,14 @@
 .table__wrapper {
     overflow-x: auto;
     border-radius: var(--border-radius);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--gray-100);
 }
 
 .table th,
 .table td {
     padding: var(--spacing-md);
     text-align: left;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--gray-100);
 }
 
 .table th {
@@ -53,12 +53,12 @@
 }
 
 .table--bordered {
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--gray-100);
 }
 
 .table--bordered th,
 .table--bordered td {
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--gray-100);
 }
 
 .table--borderless th,
@@ -125,11 +125,11 @@
 
 .table__action:hover {
     background-color: var(--bg-accent);
-    color: var(--primary-color);
+    color: var(--primary-500);
 }
 
 .table__action--primary {
-    color: var(--primary-color);
+    color: var(--primary-500);
 }
 
 .table__action--success {
@@ -214,14 +214,14 @@
     content: '↑';
     position: absolute;
     right: var(--spacing-xs);
-    color: var(--primary-color);
+    color: var(--primary-500);
 }
 
 .table__sort--desc::after {
     content: '↓';
     position: absolute;
     right: var(--spacing-xs);
-    color: var(--primary-color);
+    color: var(--primary-500);
 }
 
 /* Responsive */

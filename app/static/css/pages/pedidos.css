@@ -455,3 +455,61 @@
     background-size: 1em 1em;
     padding-right: 2.5rem;
 }
+
+/* ===========================================
+   Estilos para el Bloque de Últimos Clientes
+   =========================================== */
+
+.latest-clients-card {
+    margin-top: 3rem; /* Espaciado entre el bloque de formulario y el de últimos clientes */
+    border-left: 4px solid var(--accent-500);
+    transition: all 0.3s ease-in-out;
+}
+
+.latest-clients-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+.latest-clients-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-4) var(--spacing-6);
+    border-bottom: 1px solid var(--gray-100);
+    background-color: var(--gray-50);
+}
+
+.latest-clients-card .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.btn-info.mt-3 {
+    --primary-rgb: 59, 130, 246; /* RGB de --primary-500 */
+    background-color: var(--primary-500);
+    border-color: var(--primary-500);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(var(--primary-rgb), 0.2);
+}
+
+.btn-info.mt-3:hover {
+    background-color: var(--primary-600);
+    border-color: var(--primary-600);
+    box-shadow: 0 6px 8px rgba(var(--primary-rgb), 0.3);
+    transform: translateY(-1px);
+}

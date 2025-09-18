@@ -1,7 +1,7 @@
 /* Estilos del footer */
 .footer {
     background-color: var(--bg-secondary);
-    border-top: 1px solid var(--border-color);
+    border-top: 1px solid var(--gray-100);
     padding: var(--spacing-xl) 0;
     margin-top: auto;
 }
@@ -46,7 +46,7 @@
 }
 
 .footer__link:hover {
-    color: var(--primary-color);
+    color: var(--primary-600);
 }
 
 .footer__description {
@@ -68,7 +68,7 @@
     width: 2.5rem;
     height: 2.5rem;
     background-color: var(--bg-primary);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--gray-100);
     border-radius: 50%;
     color: var(--text-medium);
     text-decoration: none;
@@ -76,8 +76,8 @@
 }
 
 .footer__social-link:hover {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
+    background-color: var(--primary-500);
+    border-color: var(--primary-500);
     color: var(--text-light);
     transform: translateY(-2px);
 }
@@ -89,7 +89,7 @@
 
 .footer__bottom {
     padding-top: var(--spacing-lg);
-    border-top: 1px solid var(--border-color);
+    border-top: 1px solid var(--gray-100);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -115,7 +115,7 @@
 }
 
 .footer__legal-link:hover {
-    color: var(--primary-color);
+    color: var(--primary-500);
 }
 
 /* Footer compacto */

@@ -77,7 +77,6 @@
     --background-accent: var(--primary-50);
     
     /* Aliases para compatibilidad (DEPRECATED - usar los nuevos) */
-    --primary-color: var(--primary-600);
     --success-color: var(--success-500);
     --warning-color: var(--warning-500);
     --error-color: var(--error-500);
@@ -119,7 +118,6 @@
     
     --border-width: 1px;
     --border-width-2: 2px;
-    --border-color: var(--secondary-200);
     --border-color-light: var(--secondary-100);
     --border-color-dark: var(--secondary-300);
     

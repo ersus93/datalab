@@ -63,3 +63,20 @@ def obtener_clientes():
         })
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
+
+@bp.route('/ultimos_clientes', methods=['GET'])
+def ultimos_clientes():
+    """Get the last 5 added clients."""
+    try:
+        # Obtener los últimos 5 clientes ordenados por ID de forma descendente
+        clientes = Cliente.query.order_by(Cliente.id.desc()).limit(5).all()
+        return jsonify({
+            'success': True,
+            'clientes': [{
+                'id': c.id,
+                'nombre': f"{c.nombre} {c.apellido}",
+                'identificacion': c.identificacion or ''
+            } for c in clientes]
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500

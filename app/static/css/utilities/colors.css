@@ -1,7 +1,7 @@
 /* Utilidades de colores */
 
 /* Colores de texto */
-.text-primary { color: var(--primary-color); }
+.text-primary { color: var(--primary-500); }
 .text-secondary { color: var(--secondary-color); }
 .text-accent { color: var(--accent-color); }
 .text-dark { color: var(--text-dark); }
@@ -24,7 +24,7 @@
 .bg-transparent { background-color: transparent; }
 
 /* Fondos de colores principales */
-.bg-color-primary { background-color: var(--primary-color); }
+.bg-color-primary { background-color: var(--primary-500); }
 .bg-color-secondary { background-color: var(--secondary-color); }
 .bg-color-accent { background-color: var(--accent-color); }
 
@@ -41,10 +41,10 @@
 .bg-info-light { background-color: #dbeafe; }
 
 /* Colores de borde */
-.border-primary { border-color: var(--primary-color); }
+.border-primary { border-color: var(--primary-500); }
 .border-secondary { border-color: var(--secondary-color); }
 .border-accent { border-color: var(--accent-color); }
-.border-default { border-color: var(--border-color); }
+.border-default { border-color: var(--gray-100); }
 .border-success { border-color: #10b981; }
 .border-warning { border-color: #f59e0b; }
 .border-danger { border-color: #ef4444; }
@@ -59,7 +59,7 @@
 .opacity-100 { opacity: 1; }
 
 /* Hover states */
-.hover\:text-primary:hover { color: var(--primary-color); }
+.hover\:text-primary:hover { color: var(--primary-500); }
 .hover\:text-secondary:hover { color: var(--secondary-color); }
 .hover\:text-accent:hover { color: var(--accent-color); }
 .hover\:bg-primary:hover { background-color: var(--bg-primary); }

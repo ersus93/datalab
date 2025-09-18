@@ -32,6 +32,50 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Función para cargar los últimos clientes agregados
+    async function cargarUltimosClientes() {
+        try {
+            const response = await fetch('/pedidos/ultimos_clientes');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            const ultimosClientesList = document.getElementById('ultimos-clientes-list');
+            ultimosClientesList.innerHTML = ''; // Limpiar el contenido actual
+
+            if (data.length > 0) {
+                data.forEach(cliente => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><span class="client-name">${cliente.nombre}</span></td>
+                        <td><span class="client-email">${cliente.email}</span></td>
+                        <td>${cliente.telefono || 'N/A'}</td>
+                        <td>${new Date(cliente.fecha_registro).toLocaleDateString()}</td>
+                    `;
+                    ultimosClientesList.appendChild(row);
+                });
+            } else {
+                ultimosClientesList.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center">No hay clientes recientes.</td>
+                    </tr>
+                `;
+            }
+        } catch (error) {
+            console.error('Error al cargar los últimos clientes:', error);
+            const ultimosClientesList = document.getElementById('ultimos-clientes-list');
+            ultimosClientesList.innerHTML = `
+                <tr>
+                    <td colspan="4" class="text-center text-danger">Error al cargar clientes.</td>
+                </tr>
+            `;
+        }
+    }
+
+    // Cargar clientes al iniciar la página
+    cargarClientesDropdown();
+    cargarUltimosClientes();
+
     // Manejar envío del formulario
     formPedido.addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -108,6 +152,9 @@ document.addEventListener('DOMContentLoaded', function() {
         cargarClientes();
     }
     
+    // Cargar últimos clientes al iniciar
+    cargarUltimosClientes();
+
     // Mostrar el formulario por defecto
     if (formContainer) {
         toggleForm(true);
