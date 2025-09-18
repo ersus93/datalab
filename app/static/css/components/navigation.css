@@ -100,7 +100,7 @@
 
 /* Navegación de tabs */
 .nav-tabs {
-    border-bottom: var(--border-width) solid var(--border-color);
+    border-bottom: var(--border-width) solid var(--gray-100);
 }
 
 .nav-tabs .nav-list {
@@ -115,7 +115,7 @@
 
 .nav-tabs .nav-link:hover {
     background-color: var(--gray-50);
-    border-bottom-color: var(--border-color);
+    border-bottom-color: var(--gray-100);
 }
 
 .nav-tabs .nav-link-active {

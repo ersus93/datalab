@@ -25,7 +25,7 @@ body {
 
 /* Enlaces */
 a {
-    color: var(--primary-color);
+    color: var(--primary-600);
     text-decoration: none;
     transition: color var(--transition-fast);
 }

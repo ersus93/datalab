@@ -1,0 +1,515 @@
+/* Estilos específicos para la página de Pedidos */
+:root {
+    --form-card-bg: var(--white);
+    --form-card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --form-card-radius: 0.75rem;
+    --form-spacing: 1.25rem;
+}
+
+/* Contenedor principal */
+.pedidos-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+}
+
+/* Tarjeta de herramientas */
+.tools-card {
+    background: var(--white);
+    border-radius: var(--border-radius-xl);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+    margin-bottom: var(--spacing-8);
+    overflow: hidden;
+    border: 1px solid var(--gray-100);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    z-index: 1;
+}
+
+.tools-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-500), var(--primary-300));
+    opacity: 0.8;
+    z-index: 2;
+}
+
+.tools-card:hover {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    transform: translateY(-3px);
+}
+
+.tools-card .card-header {
+    padding: var(--spacing-4) var(--spacing-6);
+    background: linear-gradient(135deg, var(--gray-50) 0%, var(--white) 100%);
+    border-bottom: 1px solid var(--gray-100);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-4);
+}
+
+.tools-card .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    position: relative;
+    padding-left: var(--spacing-3);
+}
+
+.tools-card .card-title i {
+    color: var(--primary-500);
+    font-size: 1.2em;
+}
+
+.search-box {
+    position: relative;
+    min-width: 250px;
+    flex: 1;
+    max-width: 400px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.5rem 1rem 0.5rem 2.5rem;
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--gray-200);
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    background-color: var(--gray-50);
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary-300);
+    box-shadow: 0 0 0 3px var(--primary-100);
+    background-color: var(--white);
+}
+
+.search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-400);
+    pointer-events: none;
+}
+
+.tools-card .card-body {
+    padding: var(--spacing-4) var(--spacing-6);
+    background: var(--white);
+}
+
+.tools-actions {
+    display: flex;
+    gap: var(--spacing-2);
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.tooltip-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip {
+    visibility: hidden;
+    width: max-content;
+    background-color: var(--gray-800);
+    color: var(--white);
+    text-align: center;
+    border-radius: var(--border-radius-sm);
+    padding: 0.25rem 0.75rem;
+    position: absolute;
+    z-index: 10;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    pointer-events: none;
+}
+
+.tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: var(--gray-800) transparent transparent transparent;
+}
+
+.tooltip-wrapper:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+    transform: translateX(-50%) translateY(-2px);
+}
+
+/* Base Button Styles */
+.btn--icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Button Icons */
+.btn--icon i {
+    font-size: 1.2rem;
+    position: relative;
+    z-index: 2;
+    transition: all 0.3s ease;
+}
+
+/* Button Hover Effects */
+.btn--icon::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 100%);
+    opacity: 0.7;
+    transition: all 0.3s ease;
+}
+
+.btn--icon:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn--icon:hover i {
+    transform: scale(1.15);
+}
+
+.btn--icon:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Button States */
+.btn--icon:disabled {
+    opacity: 0.5;
+    transform: none !important;
+    box-shadow: none !important;
+    cursor: not-allowed;
+}
+
+.btn--icon:disabled i {
+    transform: none !important;
+}
+
+.divider {
+    width: 1px;
+    height: 1.75rem;
+    background: linear-gradient(to bottom, 
+        transparent, 
+        rgba(0, 0, 0, 0.1), 
+        transparent);
+    margin: 0 var(--spacing-2);
+    align-self: center;
+    position: relative;
+    opacity: 0.5;
+}
+
+/* Button Variants with Gradient Effects */
+.btn--primary {
+    --btn-bg: var(--primary-500);
+    --btn-hover-bg: var(--primary-600);
+    --btn-active-bg: var(--primary-700);
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-400));
+    color: white;
+}
+
+.btn--primary:hover {
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-500));
+}
+
+.btn--accent {
+    --btn-bg: var(--accent-500);
+    --btn-hover-bg: var(--accent-600);
+    --btn-active-bg: var(--accent-700);
+    background: linear-gradient(135deg, var(--accent-500), var(--accent-400));
+    color: white;
+}
+
+.btn--accent:hover {
+    background: linear-gradient(135deg, var(--accent-600), var(--accent-500));
+}
+
+.btn--danger {
+    --btn-bg: var(--error-500);
+    --btn-hover-bg: var(--error-600);
+    --btn-active-bg: var(--error-700);
+    background: linear-gradient(135deg, var(--error-500), var(--error-400));
+    color: white;
+}
+
+.btn--danger:hover {
+    background: linear-gradient(135deg, var(--error-600), var(--error-500));
+}
+
+.btn--info {
+    --btn-bg: var(--info-500);
+    --btn-hover-bg: var(--info-600);
+    --btn-active-bg: var(--info-700);
+    background: linear-gradient(135deg, var(--info-500), var(--info-400));
+    color: white;
+}
+
+.btn--info:hover {
+    background: linear-gradient(135deg, var(--info-600), var(--info-500));
+}
+
+/* Pulse Animation for Buttons */
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(var(--btn-rgb), 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(var(--btn-rgb), 0); }
+    100% { box-shadow: 0 0 0 0 rgba(var(--btn-rgb), 0); }
+}
+
+/* Add subtle pulse to primary button */
+.btn--primary {
+    --btn-rgb: 59, 130, 246; /* primary-500 */
+    animation: pulse 2s infinite;
+}
+
+/* Disabled State */
+.btn--icon:disabled {
+    background: var(--gray-200) !important;
+    color: var(--gray-500) !important;
+    box-shadow: none !important;
+}
+
+/* Tooltip Enhancements */
+.tooltip {
+    background: var(--gray-800);
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    white-space: nowrap;
+    pointer-events: none;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transform: translateY(4px) scale(0.95);
+    opacity: 0;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tooltip-wrapper:hover .tooltip {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+/* Tarjeta de formulario */
+.form-card {
+    background: var(--form-card-bg);
+    border-radius: var(--form-card-radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    border: 1px solid var(--gray-100);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.form-card__header {
+    padding: var(--spacing-5) var(--spacing-6);
+    border-bottom: 1px solid var(--gray-100);
+    background: var(--gray-50);
+}
+
+.form-card__title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin: 0;
+}
+
+.form-card__body {
+    padding: var(--spacing-6);
+}
+
+/* Estructura del formulario */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-8);
+}
+
+.form__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-6);
+}
+
+.form__group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+}
+
+.form__group--full {
+    grid-column: 1 / -1;
+}
+
+/* Acciones del formulario */
+.form__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-4);
+    padding-top: var(--spacing-2);
+    border-top: 1px solid var(--gray-100);
+    margin-top: var(--spacing-2);
+}
+
+/* Spinner de carga */
+.spinner {
+    display: none;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+    margin-right: 0.5rem;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Estado de carga */
+.is-loading .spinner {
+    display: inline-block;
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+    .pedidos-container {
+        padding: var(--spacing-4);
+    }
+    
+    .form-card__header,
+    .form-card__body {
+        padding: var(--spacing-4);
+    }
+    
+    .form__actions {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+    }
+}
+
+/* Transiciones suaves */
+.form__input,
+.form__select,
+.form__textarea,
+.btn {
+    transition: all 0.2s ease;
+}
+
+/* Mejoras de accesibilidad */
+.form__input:focus,
+.form__select:focus,
+.form__textarea:focus {
+    outline: 2px solid var(--primary-300);
+    outline-offset: 2px;
+}
+
+/* Estilos para el select personalizado */
+.form__select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1em 1em;
+    padding-right: 2.5rem;
+}
+
+/* ===========================================
+   Estilos para el Bloque de Últimos Clientes
+   =========================================== */
+
+.latest-clients-card {
+    margin-top: 3rem; /* Espaciado entre el bloque de formulario y el de últimos clientes */
+    border-left: 4px solid var(--accent-500);
+    transition: all 0.3s ease-in-out;
+}
+
+.latest-clients-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+.latest-clients-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-4) var(--spacing-6);
+    border-bottom: 1px solid var(--gray-100);
+    background-color: var(--gray-50);
+}
+
+.latest-clients-card .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.btn-info.mt-3 {
+    --primary-rgb: 59, 130, 246; /* RGB de --primary-500 */
+    background-color: var(--primary-500);
+    border-color: var(--primary-500);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(var(--primary-rgb), 0.2);
+}
+
+.btn-info.mt-3:hover {
+    background-color: var(--primary-600);
+    border-color: var(--primary-600);
+    box-shadow: 0 6px 8px rgba(var(--primary-rgb), 0.3);
+    transform: translateY(-1px);
+}

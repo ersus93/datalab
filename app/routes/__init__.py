@@ -1,20 +1,17 @@
-#!/usr/bin/env python3
-"""Registro de rutas de la aplicación DataLab."""
+from flask import Blueprint, render_template
 
-from flask import render_template
+from .dashboard import dashboard_bp
+from .pedidos import bp as pedidos_bp
+from .search import bp as search_bp
+from .clientes import clientes_bp
 
 def register_routes(app):
-    """Registrar todas las rutas de la aplicación."""
-    
-    # Importar blueprints
-    from app.routes.dashboard import dashboard_bp
-    
-    # Registrar blueprints
     app.register_blueprint(dashboard_bp)
-    
-    # Ruta principal - redirigir al dashboard
+    app.register_blueprint(pedidos_bp)
+    app.register_blueprint(search_bp)
+    app.register_blueprint(clientes_bp)
+
     @app.route('/')
     def index():
-        """Página principal - redirige al dashboard."""
         from flask import redirect, url_for
         return redirect(url_for('dashboard.index'))

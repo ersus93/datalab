@@ -34,3 +34,4 @@
 /* Importación de páginas específicas */
 @import 'pages/base.css';
 @import 'pages/dashboard.css';
+@import 'pages/pedidos.css';
