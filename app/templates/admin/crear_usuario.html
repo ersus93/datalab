@@ -1,0 +1,76 @@
+{% extends 'crud/base_form.html' %}
+
+{% block title %}{{ _('Crear Usuario') }} - DataLab{% endblock %}
+{% block form_title %}{{ _('Crear Nuevo Usuario') }}{% endblock %}
+
+{% block form_fields %}
+<div class="space-y-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">{{ _('Usuario') }}</label>
+            {{ form.username(class='w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500', placeholder=_('Nombre de usuario')) }}
+            {% if form.username.errors %}
+            <p class="text-red-500 text-xs mt-1">{{ form.username.errors[0] }}</p>
+            {% endif %}
+        </div>
+        <div>
+            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">{{ _('Email') }}</label>
+            {{ form.email(class='w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500', placeholder='usuario@ejemplo.com') }}
+            {% if form.email.errors %}
+            <p class="text-red-500 text-xs mt-1">{{ form.email.errors[0] }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div>
+        <label for="nombre_completo" class="block text-sm font-medium text-gray-700 mb-1">{{ _('Nombre Completo') }}</label>
+        {{ form.nombre_completo(class='w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500', placeholder=_('Nombre y apellidos')) }}
+        {% if form.nombre_completo.errors %}
+        <p class="text-red-500 text-xs mt-1">{{ form.nombre_completo.errors[0] }}</p>
+        {% endif %}
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <label for="role" class="block text-sm font-medium text-gray-700 mb-1">{{ _('Rol') }}</label>
+            {{ form.role(class='w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500') }}
+            {% if form.role.errors %}
+            <p class="text-red-500 text-xs mt-1">{{ form.role.errors[0] }}</p>
+            {% endif %}
+        </div>
+        <div>
+            <label for="cliente_id" class="block text-sm font-medium text-gray-700 mb-1">{{ _('Cliente Asociado') }}</label>
+            {{ form.cliente_id(class='w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500') }}
+            {% if form.cliente_id.errors %}
+            <p class="text-red-500 text-xs mt-1">{{ form.cliente_id.errors[0] }}</p>
+            {% endif %}
+            <p class="text-gray-500 text-xs mt-1">{{ _('Solo requerido para rol Cliente') }}</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">{{ _('Contraseña') }}</label>
+            {{ form.password(class='w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500') }}
+            {% if form.password.errors %}
+            <p class="text-red-500 text-xs mt-1">{{ form.password.errors[0] }}</p>
+            {% endif %}
+            <p class="text-gray-500 text-xs mt-1">{{ _('Mínimo 8 caracteres, mayúscula, minúscula y número') }}</p>
+        </div>
+        <div>
+            <label for="confirmar_password" class="block text-sm font-medium text-gray-700 mb-1">{{ _('Confirmar Contraseña') }}</label>
+            {{ form.confirmar_password(class='w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500') }}
+            {% if form.confirmar_password.errors %}
+            <p class="text-red-500 text-xs mt-1">{{ form.confirmar_password.errors[0] }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="flex items-center">
+        {{ form.activo(class='h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded') }}
+        <label for="activo" class="ml-2 block text-sm text-gray-900">{{ _('Usuario Activo') }}</label>
+    </div>
+</div>
+{% endblock %}
+
+{% block cancel_url %}{{ url_for('admin.listar_usuarios') }}{% endblock %}
