@@ -83,3 +83,6 @@ coverage.xml
 
 # Documentation
 docs/_build/
+
+# Access database files and sensitive data
+utiles/
