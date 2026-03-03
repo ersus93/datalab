@@ -4,8 +4,24 @@ Registra todos los features como blueprints.
 La arquitectura hexagonal permite agregar/quitar features sin tocar el core.
 """
 from flask import Flask
+from flask_login import LoginManager
 
 from app.core.infrastructure.database import db
+
+# Inicializar extensiones
+login_manager = LoginManager()
+
+# Exportar db para compatibilidad
+__all__ = ['create_app', 'db', 'login_manager']
+
+
+def _register_template_context_processors(app):
+    """Registra context processors para templates."""
+    from app.utils.flash_messages import flash_message_component
+
+    @app.context_processor
+    def inject_globals():
+        return {"flash_message_component": flash_message_component}
 
 
 def create_app(config_name: str = "development") -> Flask:
@@ -17,14 +33,41 @@ def create_app(config_name: str = "development") -> Flask:
 
     # Inicializar extensiones
     db.init_app(app)
+    login_manager.init_app(app)
 
-    # Registrar features (blueprints)
-    _register_features(app)
+    # Configurar Flask-Login
+    _configure_login_manager(app)
+
+    # Registrar context processors para templates
+    _register_template_context_processors(app)
+
+    # Registrar rutas (lazy import para evitar ciclos)
+    from app.routes import register_routes
+
+    register_routes(app)
 
     # Manejadores de error globales
     _register_error_handlers(app)
 
     return app
+
+
+def _configure_login_manager(app: Flask):
+    """Configura el LoginManager de Flask-Login."""
+    login_manager.login_view = app.config.get("LOGIN_VIEW", "auth.login")
+    login_manager.login_message = app.config.get(
+        "LOGIN_MESSAGE", "Por favor inicie sesión para acceder a esta página."
+    )
+    login_manager.login_message_category = app.config.get(
+        "LOGIN_MESSAGE_CATEGORY", "warning"
+    )
+
+    @login_manager.user_loader
+    def load_user(user_id: str):
+        """Carga el usuario por su ID."""
+        from app.database.models.user import User
+
+        return User.query.get(int(user_id))
 
 
 def _configure_app(app: Flask, config_name: str):
@@ -34,17 +77,6 @@ def _configure_app(app: Flask, config_name: str):
         "production": "app.config.ProductionConfig",
     }
     app.config.from_object(configs.get(config_name, configs["development"]))
-
-
-def _register_features(app: Flask):
-    """Registra cada feature como un blueprint independiente."""
-    from app.features.clientes.infrastructure.web.routes import clientes_bp
-    from app.features.muestras.infrastructure.web.routes import muestras_bp
-    from app.features.ensayos.infrastructure.web.routes import ensayos_bp
-
-    app.register_blueprint(clientes_bp)
-    app.register_blueprint(muestras_bp)
-    app.register_blueprint(ensayos_bp)
 
 
 def _register_error_handlers(app: Flask):

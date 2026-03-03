@@ -3,12 +3,23 @@ Configuración de la aplicación DataLab.
 Desacoplada de Flask - solo parámetros.
 """
 import os
+from datetime import timedelta
 
 
 class BaseConfig:
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-change-in-prod")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = False
+
+    # Configuraciones de Flask-Login
+    LOGIN_VIEW = "auth.login"
+    LOGIN_MESSAGE = "Por favor inicie sesión para acceder a esta página."
+    LOGIN_MESSAGE_CATEGORY = "warning"
+
+    # Configuraciones de sesión
+    PERMANENT_SESSION_LIFETIME = timedelta(hours=8)
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = "Lax"
 
 
 class DevelopmentConfig(BaseConfig):

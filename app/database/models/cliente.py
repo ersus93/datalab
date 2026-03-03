@@ -6,8 +6,9 @@ from app import db
 
 class Cliente(db.Model):
     """Modelo de Cliente."""
-    
-    __tablename__ = 'clientes'
+
+    __tablename__ = "clientes"
+    __table_args__ = {"extend_existing": True}
     
     id = db.Column(db.Integer, primary_key=True)
     codigo = db.Column(db.String(20), unique=True, nullable=False, index=True)
