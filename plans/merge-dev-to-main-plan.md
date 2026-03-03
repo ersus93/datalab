@@ -1,9 +1,9 @@
 #   
-# Plan: Merge Selectivo de dev a main (sin docs/, plans/, ski/, utiles/ ni archivos de análisis Access)
+# Plan: Merge Selectivo de dev a main (sin docs/, plans/, ski/ ni utiles/)
 
 ## Resumen
 
-Este plan describe el proceso para pasar el código de la rama `dev` a `main`, excluyendo los directorios `docs/`, `plans/`, `ski/`, `utiles/` y los archivos de análisis Access (`analyze_access.py`, `access_analysis_report.json`, `ACCESS_MIGRATION_ANALYSIS.md`), publicar los cambios y verificar que no existan inconsistencias.
+Este plan describe el proceso para pasar el código de la rama `dev` a `main`, excluyendo los directorios `docs/`, `plans/`, `ski/` y `utiles/` (que contiene archivos de Access y análisis), publicar los cambios y verificar que no existan inconsistencias.
   
 **Objetivo**: Dejar en `main` solo los directorios, documentos y código necesarios para que el bot funcione. Los usuarios que clonen el repositorio público solo necesitan el código funcional, no el proceso de desarrollo.  
   
@@ -18,10 +18,7 @@ Este plan describe el proceso para pasar el código de la rama `dev` a `main`, e
 |`docs/`           |Documentación de desarrollo    |Documentación interna del proceso de desarrollo         |
 |`plans/`          |Planes y especificaciones      |Planes de desarrollo, no necesarios para ejecutar el bot|
 |`ski/`            |Development skills             |Internal documentation and development skill files       |
-|`utiles/`         |Access database files          |Archivos de Access y datos sensibles que no deben publicarse|
-|`analyze_access.py`|Script de análisis Access     |Script de análisis temporal, no parte del código funcional|
-|`access_analysis_report.json`|Reporte de análisis Access|Resultado del análisis, no necesario para producción    |
-|`ACCESS_MIGRATION_ANALYSIS.md`|Documentación de análisis|Análisis de migración, documentación interna temporal   |
+|`utiles/`         |Access database files          |Archivos de Access, análisis y datos sensibles que no deben publicarse|
   
 ## Estructura Final de main (Lo que debe quedar)  
   
@@ -143,30 +140,24 @@ git checkout -b merge-dev-to-main
 # 3. Traer cambios de dev SIN hacer commit automático  
 git merge dev --no-commit --no-ff  
   
-# 4. Sacar docs/, plans/, ski/, utiles/ y archivos de análisis Access del staging
+# 4. Sacar docs/, plans/, ski/ y utiles/ del staging
 git reset HEAD docs/ 2>/dev/null || true
 git reset HEAD plans/ 2>/dev/null || true
 git reset HEAD ski/ 2>/dev/null || true
 git reset HEAD utiles/ 2>/dev/null || true
-git reset HEAD analyze_access.py 2>/dev/null || true
-git reset HEAD access_analysis_report.json 2>/dev/null || true
-git reset HEAD ACCESS_MIGRATION_ANALYSIS.md 2>/dev/null || true
 
-# 5. Restaurar esos directorios y archivos al estado de main (no al de dev)
+# 5. Restaurar esos directorios al estado de main (no al de dev)
 git checkout -- docs/ 2>/dev/null || true
 git checkout -- plans/ 2>/dev/null || true
 git checkout -- ski/ 2>/dev/null || true
 git checkout -- utiles/ 2>/dev/null || true
-git checkout -- analyze_access.py 2>/dev/null || true
-git checkout -- access_analysis_report.json 2>/dev/null || true
-git checkout -- ACCESS_MIGRATION_ANALYSIS.md 2>/dev/null || true
   
 # 6. Revisar que el staging es correcto ANTES de commitear  
 git status  
 git diff --cached --name-only   # solo archivos que van al commit  
   
 # 7. Commit del merge  
-git commit -m "merge: dev a main (sin docs/, plans/, ski/, utiles/ ni archivos de análisis Access)"  
+git commit -m "merge: dev a main (sin docs/, plans/, ski/ ni utiles/)"  
 ```  
   
 > 💡 **Si en el paso 3 aparecen conflictos**, Git lo indicará. Resuélvelos manualmente (edita los archivos marcados con `<<<<<<<`), luego haz `git add <archivo>` por cada uno y continúa desde el paso 4.  
@@ -201,8 +192,8 @@ git cherry-pick <hash2>
 git checkout main  
 git checkout -b merge-dev-to-main  
 git merge dev -X ours --no-commit
-git checkout dev -- . ':!docs/' ':!plans/' ':!analyze_access.py' ':!access_analysis_report.json' ':!ACCESS_MIGRATION_ANALYSIS.md'
-git commit -m "merge: dev a main (sin docs/, plans/, ski/, utiles/ ni archivos de análisis Access)"  
+git checkout dev -- . ':!docs/' ':!plans/' ':!ski/' ':!utiles/'
+git commit -m "merge: dev a main (sin docs/, plans/, ski/ ni utiles/)"
 ```  
   
 </details>  
@@ -242,7 +233,7 @@ git log main..dev --oneline --no-merges
 - [ ] Archivos de configuración correctos  
 - [ ] Tests pasan correctamente  
 - [ ] `.env.example` refleja las variables actuales  
-- [ ] `docs/`, `plans/`, `ski/`, `utiles/` y archivos de análisis Access **NO** están en el staging  
+- [ ] `docs/`, `plans/`, `ski/` y `utiles/` **NO** están en el staging  
   
 ### Comandos de Verificación  
   
@@ -263,13 +254,10 @@ pip install -r requirements.txt --dry-run
 # Ejecutar tests  
 python -m pytest tests/ -v   # o el comando que use el proyecto  
   
-# Confirmar que docs/, plans/, ski/, utiles/ y archivos de análisis Access NO están en el staging
+# Confirmar que docs/, plans/, ski/ y utiles/ NO están en el staging
 git diff --cached --name-only | grep -E '^(docs|plans|ski|utiles)/' \
   && echo "⚠️ ATENCIÓN: docs/, plans/, ski/ o utiles/ están en el staging" \
   || echo "✅ docs/, plans/, ski/ y utiles/ excluidos correctamente"
-git diff --cached --name-only | grep -E '^(analyze_access\.py|access_analysis_report\.json|ACCESS_MIGRATION_ANALYSIS\.md)$' \
-  && echo "⚠️ ATENCIÓN: archivos de análisis Access están en el staging" \
-  || echo "✅ Archivos de análisis Access excluidos correctamente"
 ```  
   
 -----  
@@ -323,19 +311,8 @@ git ls-tree -d origin/main --name-only | grep -E '^utiles$' \
   && echo "⚠️ utiles/ encontrado en main" \
   || echo "✅ utiles/ no está en main"
 
-# Verificar que archivos de análisis Access NO están en main
-git ls-tree -r origin/main --name-only | grep -E '^analyze_access\.py$' \
-  && echo "⚠️ analyze_access.py encontrado en main" \
-  || echo "✅ analyze_access.py no está en main"
-git ls-tree -r origin/main --name-only | grep -E '^access_analysis_report\.json$' \
-  && echo "⚠️ access_analysis_report.json encontrado en main" \
-  || echo "✅ access_analysis_report.json no está en main"
-git ls-tree -r origin/main --name-only | grep -E '^ACCESS_MIGRATION_ANALYSIS\.md$' \
-  && echo "⚠️ ACCESS_MIGRATION_ANALYSIS.md encontrado en main" \
-  || echo "✅ ACCESS_MIGRATION_ANALYSIS.md no está en main"
-
-# Comparar main vs dev ignorando los directorios y archivos excluidos
-git diff origin/main origin/dev --stat ':!docs' ':!plans' ':!ski' ':!utiles' ':!analyze_access.py' ':!access_analysis_report.json' ':!ACCESS_MIGRATION_ANALYSIS.md'
+# Comparar main vs dev ignorando los directorios excluidos
+git diff origin/main origin/dev --stat ':!docs' ':!plans' ':!ski' ':!utiles'
 ```  
   
 -----  
@@ -375,21 +352,15 @@ git reset HEAD docs/ 2>/dev/null || true
 git reset HEAD plans/ 2>/dev/null || true
 git reset HEAD ski/ 2>/dev/null || true
 git reset HEAD utiles/ 2>/dev/null || true
-git reset HEAD analyze_access.py 2>/dev/null || true
-git reset HEAD access_analysis_report.json 2>/dev/null || true
-git reset HEAD ACCESS_MIGRATION_ANALYSIS.md 2>/dev/null || true
 git checkout -- docs/ 2>/dev/null || true
 git checkout -- plans/ 2>/dev/null || true
 git checkout -- ski/ 2>/dev/null || true
 git checkout -- utiles/ 2>/dev/null || true
-git checkout -- analyze_access.py 2>/dev/null || true
-git checkout -- access_analysis_report.json 2>/dev/null || true
-git checkout -- ACCESS_MIGRATION_ANALYSIS.md 2>/dev/null || true
   
 # Verificar staging antes de commitear  
 git diff --cached --name-only  
   
-git commit -m "merge: dev a main (sin docs/, plans/, ski/, utiles/ ni archivos de análisis Access)"  
+git commit -m "merge: dev a main (sin docs/, plans/, ski/ ni utiles/)"  
   
 # === VERIFICACIÓN ===  
 python -m py_compile bbalert.py core/*.py handlers/*.py utils/*.py  
@@ -441,10 +412,7 @@ git push origin main
 |Código fuente (`*.py`)                     |Documentación de desarrollo (`docs/`)          |  
 |Archivos de configuración                  |Planes y especificaciones (`plans/`)           |  
 |Datos de ejemplo (`data-example/`)         |Development skills (`ski/`)                    |  
-|                                           |Borradores y WIP (`utiles/`)                   |  
-|                                           |Script de análisis Access (`analyze_access.py`)|  
-|                                           |Reporte de análisis Access (`access_analysis_report.json`)|
-|                                           |Documentación de análisis (`ACCESS_MIGRATION_ANALYSIS.md`)|
+|                                           |Borradores, WIP y archivos Access (`utiles/`)  |  
 |`README.md` (guía de usuario)              |Notas internas de desarrollo                   |  
 |`LICENSE`, `requirements.txt`              |                                               |  
 |Scripts de deploy y systemd                |                                               |  
