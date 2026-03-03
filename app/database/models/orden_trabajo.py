@@ -20,6 +20,10 @@ class OrdenTrabajo(db.Model):
     pedido_id = db.Column(db.Integer, db.ForeignKey('pedidos.id'), nullable=False)
     pedido = db.relationship('Pedido', backref=db.backref('ordenes_trabajo', lazy=True))
     
+    # Relación con cliente (opcional, para acceso directo)
+    cliente_id = db.Column(db.Integer, db.ForeignKey('clientes.id'), nullable=True)
+    cliente = db.relationship('Cliente', back_populates='ordenes_trabajo')
+    
     # Fechas importantes
     fecha_inicio = db.Column(db.DateTime, nullable=True)
     fecha_fin_estimada = db.Column(db.DateTime, nullable=True)

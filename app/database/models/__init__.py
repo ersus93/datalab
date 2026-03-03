@@ -2,7 +2,12 @@
 """Modelos de la base de datos para DataLab."""
 
 from .cliente import Cliente
+from .ensayo import Ensayo
+from .ensayo_es import EnsayoES
+from .ensayo_x_producto import EnsayoXProducto
+from .fabrica import Fabrica
 from .pedido import Pedido
+from .producto import Producto
 from .orden_trabajo import OrdenTrabajo
 from .reference import (
     Area,
@@ -19,7 +24,12 @@ from .user import User, UserRole
 
 __all__ = [
     'Cliente',
+    'Ensayo',
+    'EnsayoES',
+    'EnsayoXProducto',
+    'Fabrica',
     'Pedido',
+    'Producto',
     'OrdenTrabajo',
     'Area',
     'Organismo',
