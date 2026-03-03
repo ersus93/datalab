@@ -4,8 +4,11 @@ Registra todos los features como blueprints.
 La arquitectura hexagonal permite agregar/quitar features sin tocar el core.
 """
 from flask import Flask
+from flask_migrate import Migrate
 
 from app.core.infrastructure.database import db
+
+migrate = Migrate()
 
 
 def create_app(config_name: str = "development") -> Flask:
@@ -17,6 +20,7 @@ def create_app(config_name: str = "development") -> Flask:
 
     # Inicializar extensiones
     db.init_app(app)
+    migrate.init_app(app, db)
 
     # Registrar features (blueprints)
     _register_features(app)
