@@ -13,7 +13,7 @@ from .reference import (
     Mes,
     Anno,
     TipoES,
-    UnidadMedida
+    UnidadMedida,
 )
 from .user import User, UserRole
 
@@ -31,5 +31,5 @@ __all__ = [
     'TipoES',
     'UnidadMedida',
     'User',
-    'UserRole'
+    'UserRole',
 ]

@@ -5,11 +5,13 @@ La arquitectura hexagonal permite agregar/quitar features sin tocar el core.
 """
 from flask import Flask
 from flask_login import LoginManager
+from flask_migrate import Migrate
 
 from app.core.infrastructure.database import db
 
 # Inicializar extensiones
 login_manager = LoginManager()
+migrate = Migrate()
 
 # Exportar db para compatibilidad
 __all__ = ['create_app', 'db', 'login_manager']
@@ -34,6 +36,7 @@ def create_app(config_name: str = "development") -> Flask:
     # Inicializar extensiones
     db.init_app(app)
     login_manager.init_app(app)
+    migrate.init_app(app, db)
 
     # Configurar Flask-Login
     _configure_login_manager(app)
@@ -43,7 +46,6 @@ def create_app(config_name: str = "development") -> Flask:
 
     # Registrar rutas (lazy import para evitar ciclos)
     from app.routes import register_routes
-
     register_routes(app)
 
     # Manejadores de error globales
@@ -66,7 +68,6 @@ def _configure_login_manager(app: Flask):
     def load_user(user_id: str):
         """Carga el usuario por su ID."""
         from app.database.models.user import User
-
         return User.query.get(int(user_id))
 
 

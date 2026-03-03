@@ -39,5 +39,11 @@ class TestingConfig(BaseConfig):
 class ProductionConfig(BaseConfig):
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
-    SQLALCHEMY_POOL_SIZE = 10
-    SQLALCHEMY_POOL_TIMEOUT = 30
+    # PostgreSQL connection pooling
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "pool_size": 10,
+        "pool_timeout": 30,
+        "pool_recycle": 1800,
+        "max_overflow": 20,
+    }
+    SQLALCHEMY_ECHO = False
