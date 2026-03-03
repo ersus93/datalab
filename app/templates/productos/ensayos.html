@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ _('Gestionar Ensayos') }} - {{ producto.nombre }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-bold">{{ _('Gestionar Ensayos') }}</h1>
+            <p class="text-gray-600 mt-1">{{ producto.nombre }}</p>
+        </div>
+        <div class="flex gap-2">
+            <button type="submit" form="ensayos-form" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                <i class="fas fa-save mr-1"></i>
+                {{ _('Guardar Asociaciones') }}
+            </button>
+            <a href="{{ url_for('productos.ver', id=producto.id) }}" class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100">
+                <i class="fas fa-times mr-1"></i>
+                {{ _('Cancelar') }}
+            </a>
+        </div>
+    </div>
+
+    <!-- Búsqueda -->
+    <div class="bg-white rounded-lg shadow p-4 mb-6">
+        <div class="flex items-center gap-4">
+            <div class="flex-1">
+                <input type="text" id="search-ensayos" placeholder="{{ _('Buscar ensayos por nombre...') }}"
+                       class="w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500">
+            </div>
+            <button type="button" onclick="clearSearch()" class="px-4 py-2 text-gray-600 hover:text-gray-800">
+                <i class="fas fa-times mr-1"></i>
+                {{ _('Limpiar') }}
+            </button>
+        </div>
+    </div>
+
+    <!-- Formulario -->
+    <form id="ensayos-form" method="POST" action="{{ url_for('productos.gestionar_ensayos', id=producto.id) }}">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Columna FQ -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold">
+                        <i class="fas fa-vial mr-2 text-blue-600"></i>
+                        {{ _('Ensayos Fisicoquímicos') }}
+                    </h2>
+                    <span class="text-sm text-gray-500" id="count-fq">{{ ensayos_fq|length }} {{ _('disponibles') }}</span>
+                </div>
+                
+                <div class="mb-4 flex gap-2">
+                    <button type="button" onclick="selectAll('fq')" class="text-sm text-blue-600 hover:underline">
+                        {{ _('Seleccionar todos') }}
+                    </button>
+                    <span class="text-gray-300">|</span>
+                    <button type="button" onclick="deselectAll('fq')" class="text-sm text-blue-600 hover:underline">
+                        {{ _('Deseleccionar todos') }}
+                    </button>
+                </div>
+                
+                <div class="max-h-[500px] overflow-y-auto space-y-2" id="list-fq">
+                    {% for ensayo in ensayos_fq %}
+                    <label class="ensayo-item-fq flex items-start p-2 rounded hover:bg-gray-50 cursor-pointer transition-colors">
+                        <input type="checkbox" name="ensayos_fq" value="{{ ensayo.id }}"
+                               {% if ensayo.id in asignados_fq %}checked{% endif %}
+                               class="mt-1 mr-3 h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                        <div class="flex-1">
+                            <div class="font-medium text-sm">{{ ensayo.nombre_corto }}</div>
+                            <div class="text-xs text-gray-500">{{ ensayo.area.nombre if ensayo.area else '-' }}</div>
+                        </div>
+                        <div class="text-xs text-gray-500">{{ ensayo.get_precio_formateado() }}</div>
+                    </label>
+                    {% else %}
+                    <p class="text-gray-500 text-center py-4">{{ _('No hay ensayos FQ disponibles') }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Columna ES -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold">
+                        <i class="fas fa-utensils mr-2 text-green-600"></i>
+                        {{ _('Ensayos Evaluación Sensorial') }}
+                    </h2>
+                    <span class="text-sm text-gray-500" id="count-es">{{ ensayos_es|length }} {{ _('disponibles') }}</span>
+                </div>
+                
+                <div class="mb-4 flex gap-2">
+                    <button type="button" onclick="selectAll('es')" class="text-sm text-green-600 hover:underline">
+                        {{ _('Seleccionar todos') }}
+                    </button>
+                    <span class="text-gray-300">|</span>
+                    <button type="button" onclick="deselectAll('es')" class="text-sm text-green-600 hover:underline">
+                        {{ _('Deseleccionar todos') }}
+                    </button>
+                </div>
+                
+                <div class="max-h-[500px] overflow-y-auto space-y-2" id="list-es">
+                    {% for ensayo in ensayos_es %}
+                    <label class="ensayo-item-es flex items-start p-2 rounded hover:bg-gray-50 cursor-pointer transition-colors">
+                        <input type="checkbox" name="ensayos_es" value="{{ ensayo.id }}"
+                               {% if ensayo.id in asignados_es %}checked{% endif %}
+                               class="mt-1 mr-3 h-4 w-4 text-green-600 rounded border-gray-300 focus:ring-green-500">
+                        <div class="flex-1">
+                            <div class="font-medium text-sm">{{ ensayo.nombre_corto }}</div>
+                            <div class="text-xs text-gray-500">{{ ensayo.tipo_es.nombre if ensayo.tipo_es else '-' }}</div>
+                        </div>
+                        <div class="text-xs text-gray-500">{{ ensayo.get_precio_formateado() }}</div>
+                    </label>
+                    {% else %}
+                    <p class="text-gray-500 text-center py-4">{{ _('No hay ensayos ES disponibles') }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+// Búsqueda de ensayos
+document.getElementById('search-ensayos').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    
+    // Filtrar FQ
+    document.querySelectorAll('.ensayo-item-fq').forEach(item => {
+        const text = item.textContent.toLowerCase();
+        item.style.display = text.includes(searchTerm) ? 'flex' : 'none';
+    });
+    
+    // Filtrar ES
+    document.querySelectorAll('.ensayo-item-es').forEach(item => {
+        const text = item.textContent.toLowerCase();
+        item.style.display = text.includes(searchTerm) ? 'flex' : 'none';
+    });
+    
+    updateCounts();
+});
+
+function clearSearch() {
+    document.getElementById('search-ensayos').value = '';
+    document.querySelectorAll('.ensayo-item-fq, .ensayo-item-es').forEach(item => {
+        item.style.display = 'flex';
+    });
+    updateCounts();
+}
+
+function updateCounts() {
+    const visibleFq = document.querySelectorAll('.ensayo-item-fq:not([style*="none"])').length;
+    const visibleEs = document.querySelectorAll('.ensayo-item-es:not([style*="none"])').length;
+    document.getElementById('count-fq').textContent = visibleFq + ' {{ _("mostrados") }}';
+    document.getElementById('count-es').textContent = visibleEs + ' {{ _("mostrados") }}';
+}
+
+function selectAll(type) {
+    document.querySelectorAll('.ensayo-item-' + type + ':not([style*="none"]) input[type="checkbox"]').forEach(cb => {
+        cb.checked = true;
+    });
+}
+
+function deselectAll(type) {
+    document.querySelectorAll('.ensayo-item-' + type + ':not([style*="none"]) input[type="checkbox"]').forEach(cb => {
+        cb.checked = false;
+    });
+}
+</script>
+{% endblock %}

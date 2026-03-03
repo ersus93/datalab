@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ producto.nombre }}{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="flex justify-between items-start mb-6">
+        <div>
+            <h1 class="text-3xl font-bold">{{ producto.nombre }}</h1>
+            <div class="mt-2 flex items-center gap-2">
+                {% if producto.rama %}
+                {% set color_info = get_rama_color(producto.rama.id) %}
+                <span class="px-3 py-1 rounded-full text-sm font-medium" 
+                      style="background-color: {{ color_info.color }}20; color: {{ color_info.color }}; border: 1px solid {{ color_info.color }}">
+                    <i class="fas fa-industry mr-1"></i>
+                    {{ producto.rama.nombre }}
+                </span>
+                {% endif %}
+                {% if producto.destino %}
+                {% set icon = get_destino_icon(producto.destino.sigla) %}
+                <span class="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800 border border-gray-300">
+                    <i class="fas fa-{{ icon }} mr-1"></i>
+                    {{ producto.destino.sigla }} - {{ producto.destino.nombre }}
+                </span>
+                {% endif %}
+                {% if producto.activo %}
+                <span class="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                    <i class="fas fa-check-circle mr-1"></i>
+                    {{ _('Activo') }}
+                </span>
+                {% else %}
+                <span class="px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                    <i class="fas fa-times-circle mr-1"></i>
+                    {{ _('Inactivo') }}
+                </span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="flex gap-2">
+            {% if current_user.is_admin() or current_user.is_laboratory_manager() %}
+            <a href="{{ url_for('productos.editar', id=producto.id) }}" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                <i class="fas fa-edit mr-1"></i>
+                {{ _('Editar') }}
+            </a>
+            <a href="{{ url_for('productos.gestionar_ensayos', id=producto.id) }}" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">
+                <i class="fas fa-flask mr-1"></i>
+                {{ _('Gestionar Ensayos') }}
+            </a>
+            {% endif %}
+            <a href="{{ url_for('productos.listar') }}" class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100">
+                <i class="fas fa-arrow-left mr-1"></i>
+                {{ _('Volver') }}
+            </a>
+        </div>
+    </div>
+
+    <!-- Ensayos FQ -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">
+                <i class="fas fa-vial mr-2 text-blue-600"></i>
+                {{ _('Ensayos Fisicoquímicos') }}
+                <span class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">{{ ensayos_fq|length }}</span>
+            </h2>
+        </div>
+        
+        {% if ensayos_fq %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ _('Código') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ _('Nombre') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ _('Área') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ _('Precio') }}</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for ensayo in ensayos_fq %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{{ ensayo.id }}</td>
+                        <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-900">{{ ensayo.nombre_corto }}</td>
+                        <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500">{{ ensayo.area.nombre if ensayo.area else '-' }}</td>
+                        <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-900">{{ ensayo.get_precio_formateado() }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-8 text-gray-500">
+            <i class="fas fa-flask text-4xl mb-3 text-gray-300"></i>
+            <p>{{ _('No hay ensayos fisicoquímicos asignados') }}</p>
+            {% if current_user.is_admin() or current_user.is_laboratory_manager() %}
+            <a href="{{ url_for('productos.gestionar_ensayos', id=producto.id) }}" class="mt-2 inline-block text-blue-600 hover:underline">
+                {{ _('Asignar ensayos') }}
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Ensayos ES -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">
+                <i class="fas fa-utensils mr-2 text-green-600"></i>
+                {{ _('Ensayos de Evaluación Sensorial') }}
+                <span class="ml-2 px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">{{ ensayos_es|length }}</span>
+            </h2>
+        </div>
+        
+        {% if ensayos_es %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ _('Código') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ _('Nombre') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ _('Tipo ES') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ _('Precio') }}</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for ensayo in ensayos_es %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{{ ensayo.id }}</td>
+                        <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-900">{{ ensayo.nombre_corto }}</td>
+                        <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500">{{ ensayo.tipo_es.nombre if ensayo.tipo_es else '-' }}</td>
+                        <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-900">{{ ensayo.get_precio_formateado() }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-8 text-gray-500">
+            <i class="fas fa-utensils text-4xl mb-3 text-gray-300"></i>
+            <p>{{ _('No hay ensayos de evaluación sensorial asignados') }}</p>
+            {% if current_user.is_admin() or current_user.is_laboratory_manager() %}
+            <a href="{{ url_for('productos.gestionar_ensayos', id=producto.id) }}" class="mt-2 inline-block text-blue-600 hover:underline">
+                {{ _('Asignar ensayos') }}
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

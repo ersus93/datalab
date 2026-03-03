@@ -1,0 +1,146 @@
+{% extends 'crud/base_list.html' %}
+{% from 'macros/tables.html' import pagination, empty_state %}
+
+{% block title %}{{ _('Productos') }}{% endblock %}
+
+{% block list_title %}{{ _('Catálogo de Productos') }}{% endblock %}
+
+{% block create_button %}
+{% if current_user.is_admin() or current_user.is_laboratory_manager() %}
+<a href="{{ url_for('productos.nuevo') }}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+    <i class="fas fa-plus mr-1"></i>
+    {{ _('Nuevo Producto') }}
+</a>
+{% endif %}
+{% endblock %}
+
+{% block filters %}
+<form method="GET" class="mb-4 flex flex-wrap gap-4">
+    <div class="flex-1 min-w-[200px]">
+        <input type="text" name="q" value="{{ q }}" placeholder="{{ _('Buscar por nombre...') }}"
+               class="w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500">
+    </div>
+    <div>
+        <select name="rama" class="px-3 py-2 border rounded focus:outline-none focus:border-blue-500">
+            <option value="">{{ _('Todas las ramas') }}</option>
+            {% for rama in ramas %}
+            {% set color_info = get_rama_color(rama.id) %}
+            <option value="{{ rama.id }}" {% if request.args.get('rama')|int == rama.id %}selected{% endif %}>
+                {{ rama.nombre }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div>
+        <select name="destino" class="px-3 py-2 border rounded focus:outline-none focus:border-blue-500">
+            <option value="">{{ _('Todos los destinos') }}</option>
+            {% for destino in destinos %}
+            <option value="{{ destino.id }}" {% if request.args.get('destino')|int == destino.id %}selected{% endif %}>
+                {{ destino.sigla }} - {{ destino.nombre }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div>
+        <select name="con_ensayos" class="px-3 py-2 border rounded focus:outline-none focus:border-blue-500">
+            <option value="">{{ _('Con/sin ensayos') }}</option>
+            <option value="1" {% if request.args.get('con_ensayos') == '1' %}selected{% endif %}>{{ _('Con ensayos') }}</option>
+            <option value="0" {% if request.args.get('con_ensayos') == '0' %}selected{% endif %}>{{ _('Sin ensayos') }}</option>
+        </select>
+    </div>
+    <button type="submit" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
+        <i class="fas fa-search mr-1"></i>
+        {{ _('Filtrar') }}
+    </button>
+    {% if q or request.args.get('rama') or request.args.get('destino') or request.args.get('con_ensayos') %}
+    <a href="{{ url_for('productos.listar') }}" class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100">
+        <i class="fas fa-times mr-1"></i>
+        {{ _('Limpiar') }}
+    </a>
+    {% endif %}
+</form>
+{% endblock %}
+
+{% block table_headers %}
+<tr>
+    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Nombre') }}</th>
+    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Rama') }}</th>
+    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Destino') }}</th>
+    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Estado') }}</th>
+    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Ensayos') }}</th>
+    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Acciones') }}</th>
+</tr>
+{% endblock %}
+
+{% block table_rows %}
+{% for producto in productos.items %}
+<tr class="hover:bg-gray-50">
+    <td class="px-6 py-4 whitespace-nowrap">
+        <a href="{{ url_for('productos.ver', id=producto.id) }}" class="text-blue-600 hover:text-blue-800 font-medium">
+            {{ producto.nombre }}
+        </a>
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap">
+        {% if producto.rama %}
+        {% set color_info = get_rama_color(producto.rama.id) %}
+        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" 
+              style="background-color: {{ color_info.color }}20; color: {{ color_info.color }}; border: 1px solid {{ color_info.color }}">
+            {{ producto.rama.nombre }}
+        </span>
+        {% else %}
+        <span class="text-gray-400">-</span>
+        {% endif %}
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+        {% if producto.destino %}
+        {% set icon = get_destino_icon(producto.destino.sigla) %}
+        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-800">
+            <i class="fas fa-{{ icon }} mr-1"></i>
+            {{ producto.destino.sigla }}
+        </span>
+        {% else %}
+        <span class="text-gray-400">-</span>
+        {% endif %}
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap">
+        {% if producto.activo %}
+        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+            {{ _('Activo') }}
+        </span>
+        {% else %}
+        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+            {{ _('Inactivo') }}
+        </span>
+        {% endif %}
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+        {% set total_ensayos = producto.ensayos|length %}
+        <span class="{% if total_ensayos > 0 %}text-green-600 font-medium{% else %}text-gray-400{% endif %}">
+            {{ total_ensayos }} {{ _('asignados') }}
+        </span>
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+        <div class="flex space-x-2">
+            <a href="{{ url_for('productos.ver', id=producto.id) }}" class="text-blue-600 hover:text-blue-800" title="{{ _('Ver') }}">
+                <i class="fas fa-eye"></i>
+            </a>
+            {% if current_user.is_admin() or current_user.is_laboratory_manager() %}
+            <a href="{{ url_for('productos.editar', id=producto.id) }}" class="text-green-600 hover:text-green-800" title="{{ _('Editar') }}">
+                <i class="fas fa-edit"></i>
+            </a>
+            {% endif %}
+        </div>
+    </td>
+</tr>
+{% else %}
+<tr>
+    <td colspan="6" class="px-6 py-4">
+        {{ empty_state(_('No hay productos registrados')) }}
+    </td>
+</tr>
+{% endfor %}
+{% endblock %}
+
+{% block pagination %}
+{{ pagination(productos, 'productos.listar', q=q, rama=request.args.get('rama'), destino=request.args.get('destino'), con_ensayos=request.args.get('con_ensayos')) }}
+{% endblock %}
