@@ -42,11 +42,9 @@ def _configure_app(app: Flask, config_name: str):
 
 def _register_features(app: Flask):
     """Registra cada feature como un blueprint independiente."""
-    from app.features.clientes.infrastructure.web.routes import clientes_bp
     from app.features.muestras.infrastructure.web.routes import muestras_bp
     from app.features.ensayos.infrastructure.web.routes import ensayos_bp
 
-    app.register_blueprint(clientes_bp)
     app.register_blueprint(muestras_bp)
     app.register_blueprint(ensayos_bp)
 
