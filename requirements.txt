@@ -8,6 +8,7 @@ Flask-Babel==4.0.0
 
 # Database
 SQLAlchemy==2.0.35
+pyodbc>=4.0.35
 
 # Environment and Configuration
 python-dotenv==1.0.0
