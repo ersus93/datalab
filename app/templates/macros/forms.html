@@ -1,0 +1,58 @@
+{% macro render_field(field, label=None) %}
+<div class="mb-4">
+    <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ field.id }}">
+        {{ label or field.label.text }}
+        {% if field.flags.required %}<span class="text-red-500">*</span>{% endif %}
+    </label>
+    {{ field(class='w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500' + (' border-red-500' if field.errors else ' border-gray-300'), **kwargs) }}
+    {% if field.errors %}
+        {% for error in field.errors %}
+            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endmacro %}
+
+{% macro render_checkbox(field) %}
+<div class="mb-4">
+    <label class="flex items-center cursor-pointer">
+        {{ field(class="mr-2") }}
+        <span class="text-gray-700 text-sm">{{ field.label.text }}</span>
+    </label>
+    {% if field.errors %}
+        {% for error in field.errors %}
+            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endmacro %}
+
+{% macro render_select(field, label=None) %}
+<div class="mb-4">
+    <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ field.id }}">
+        {{ label or field.label.text }}
+        {% if field.flags.required %}<span class="text-red-500">*</span>{% endif %}
+    </label>
+    {{ field(class='w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500' + (' border-red-500' if field.errors else ' border-gray-300')) }}
+    {% if field.errors %}
+        {% for error in field.errors %}
+            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endmacro %}
+
+{% macro render_textarea(field, label=None, rows=4) %}
+<div class="mb-4">
+    <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ field.id }}">
+        {{ label or field.label.text }}
+        {% if field.flags.required %}<span class="text-red-500">*</span>{% endif %}
+    </label>
+    {{ field(class='w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500' + (' border-red-500' if field.errors else ' border-gray-300'), rows=rows) }}
+    {% if field.errors %}
+        {% for error in field.errors %}
+            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endmacro %}

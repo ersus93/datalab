@@ -3,15 +3,17 @@ App Factory - DataLab
 Registra todos los features como blueprints.
 La arquitectura hexagonal permite agregar/quitar features sin tocar el core.
 """
-from flask import Flask
+from flask import Flask, request
 from flask_login import LoginManager
 from flask_migrate import Migrate
+from flask_babel import Babel
 
 from app.core.infrastructure.database import db
 
 # Inicializar extensiones
 login_manager = LoginManager()
 migrate = Migrate()
+babel = Babel()
 
 # Exportar db para compatibilidad
 __all__ = ['create_app', 'db', 'login_manager']
@@ -37,6 +39,7 @@ def create_app(config_name: str = "development") -> Flask:
     db.init_app(app)
     login_manager.init_app(app)
     migrate.init_app(app, db)
+    babel.init_app(app, locale_selector=_get_locale)
 
     # Configurar Flask-Login
     _configure_login_manager(app)
@@ -78,6 +81,11 @@ def _configure_app(app: Flask, config_name: str):
         "production": "app.config.ProductionConfig",
     }
     app.config.from_object(configs.get(config_name, configs["development"]))
+
+
+def _get_locale():
+    """Determina el idioma preferido del usuario."""
+    return request.accept_languages.best_match(['es', 'en']) or 'es'
 
 
 def _register_error_handlers(app: Flask):

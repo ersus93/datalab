@@ -1,0 +1,26 @@
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="container mx-auto px-4 py-4">
+            {% for category, message in messages %}
+                {% set alert_class = 'bg-blue-100 text-blue-800 border-blue-200' %}
+                {% set icon_class = 'fa-info-circle' %}
+                
+                {% if category == 'success' %}
+                    {% set alert_class = 'bg-green-100 text-green-800 border-green-200' %}
+                    {% set icon_class = 'fa-check-circle' %}
+                {% elif category == 'error' or category == 'danger' %}
+                    {% set alert_class = 'bg-red-100 text-red-800 border-red-200' %}
+                    {% set icon_class = 'fa-exclamation-circle' %}
+                {% elif category == 'warning' %}
+                    {% set alert_class = 'bg-yellow-100 text-yellow-800 border-yellow-200' %}
+                    {% set icon_class = 'fa-exclamation-triangle' %}
+                {% endif %}
+                
+                <div class="p-4 mb-4 rounded border {{ alert_class }} flex items-center" role="alert">
+                    <i class="fas {{ icon_class }} mr-2"></i>
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}

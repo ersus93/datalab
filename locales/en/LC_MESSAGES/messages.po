@@ -1,0 +1,93 @@
+# English translations for DataLab
+# Copyright (C) 2026 DataLab Team
+msgid ""
+msgstr ""
+"Project-Id-Version: DataLab 1.0\n"
+"PO-Revision-Date: 2026-03-03 16:30+0000\n"
+"Last-Translator: Translation Agent v1.1\n"
+"Language-Team: English\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: app/templates/base.html:10
+msgid "Sistema de gestión y elaboración de informes para laboratorio"
+msgstr "Laboratory management and report generation system"
+
+#: app/templates/partials/navbar.html:14
+msgid "Cerrar Sesión"
+msgstr "Logout"
+
+#: app/templates/partials/flash_messages.html:7
+msgid "Mostrando"
+msgstr "Showing"
+
+#: app/templates/partials/flash_messages.html:8
+msgid "de"
+msgstr "of"
+
+#: app/templates/partials/flash_messages.html:9
+msgid "registros"
+msgstr "records"
+
+#: app/templates/partials/footer.html:4
+msgid "Sistema de Gestión de Laboratorio"
+msgstr "Laboratory Management System"
+
+#: app/templates/crud/base_list.html:5
+msgid "Listado"
+msgstr "List"
+
+#: app/templates/crud/base_form.html:5
+msgid "Formulario"
+msgstr "Form"
+
+#: app/templates/crud/base_form.html:17
+msgid "Cancelar"
+msgstr "Cancel"
+
+#: app/templates/crud/base_form.html:21
+msgid "Guardar"
+msgstr "Save"
+
+#: app/templates/macros/tables.html:8
+msgid "Editar"
+msgstr "Edit"
+
+#: app/templates/macros/tables.html:12
+msgid "Eliminar"
+msgstr "Delete"
+
+#: app/templates/macros/tables.html:12
+msgid "¿Estás seguro de que deseas eliminar este elemento?"
+msgstr "Are you sure you want to delete this item?"
+
+#: app/templates/macros/tables.html:34
+msgid "No hay registros para mostrar"
+msgstr "No records to display"
+
+#: app/templates/auth/login.html:3
+msgid "Iniciar Sesión"
+msgstr "Login"
+
+#: app/templates/auth/login.html:14
+msgid "Sistema de Gestión para Laboratorio"
+msgstr "Laboratory Management System"
+
+#: app/templates/auth/login.html:23
+msgid "Usuario"
+msgstr "Username"
+
+#: app/templates/auth/login.html:25
+msgid "Nombre de usuario"
+msgstr "Username"
+
+#: app/templates/auth/login.html:33
+msgid "Contraseña"
+msgstr "Password"
+
+#: app/templates/auth/login.html:43
+msgid "Recordarme"
+msgstr "Remember me"

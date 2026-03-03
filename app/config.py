@@ -16,6 +16,11 @@ class BaseConfig:
     LOGIN_MESSAGE = "Por favor inicie sesión para acceder a esta página."
     LOGIN_MESSAGE_CATEGORY = "warning"
 
+    # Configuraciones de Flask-Babel
+    BABEL_DEFAULT_LOCALE = "es"
+    BABEL_DEFAULT_TIMEZONE = "UTC"
+    BABEL_TRANSLATION_DIRECTORIES = "locales"
+
     # Configuraciones de sesión
     PERMANENT_SESSION_LIFETIME = timedelta(hours=8)
     SESSION_COOKIE_HTTPONLY = True

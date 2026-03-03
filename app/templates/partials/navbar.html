@@ -1,0 +1,23 @@
+<nav class="bg-blue-600 text-white shadow-lg">
+    <div class="container mx-auto px-4">
+        <div class="flex justify-between items-center h-16">
+            <a href="{{ url_for('dashboard.index') }}" class="text-xl font-bold flex items-center space-x-2">
+                <i class="fas fa-flask"></i>
+                <span>DataLab</span>
+            </a>
+            
+            {% if current_user.is_authenticated %}
+            <div class="flex items-center space-x-4">
+                <span class="text-sm">
+                    <i class="fas fa-user mr-1"></i>
+                    {{ current_user.nombre_completo or current_user.username }}
+                </span>
+                <a href="{{ url_for('auth.logout') }}" class="hover:text-gray-200 text-sm flex items-center space-x-1">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>{{ _('Cerrar Sesión') }}</span>
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</nav>

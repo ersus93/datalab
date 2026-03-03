@@ -1,0 +1,94 @@
+# DataLab Translations Template
+# Copyright (C) 2026 DataLab Team
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: DataLab 1.0\n"
+"POT-Creation-Date: 2026-03-03 16:30+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: app/templates/base.html:10
+msgid "Sistema de gestión y elaboración de informes para laboratorio"
+msgstr ""
+
+#: app/templates/partials/navbar.html:14
+msgid "Cerrar Sesión"
+msgstr ""
+
+#: app/templates/partials/flash_messages.html:7
+msgid "Mostrando"
+msgstr ""
+
+#: app/templates/partials/flash_messages.html:8
+msgid "de"
+msgstr ""
+
+#: app/templates/partials/flash_messages.html:9
+msgid "registros"
+msgstr ""
+
+#: app/templates/partials/footer.html:4
+msgid "Sistema de Gestión de Laboratorio"
+msgstr ""
+
+#: app/templates/crud/base_list.html:5
+msgid "Listado"
+msgstr ""
+
+#: app/templates/crud/base_form.html:5
+msgid "Formulario"
+msgstr ""
+
+#: app/templates/crud/base_form.html:17
+msgid "Cancelar"
+msgstr ""
+
+#: app/templates/crud/base_form.html:21
+msgid "Guardar"
+msgstr ""
+
+#: app/templates/macros/tables.html:8
+msgid "Editar"
+msgstr ""
+
+#: app/templates/macros/tables.html:12
+msgid "Eliminar"
+msgstr ""
+
+#: app/templates/macros/tables.html:12
+msgid "¿Estás seguro de que deseas eliminar este elemento?"
+msgstr ""
+
+#: app/templates/macros/tables.html:34
+msgid "No hay registros para mostrar"
+msgstr ""
+
+#: app/templates/auth/login.html:3
+msgid "Iniciar Sesión"
+msgstr ""
+
+#: app/templates/auth/login.html:14
+msgid "Sistema de Gestión para Laboratorio"
+msgstr ""
+
+#: app/templates/auth/login.html:23
+msgid "Usuario"
+msgstr ""
+
+#: app/templates/auth/login.html:25
+msgid "Nombre de usuario"
+msgstr ""
+
+#: app/templates/auth/login.html:33
+msgid "Contraseña"
+msgstr ""
+
+#: app/templates/auth/login.html:43
+msgid "Recordarme"
+msgstr ""
