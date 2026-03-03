@@ -15,10 +15,11 @@ from .reference import (
     TipoES,
     UnidadMedida
 )
+from .user import User, UserRole
 
 __all__ = [
-    'Cliente', 
-    'Pedido', 
+    'Cliente',
+    'Pedido',
     'OrdenTrabajo',
     'Area',
     'Organismo',
@@ -28,5 +29,7 @@ __all__ = [
     'Mes',
     'Anno',
     'TipoES',
-    'UnidadMedida'
+    'UnidadMedida',
+    'User',
+    'UserRole'
 ]
