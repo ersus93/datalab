@@ -17,6 +17,10 @@ class Cliente(db.Model):
     direccion = db.Column(db.Text, nullable=True)
     activo = db.Column(db.Boolean, default=True, nullable=False)
     
+    # Relación con Organismo
+    organismo_id = db.Column(db.Integer, db.ForeignKey('organismos.id'), nullable=True)
+    organismo = db.relationship('Organismo', back_populates='clientes', lazy=True)
+    
     # Timestamps
     fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     fecha_actualizacion = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
@@ -34,6 +38,7 @@ class Cliente(db.Model):
             'telefono': self.telefono,
             'direccion': self.direccion,
             'activo': self.activo,
+            'organismo_id': self.organismo_id,
             'fecha_creacion': self.fecha_creacion.isoformat() if self.fecha_creacion else None,
             'fecha_actualizacion': self.fecha_actualizacion.isoformat() if self.fecha_actualizacion else None
         }
