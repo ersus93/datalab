@@ -1,423 +1,1334 @@
 # DataLab Architecture Overview
 
-This document describes the architecture of the DataLab application, including project structure, technology stack, data flow, and design patterns.
+This document describes the Hexagonal Architecture (Ports & Adapters) adopted for the DataLab application, including project structure, layer responsibilities, and design patterns.
 
 ---
 
-## 1. Project Structure
+## 1. Architecture Overview
 
-```
-datalab/
-├── app/                          # Main application package
-│   ├── __init__.py              # Application factory
-│   ├── core/                    # Core business logic
-│   │   ├── __init__.py
-│   │   └── models.py            # System configuration models
-│   ├── database/                # Database layer
-│   │   ├── __init__.py
-│   │   ├── database.py          # Database configuration
-│   │   ├── init_db.py           # Database initialization
-│   │   └── models/              # Domain models
-│   │       ├── __init__.py
-│   │       ├── cliente.py       # Client model
-│   │       ├── pedido.py        # Order model
-│   │       └── orden_trabajo.py # Work order model
-│   ├── routes/                  # HTTP route handlers (blueprints)
-│   │   ├── __init__.py          # Blueprint registration
-│   │   ├── clientes.py          # Client routes
-│   │   ├── dashboard.py         # Dashboard routes
-│   │   ├── pedidos.py           # Order routes
-│   │   └── search.py            # Search routes
-│   ├── services/                # Business services (future)
-│   │   └── __init__.py
-│   ├── static/                  # Static assets
-│   │   ├── css/                 # Stylesheets
-│   │   ├── js/                  # JavaScript files
-│   │   └── images/              # Image assets
-│   ├── templates/               # Jinja2 templates
-│   │   ├── base.html            # Base template
-│   │   ├── componentes/         # Reusable components
-│   │   │   ├── layouts/         # Layout components
-│   │   │   ├── modals/          # Modal dialogs
-│   │   │   └── parties/         # UI partials
-│   │   └── pages/               # Page templates
-│   │       ├── clientes/        # Client pages
-│   │       ├── dashboard/       # Dashboard pages
-│   │       └── ...
-│   └── utils/                   # Utility functions
-│       ├── __init__.py
-│       └── flash_messages.py    # Flash message helpers
-├── config/                      # Configuration
-│   ├── __init__.py
-│   └── config.py                # Config classes
-├── docs/                        # Documentation
-│   ├── PRD.md                   # Product Requirements
-│   └── ...
-├── plans/                       # Development plans
-│   └── phase-1-foundation.md
-├── ski/                         # Standards & Knowledge
-│   ├── architecture.md          # This file
-│   ├── commands.md              # Command reference
-│   └── workflow.md              # Development workflow
-├── migrations/                  # Alembic migrations
-│   └── ...
-├── tests/                       # Test suite
-│   └── ...
-├── .env                         # Environment variables
-├── .env.example                 # Environment template
-├── .gitignore                   # Git ignore rules
-├── app.py                       # Application entry point
-├── requirements.txt             # Python dependencies
-└── README.md                    # Project overview
-```
+### Hexagonal Architecture (Ports & Adapters)
+
+Hexagonal Architecture, also known as Ports and Adapters or Clean Architecture, is an architectural pattern that structures the application so that:
+
+- **Domain logic is isolated** in the center (core) of the application
+- **Dependencies point inward** - outer layers depend on inner layers, never the reverse
+- **External concerns are decoupled** from business logic through interfaces (Ports)
+- **Adapters** implement these interfaces to connect to the outside world (databases, web frameworks, external APIs)
+
+### Clean Architecture Principles
+
+DataLab follows Clean Architecture principles:
+
+1. **Independent of Frameworks** - The domain doesn't know about Flask or SQLAlchemy
+2. **Testable** - Business rules can be tested without UI, database, or external services
+3. **Independent of UI** - The interface can change without affecting business rules
+4. **Independent of Database** - Business rules don't depend on database implementation
+5. **Independent of External Services** - External dependencies are abstracted behind interfaces
+
+### Why Hexagonal Architecture for DataLab?
+
+- **Migration from Access**: Allows gradual migration from legacy Microsoft Access database
+- **Maintainability**: Business rules are centralized and protected from framework churn
+- **Testability**: Fast unit tests without database dependencies
+- **Flexibility**: Can swap Flask for another framework or SQLite for PostgreSQL without touching domain logic
 
 ---
 
-## 2. Tech Stack Details
+## 2. Layer Documentation
 
-### 2.1 Backend Stack
+### Domain Layer (Core)
 
-| Component | Technology | Version | Purpose |
-|-----------|------------|---------|---------|
-| Language | Python | 3.11+ | Core programming language |
-| Framework | Flask | 3.0.0 | Web application framework |
-| ORM | SQLAlchemy | 2.0.35 | Database abstraction |
-| Migration | Flask-Migrate | 4.0.5 | Database schema versioning |
-| WSGI | Werkzeug | 3.0.1 | WSGI utilities and dev server |
+The Domain Layer contains the business logic and is completely independent of frameworks.
 
-**Flask Extensions:**
-- `Flask-SQLAlchemy` - SQLAlchemy integration
-- `Flask-Migrate` - Alembic migration commands
+**Responsibilities:**
+- Pure Python entities (no framework dependencies)
+- Business rules and validations
+- Repository interfaces (Ports)
 
-### 2.2 Frontend Stack
+**Rules:**
+- No imports from Flask, SQLAlchemy, or any external framework
+- All dependencies must be standard library or domain-specific
+- Entities encapsulate all business invariants
 
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| Templating | Jinja2 | Server-side HTML rendering |
-| Styling | Custom CSS | Application styles |
-| Interactivity | Vanilla JavaScript | DOM manipulation |
-| Visualization | Plotly | Charts and graphs |
-| Icons | (TBD) | Icon system |
+**Locations:**
+- `app/core/domain/` - Shared domain components
+- `app/features/[feature]/domain/` - Feature-specific domain
 
-### 2.3 Database Stack
-
-| Environment | Technology | Notes |
-|-------------|------------|-------|
-| Development | SQLite | File-based, zero config |
-| Production | PostgreSQL | Recommended for production |
-| ORM | SQLAlchemy | Database abstraction layer |
-
-**Database Schema:**
-- `clientes` - Client information
-- `pedidos` - Orders from clients
-- `ordenes_trabajo` - Work orders for lab analysis
-- `system_config` - System configuration settings
-
-### 2.4 Development Tools
-
-| Tool | Purpose |
-|------|---------|
-| python-dotenv | Environment variable management |
-| Click | CLI framework (via Flask) |
-| Git | Version control |
-
-### 2.5 Optional/Future Tools
-
-| Tool | Purpose | Status |
-|------|---------|--------|
-| pytest | Testing framework | Recommended |
-| flake8 | Linting | Recommended |
-| black | Code formatting | Recommended |
-| mypy | Type checking | Optional |
-| gunicorn | Production WSGI | Production |
-
----
-
-## 3. Data Flow
-
-### 3.1 Request-Response Cycle
-
-```
-┌─────────────┐     HTTP Request      ┌─────────────┐
-│   Client    │ ────────────────────> │    Nginx    │
-│  (Browser)  │                       │   (Proxy)   │
-└─────────────┘                       └──────┬──────┘
-       ^                                     │
-       │                                     │
-       │ HTTP Response                       │ WSGI
-       │                                     v
-┌─────────────┐                       ┌─────────────┐
-│  Template   │ <── Render HTML ─────│    Flask    │
-│   (Jinja2)  │                       │  Application│
-└─────────────┘                       └──────┬──────┘
-                                             │
-                                             │ SQL
-                                             v
-                                       ┌─────────────┐
-                                       │  SQLAlchemy │
-                                       │    ORM      │
-                                       └──────┬──────┘
-                                              │
-                                              │ SQL
-                                              v
-                                       ┌─────────────┐
-                                       │  SQLite/    │
-                                       │ PostgreSQL  │
-                                       └─────────────┘
-```
-
-### 3.2 Data Flow by Feature
-
-#### Client Management Flow
-```
-User Request
-    ↓
-clientes_bp (Blueprint)
-    ↓
-Route Handler (clientes.py)
-    ↓
-Cliente Model (SQLAlchemy)
-    ↓
-Database
-    ↓
-Template Rendering (Jinja2)
-    ↓
-HTML Response
-```
-
-#### Dashboard Data Flow
-```
-Dashboard Request
-    ↓
-dashboard_bp
-    ↓
-Query Multiple Models
-    ├── Cliente.query.count()
-    ├── Pedido.query.filter_by(status)
-    └── OrdenTrabajo.query.all()
-    ↓
-Aggregate Data
-    ↓
-Render Template with Metrics
-    ↓
-Response with Plotly Charts
-```
-
-### 3.3 Model Relationships
-
-```
-┌─────────────┐       ┌─────────────┐       ┌─────────────┐
-│  Cliente    │◄─────►│   Pedido    │◄─────►│OrdenTrabajo │
-│  (Client)   │  1:N  │   (Order)   │  1:N  │ (Work Order)│
-└─────────────┘       └─────────────┘       └─────────────┘
-       │
-       │ Attributes:
-       │ - id (PK)
-       │ - codigo
-       │ - nombre
-       │ - email
-       │ - telefono
-       │ - direccion
-       │ - activo
-       │ - timestamps
-```
-
-**Relationship Details:**
-- **Cliente → Pedido:** One-to-Many (A client can have multiple orders)
-- **Pedido → OrdenTrabajo:** One-to-Many (An order can have multiple work orders)
-
----
-
-## 4. Key Patterns Used
-
-### 4.1 Application Factory Pattern
-
-The application uses Flask's application factory pattern for better testability and configuration management.
-
+**Example:**
 ```python
-# app/__init__.py
-def create_app(config_name=None):
-    app = Flask(__name__)
-    # Configuration based on environment
-    app.config.from_object(Config)
-    # Initialize extensions
-    db.init_app(app)
-    migrate.init_app(app, db)
-    # Register blueprints
-    register_routes(app)
-    return app
+# app/features/clientes/domain/models.py
+class Cliente:
+    """Pure domain entity with business rules"""
+    
+    def __init__(self, id: Optional[int], codigo: str, nombre: str, 
+                 email: Optional[str] = None, telefono: Optional[str] = None,
+                 direccion: Optional[str] = None, activo: bool = True):
+        self.id = id
+        self.codigo = codigo
+        self.nombre = nombre
+        self.email = email
+        self.telefono = telefono
+        self.direccion = direccion
+        self.activo = activo
+        self.created_at = datetime.utcnow()
+        self.updated_at = datetime.utcnow()
+    
+    def validate(self) -> List[str]:
+        """Business validation rules"""
+        errors = []
+        if not self.codigo or len(self.codigo) < 3:
+            errors.append("El código debe tener al menos 3 caracteres")
+        if not self.nombre or len(self.nombre) < 2:
+            errors.append("El nombre debe tener al menos 2 caracteres")
+        return errors
+    
+    def deactivate(self):
+        """Business operation with domain rules"""
+        self.activo = False
+        self.updated_at = datetime.utcnow()
 ```
 
-**Benefits:**
-- Multiple app instances with different configs
-- Easier testing
-- No circular import issues
+---
 
-### 4.2 Blueprint Pattern
+### Application Layer
 
-Routes are organized using Flask blueprints for modularity.
+The Application Layer orchestrates use cases by coordinating domain objects. It defines what the application can do.
 
+**Responsibilities:**
+- Use cases (Commands and Queries - CQRS pattern)
+- DTOs (Data Transfer Objects) for input/output
+- Orchestration logic
+- Transaction boundaries
+
+**Locations:**
+- `app/features/[feature]/application/`
+
+**Commands** - Write operations that change state:
 ```python
-# app/routes/clientes.py
-clientes_bp = Blueprint('clientes', __name__)
+# app/features/clientes/application/commands.py
+@dataclass
+class CrearClienteCommand:
+    codigo: str
+    nombre: str
+    email: Optional[str] = None
+    telefono: Optional[str] = None
+    direccion: Optional[str] = None
+
+class CrearClienteHandler:
+    def __init__(self, repository: ClienteRepository):
+        self.repository = repository
+    
+    def execute(self, command: CrearClienteCommand) -> Result[Cliente]:
+        # 1. Create domain entity
+        cliente = Cliente(
+            id=None,
+            codigo=command.codigo,
+            nombre=command.nombre,
+            email=command.email,
+            telefono=command.telefono,
+            direccion=command.direccion
+        )
+        
+        # 2. Validate business rules
+        errors = cliente.validate()
+        if errors:
+            return Result.failure(errors)
+        
+        # 3. Check uniqueness constraints
+        if self.repository.exists_by_codigo(command.codigo):
+            return Result.failure(["El código de cliente ya existe"])
+        
+        # 4. Persist
+        self.repository.save(cliente)
+        
+        return Result.success(cliente)
+```
+
+**Queries** - Read operations that return data:
+```python
+# app/features/clientes/application/queries.py
+@dataclass
+class ListarClientesQuery:
+    activos_only: bool = True
+    search_term: Optional[str] = None
+    page: int = 1
+    page_size: int = 50
+
+class ListarClientesHandler:
+    def __init__(self, repository: ClienteRepository):
+        self.repository = repository
+    
+    def execute(self, query: ListarClientesQuery) -> PaginatedResult[ClienteResponseDTO]:
+        clientes = self.repository.list(
+            activos_only=query.activos_only,
+            search_term=query.search_term,
+            page=query.page,
+            page_size=query.page_size
+        )
+        total = self.repository.count(activos_only=query.activos_only)
+        
+        dtos = [ClienteResponseDTO.from_entity(c) for c in clientes]
+        return PaginatedResult(dtos, total, query.page, query.page_size)
+```
+
+**DTOs** - Data Transfer Objects:
+```python
+# app/features/clientes/application/dtos.py
+@dataclass
+class ClienteCreateDTO:
+    """Input DTO for creating a client"""
+    codigo: str
+    nombre: str
+    email: Optional[str] = None
+    telefono: Optional[str] = None
+    direccion: Optional[str] = None
+
+@dataclass
+class ClienteResponseDTO:
+    """Output DTO for client responses"""
+    id: int
+    codigo: str
+    nombre: str
+    email: Optional[str]
+    telefono: Optional[str]
+    direccion: Optional[str]
+    activo: bool
+    created_at: str
+    updated_at: str
+    
+    @staticmethod
+    def from_entity(cliente: Cliente) -> 'ClienteResponseDTO':
+        return ClienteResponseDTO(
+            id=cliente.id,
+            codigo=cliente.codigo,
+            nombre=cliente.nombre,
+            email=cliente.email,
+            telefono=cliente.telefono,
+            direccion=cliente.direccion,
+            activo=cliente.activo,
+            created_at=cliente.created_at.isoformat() if cliente.created_at else None,
+            updated_at=cliente.updated_at.isoformat() if cliente.updated_at else None
+        )
+```
+
+---
+
+### Infrastructure Layer
+
+The Infrastructure Layer contains framework-specific implementations of the interfaces defined in the Domain Layer.
+
+**Responsibilities:**
+- Database implementations of repositories (Adapters)
+- Web framework route handlers (Web Adapters)
+- External service integrations
+- Framework-specific configurations
+
+**Locations:**
+- `app/features/[feature]/infrastructure/`
+
+**SQLAlchemy Repository (Adapter):**
+```python
+# app/features/clientes/infrastructure/persistence/sql_repository.py
+class SQLClienteRepository(ClienteRepository):
+    """SQLAlchemy implementation of ClienteRepository"""
+    
+    def __init__(self, session: Session):
+        self.session = session
+    
+    def get_by_id(self, id: int) -> Optional[Cliente]:
+        orm_cliente = self.session.get(ClienteORM, id)
+        return self._to_domain(orm_cliente) if orm_cliente else None
+    
+    def save(self, cliente: Cliente) -> Cliente:
+        orm_cliente = self._to_orm(cliente)
+        self.session.add(orm_cliente)
+        self.session.flush()  # Get ID without committing
+        cliente.id = orm_cliente.id
+        return cliente
+    
+    def _to_domain(self, orm: ClienteORM) -> Cliente:
+        return Cliente(
+            id=orm.id,
+            codigo=orm.codigo,
+            nombre=orm.nombre,
+            email=orm.email,
+            telefono=orm.telefono,
+            direccion=orm.direccion,
+            activo=orm.activo
+        )
+```
+
+**Flask Routes (Web Adapter):**
+```python
+# app/features/clientes/infrastructure/web/routes.py
+clientes_bp = Blueprint('clientes', __name__, template_folder='templates')
 
 @clientes_bp.route('/clientes')
 def index():
-    return render_template('pages/clientes/index.html')
+    """List clients page"""
+    query = ListarClientesQuery(
+        activos_only=request.args.get('activos', '1') == '1',
+        search_term=request.args.get('q'),
+        page=int(request.args.get('page', 1))
+    )
+    
+    # Dependency injection from application context
+    repository = get_cliente_repository()
+    handler = ListarClientesHandler(repository)
+    result = handler.execute(query)
+    
+    return render_template('pages/clientes/index.html', 
+                          clientes=result.items,
+                          pagination=result)
 
-# app/routes/__init__.py
-def register_routes(app):
-    from app.routes.clientes import clientes_bp
-    app.register_blueprint(clientes_bp)
+@clientes_bp.route('/clientes', methods=['POST'])
+def create():
+    """Create client endpoint"""
+    command = CrearClienteCommand(
+        codigo=request.form['codigo'],
+        nombre=request.form['nombre'],
+        email=request.form.get('email'),
+        telefono=request.form.get('telefono'),
+        direccion=request.form.get('direccion')
+    )
+    
+    repository = get_cliente_repository()
+    handler = CrearClienteHandler(repository)
+    result = handler.execute(command)
+    
+    if result.is_success:
+        flash('Cliente creado exitosamente', 'success')
+        return redirect(url_for('clientes.show', id=result.value.id))
+    else:
+        flash(f'Error: {", ".join(result.errors)}', 'danger')
+        return render_template('pages/clientes/new.html'), 422
 ```
 
-**Benefits:**
-- Modular route organization
-- URL prefix and template folder support
-- Reusable across applications
+---
 
-### 4.3 Model-View Architecture
+## 3. Shared Kernel
 
-The application follows an MVC-like pattern:
+The Shared Kernel contains components used across all features.
 
-- **Models:** Database models in `app/database/models/`
-- **Views:** Templates in `app/templates/`
-- **Controllers:** Route handlers in `app/routes/`
+### Location
+`app/core/`
 
-### 4.4 Repository Pattern (Implicit)
+### Base Classes
 
-SQLAlchemy models act as repositories:
+**Entity Base Class:**
+```python
+# app/core/domain/entity.py
+from abc import ABC, abstractmethod
+from typing import Any, Optional
+
+class Entity(ABC):
+    """Base class for all domain entities"""
+    
+    def __init__(self, id: Optional[int] = None):
+        self._id = id
+    
+    @property
+    def id(self) -> Optional[int]:
+        return self._id
+    
+    @id.setter
+    def id(self, value: int):
+        self._id = value
+    
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, self.__class__):
+            return False
+        return self.id is not None and self.id == other.id
+    
+    def __hash__(self) -> int:
+        return hash(self.id) if self.id else hash(id(self))
+```
+
+**Repository Interface (Port):**
+```python
+# app/core/domain/repository.py
+from abc import ABC, abstractmethod
+from typing import Generic, List, Optional, TypeVar
+
+T = TypeVar('T')
+
+class Repository(ABC, Generic[T]):
+    """Base repository interface (Port)"""
+    
+    @abstractmethod
+    def get_by_id(self, id: int) -> Optional[T]:
+        """Get entity by ID"""
+        pass
+    
+    @abstractmethod
+    def save(self, entity: T) -> T:
+        """Save entity (create or update)"""
+        pass
+    
+    @abstractmethod
+    def delete(self, id: int) -> bool:
+        """Delete entity by ID"""
+        pass
+```
+
+**Audit Mixin:**
+```python
+# app/core/domain/audit.py
+from datetime import datetime
+from typing import Optional
+
+class Auditable:
+    """Mixin for auditable entities"""
+    
+    def __init__(self):
+        self._created_at: Optional[datetime] = None
+        self._updated_at: Optional[datetime] = None
+    
+    @property
+    def created_at(self) -> Optional[datetime]:
+        return self._created_at
+    
+    @property
+    def updated_at(self) -> Optional[datetime]:
+        return self._updated_at
+    
+    def mark_created(self):
+        self._created_at = datetime.utcnow()
+        self._updated_at = self._created_at
+    
+    def mark_updated(self):
+        self._updated_at = datetime.utcnow()
+```
+
+**Result Pattern:**
+```python
+# app/core/domain/result.py
+from dataclasses import dataclass
+from typing import Generic, List, Optional, TypeVar
+
+T = TypeVar('T')
+
+@dataclass
+class Result(Generic[T]):
+    """Result pattern for handling success/failure"""
+    
+    is_success: bool
+    value: Optional[T] = None
+    errors: List[str] = None
+    
+    @staticmethod
+    def success(value: T) -> 'Result[T]':
+        return Result(is_success=True, value=value, errors=[])
+    
+    @staticmethod
+    def failure(errors: List[str]) -> 'Result[T]':
+        return Result(is_success=False, value=None, errors=errors)
+```
+
+---
+
+## 4. Feature Structure
+
+Each feature follows a consistent structure. Here's the complete structure using **Clientes** as the example:
+
+```
+app/features/clientes/
+├── __init__.py
+├── domain/
+│   ├── __init__.py
+│   ├── models.py              # Cliente entity with validation
+│   └── repositories.py        # ClienteRepository interface (Port)
+├── application/
+│   ├── __init__.py
+│   ├── dtos.py                # ClienteCreateDTO, ClienteResponseDTO
+│   ├── commands.py            # CrearClienteHandler, ActualizarClienteHandler
+│   └── queries.py             # ListarClientesHandler, ObtenerClienteHandler
+└── infrastructure/
+    ├── __init__.py
+    ├── persistence/
+    │   ├── __init__.py
+    │   ├── models.py          # SQLAlchemy ORM model
+    │   └── sql_repository.py  # SQLClienteRepository (Adapter)
+    └── web/
+        ├── __init__.py
+        ├── routes.py          # Flask Blueprint
+        └── templates/         # Feature-specific templates
+            └── pages/
+                └── clientes/
+                    ├── index.html
+                    ├── new.html
+                    ├── edit.html
+                    └── show.html
+```
+
+### Domain Layer Files
+
+**models.py**
+```python
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import List, Optional
+
+from app.core.domain.entity import Entity
+from app.core.domain.audit import Auditable
+
+@dataclass
+class Cliente(Entity, Auditable):
+    """Cliente domain entity"""
+    codigo: str
+    nombre: str
+    email: Optional[str] = None
+    telefono: Optional[str] = None
+    direccion: Optional[str] = None
+    activo: bool = True
+    
+    def validate(self) -> List[str]:
+        """Business validation rules"""
+        errors = []
+        if not self.codigo or len(self.codigo.strip()) < 3:
+            errors.append("El código debe tener al menos 3 caracteres")
+        if not self.nombre or len(self.nombre.strip()) < 2:
+            errors.append("El nombre debe tener al menos 2 caracteres")
+        if self.email and '@' not in self.email:
+            errors.append("El email no es válido")
+        return errors
+```
+
+**repositories.py**
+```python
+from abc import abstractmethod
+from typing import List, Optional
+
+from app.core.domain.repository import Repository
+from app.features.clientes.domain.models import Cliente
+
+class ClienteRepository(Repository[Cliente]):
+    """Repository interface for Cliente (Port)"""
+    
+    @abstractmethod
+    def exists_by_codigo(self, codigo: str, exclude_id: Optional[int] = None) -> bool:
+        """Check if a client with given code exists"""
+        pass
+    
+    @abstractmethod
+    def list(self, activos_only: bool = True, search_term: Optional[str] = None,
+             page: int = 1, page_size: int = 50) -> List[Cliente]:
+        """List clients with filtering and pagination"""
+        pass
+    
+    @abstractmethod
+    def count(self, activos_only: bool = True) -> int:
+        """Count total clients matching criteria"""
+        pass
+```
+
+### Application Layer Files
+
+**dtos.py**
+```python
+from dataclasses import dataclass
+from typing import Optional
+
+@dataclass
+class ClienteCreateDTO:
+    codigo: str
+    nombre: str
+    email: Optional[str] = None
+    telefono: Optional[str] = None
+    direccion: Optional[str] = None
+
+@dataclass
+class ClienteUpdateDTO:
+    nombre: Optional[str] = None
+    email: Optional[str] = None
+    telefono: Optional[str] = None
+    direccion: Optional[str] = None
+    activo: Optional[bool] = None
+
+@dataclass
+class ClienteResponseDTO:
+    id: int
+    codigo: str
+    nombre: str
+    email: Optional[str]
+    telefono: Optional[str]
+    direccion: Optional[str]
+    activo: bool
+    created_at: Optional[str]
+    updated_at: Optional[str]
+```
+
+**commands.py**
+```python
+from dataclasses import dataclass
+from typing import Optional
+
+from app.core.domain.result import Result
+from app.features.clientes.domain.models import Cliente
+from app.features.clientes.domain.repositories import ClienteRepository
+
+@dataclass
+class CrearClienteCommand:
+    codigo: str
+    nombre: str
+    email: Optional[str] = None
+    telefono: Optional[str] = None
+    direccion: Optional[str] = None
+
+class CrearClienteHandler:
+    def __init__(self, repository: ClienteRepository):
+        self.repository = repository
+    
+    def execute(self, command: CrearClienteCommand) -> Result[Cliente]:
+        # Create domain entity
+        cliente = Cliente(
+            id=None,
+            codigo=command.codigo,
+            nombre=command.nombre,
+            email=command.email,
+            telefono=command.telefono,
+            direccion=command.direccion
+        )
+        
+        # Validate
+        errors = cliente.validate()
+        if errors:
+            return Result.failure(errors)
+        
+        # Check duplicates
+        if self.repository.exists_by_codigo(command.codigo):
+            return Result.failure(["El código de cliente ya existe"])
+        
+        # Save
+        self.repository.save(cliente)
+        return Result.success(cliente)
+```
+
+**queries.py**
+```python
+from dataclasses import dataclass
+from typing import List, Optional
+
+from app.core.domain.result import PaginatedResult
+from app.features.clientes.application.dtos import ClienteResponseDTO
+from app.features.clientes.domain.repositories import ClienteRepository
+
+@dataclass
+class ListarClientesQuery:
+    activos_only: bool = True
+    search_term: Optional[str] = None
+    page: int = 1
+    page_size: int = 50
+
+class ListarClientesHandler:
+    def __init__(self, repository: ClienteRepository):
+        self.repository = repository
+    
+    def execute(self, query: ListarClientesQuery) -> PaginatedResult[ClienteResponseDTO]:
+        clientes = self.repository.list(
+            activos_only=query.activos_only,
+            search_term=query.search_term,
+            page=query.page,
+            page_size=query.page_size
+        )
+        total = self.repository.count(activos_only=query.activos_only)
+        
+        dtos = [ClienteResponseDTO.from_entity(c) for c in clientes]
+        return PaginatedResult(dtos, total, query.page, query.page_size)
+```
+
+### Infrastructure Layer Files
+
+**persistence/models.py**
+```python
+from datetime import datetime
+
+from sqlalchemy import Boolean, Column, DateTime, Integer, String
+
+from app.database.base import Base
+
+class ClienteORM(Base):
+    """SQLAlchemy ORM model for Cliente"""
+    __tablename__ = 'clientes'
+    
+    id = Column(Integer, primary_key=True)
+    codigo = Column(String(20), unique=True, nullable=False, index=True)
+    nombre = Column(String(200), nullable=False)
+    email = Column(String(120), nullable=True)
+    telefono = Column(String(20), nullable=True)
+    direccion = Column(String(300), nullable=True)
+    activo = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+```
+
+**persistence/sql_repository.py**
+```python
+from typing import List, Optional
+
+from sqlalchemy import or_
+from sqlalchemy.orm import Session
+
+from app.features.clientes.domain.models import Cliente
+from app.features.clientes.domain.repositories import ClienteRepository
+from app.features.clientes.infrastructure.persistence.models import ClienteORM
+
+class SQLClienteRepository(ClienteRepository):
+    """SQLAlchemy implementation of ClienteRepository (Adapter)"""
+    
+    def __init__(self, session: Session):
+        self.session = session
+    
+    def get_by_id(self, id: int) -> Optional[Cliente]:
+        orm = self.session.get(ClienteORM, id)
+        return self._to_domain(orm) if orm else None
+    
+    def save(self, cliente: Cliente) -> Cliente:
+        if cliente.id:
+            orm = self.session.get(ClienteORM, cliente.id)
+            if orm:
+                self._update_orm(orm, cliente)
+            else:
+                orm = self._to_orm(cliente)
+                self.session.add(orm)
+        else:
+            orm = self._to_orm(cliente)
+            self.session.add(orm)
+        
+        self.session.flush()
+        cliente.id = orm.id
+        return cliente
+    
+    def delete(self, id: int) -> bool:
+        orm = self.session.get(ClienteORM, id)
+        if orm:
+            self.session.delete(orm)
+            return True
+        return False
+    
+    def exists_by_codigo(self, codigo: str, exclude_id: Optional[int] = None) -> bool:
+        query = self.session.query(ClienteORM).filter_by(codigo=codigo)
+        if exclude_id:
+            query = query.filter(ClienteORM.id != exclude_id)
+        return query.first() is not None
+    
+    def list(self, activos_only: bool = True, search_term: Optional[str] = None,
+             page: int = 1, page_size: int = 50) -> List[Cliente]:
+        query = self.session.query(ClienteORM)
+        
+        if activos_only:
+            query = query.filter_by(activo=True)
+        
+        if search_term:
+            search = f"%{search_term}%"
+            query = query.filter(
+                or_(
+                    ClienteORM.nombre.ilike(search),
+                    ClienteORM.codigo.ilike(search)
+                )
+            )
+        
+        query = query.order_by(ClienteORM.nombre)
+        query = query.offset((page - 1) * page_size).limit(page_size)
+        
+        return [self._to_domain(orm) for orm in query.all()]
+    
+    def count(self, activos_only: bool = True) -> int:
+        query = self.session.query(ClienteORM)
+        if activos_only:
+            query = query.filter_by(activo=True)
+        return query.count()
+    
+    def _to_domain(self, orm: ClienteORM) -> Cliente:
+        return Cliente(
+            id=orm.id,
+            codigo=orm.codigo,
+            nombre=orm.nombre,
+            email=orm.email,
+            telefono=orm.telefono,
+            direccion=orm.direccion,
+            activo=orm.activo
+        )
+    
+    def _to_orm(self, cliente: Cliente) -> ClienteORM:
+        return ClienteORM(
+            id=cliente.id,
+            codigo=cliente.codigo,
+            nombre=cliente.nombre,
+            email=cliente.email,
+            telefono=cliente.telefono,
+            direccion=cliente.direccion,
+            activo=cliente.activo
+        )
+    
+    def _update_orm(self, orm: ClienteORM, cliente: Cliente):
+        orm.codigo = cliente.codigo
+        orm.nombre = cliente.nombre
+        orm.email = cliente.email
+        orm.telefono = cliente.telefono
+        orm.direccion = cliente.direccion
+        orm.activo = cliente.activo
+```
+
+**web/routes.py**
+```python
+from flask import Blueprint, flash, redirect, render_template, request, url_for
+
+from app.features.clientes.application.commands import CrearClienteCommand, CrearClienteHandler
+from app.features.clientes.application.queries import ListarClientesQuery, ListarClientesHandler
+from app.features.clientes.infrastructure.persistence.sql_repository import SQLClienteRepository
+from app.database.database import get_session
+
+clientes_bp = Blueprint('clientes', __name__, 
+                        template_folder='templates',
+                        url_prefix='/clientes')
+
+def get_cliente_repository():
+    """Factory for repository with current session"""
+    return SQLClienteRepository(get_session())
+
+@clientes_bp.route('/')
+def index():
+    """List clients page"""
+    query = ListarClientesQuery(
+        activos_only=request.args.get('activos', '1') == '1',
+        search_term=request.args.get('q') or None,
+        page=int(request.args.get('page', 1))
+    )
+    
+    repository = get_cliente_repository()
+    handler = ListarClientesHandler(repository)
+    result = handler.execute(query)
+    
+    return render_template('pages/clientes/index.html',
+                          clientes=result.items,
+                          pagination=result,
+                          search_term=request.args.get('q', ''))
+
+@clientes_bp.route('/new', methods=['GET'])
+def new():
+    """New client form"""
+    return render_template('pages/clientes/new.html')
+
+@clientes_bp.route('/', methods=['POST'])
+def create():
+    """Create client"""
+    command = CrearClienteCommand(
+        codigo=request.form['codigo'],
+        nombre=request.form['nombre'],
+        email=request.form.get('email') or None,
+        telefono=request.form.get('telefono') or None,
+        direccion=request.form.get('direccion') or None
+    )
+    
+    repository = get_cliente_repository()
+    handler = CrearClienteHandler(repository)
+    result = handler.execute(command)
+    
+    if result.is_success:
+        flash('Cliente creado exitosamente', 'success')
+        return redirect(url_for('clientes.show', id=result.value.id))
+    else:
+        for error in result.errors:
+            flash(error, 'danger')
+        return render_template('pages/clientes/new.html', 
+                              data=request.form), 422
+```
+
+---
+
+## 5. Dependency Rules
+
+### Visual Dependency Diagram
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           EXTERNAL LAYER                                     │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
+│  │   Flask      │  │  SQLAlchemy  │  │   Other      │  │  External    │     │
+│  │   Routes     │  │  Repository  │  │   Adapters   │  │   APIs       │     │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘     │
+│         │                 │                 │                 │              │
+│         │  depends on     │  implements     │  implements     │              │
+│         │                 │                 │                 │              │
+│         ▼                 ▼                 ▼                 ▼              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                        APPLICATION LAYER                                     │
+│  ┌──────────────────────────────────────────────────────────────────┐       │
+│  │  Command Handlers  │  Query Handlers  │  DTOs  │  Orchestration  │       │
+│  └──────────────────────────────────────────────────────────────────┘       │
+│         ▲                              │                                     │
+│         │  uses                        │  uses                               │
+│         │                              │                                     │
+├─────────┼──────────────────────────────┼─────────────────────────────────────┤
+│         │                              │                                     │
+│         │        DOMAIN LAYER (Core)   │                                     │
+│         │  ┌──────────────────────────────────────────────────────────┐     │
+│         └──┤  Entities  │  Business Rules  │  Repository Interfaces   │     │
+│            └──────────────────────────────────────────────────────────┘     │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Dependency Rule: Dependencies point INWARD only
+```
+
+### Import Rules
+
+| Layer | Can Import From | Cannot Import From |
+|-------|-----------------|-------------------|
+| **Domain** | Python stdlib, typing | Flask, SQLAlchemy, any framework |
+| **Application** | Domain, Python stdlib | Flask, SQLAlchemy, infrastructure |
+| **Infrastructure** | Domain, Application, Flask, SQLAlchemy | None (outermost layer) |
+
+### The Dependency Inversion Principle
+
+**Before (Traditional):**
+```
+┌─────────────┐         ┌─────────────┐
+│   Routes    │───────► │   Models    │
+│             │         │  (SQLAlchemy)│
+└─────────────┘         └─────────────┘
+```
+Routes directly depend on SQLAlchemy models - hard to test, tightly coupled.
+
+**After (Hexagonal):**
+```
+┌───────────────┐         ┌──────────────────┐         ┌─────────────────┐
+│     Routes    │───────► │ ClienteRepository│◄────────│ SQLClienteRepository│
+│               │         │   (Interface)    │         │   (Implementation)  │
+└───────────────┘         └──────────────────┘         └─────────────────┘
+        │                                                    │
+        │                                                    │
+        └────────────────────────────────────────────────────┘
+                    Depends on abstraction
+```
+
+Routes depend on the repository interface, not the SQLAlchemy implementation. We can:
+- Swap SQLAlchemy for another ORM
+- Use an in-memory repository for testing
+- Mock repositories in unit tests
+
+---
+
+## 6. Testing Strategy
+
+### Test Pyramid
+
+```
+    /\
+   /  \
+  / E2E\         <- Few tests (Selenium/Playwright)
+ /______\
+ /        \
+/Integration\    <- Some tests (with real DB)
+/____________\
+/              \
+/     Unit       \  <- Many tests (fast, no DB)
+/__________________\
+```
+
+### Unit Tests - Domain + Application
+
+Unit tests don't need a database. They test business rules in isolation.
 
 ```python
-# Query all
-clientes = Cliente.query.all()
+# tests/features/clientes/domain/test_models.py
+import pytest
 
-# Query with filter
-clientes_activos = Cliente.query.filter_by(activo=True).all()
+from app.features.clientes.domain.models import Cliente
 
-# Create
-nuevo_cliente = Cliente(nombre="Test", codigo="CLI001")
-db.session.add(nuevo_cliente)
-db.session.commit()
+class TestCliente:
+    """Unit tests for Cliente domain entity"""
+    
+    def test_valid_cliente_passes_validation(self):
+        cliente = Cliente(id=None, codigo="CLI001", nombre="Test Client")
+        errors = cliente.validate()
+        assert len(errors) == 0
+    
+    def test_short_codigo_fails_validation(self):
+        cliente = Cliente(id=None, codigo="AB", nombre="Test Client")
+        errors = cliente.validate()
+        assert "al menos 3 caracteres" in errors[0]
+    
+    def test_empty_nombre_fails_validation(self):
+        cliente = Cliente(id=None, codigo="CLI001", nombre="")
+        errors = cliente.validate()
+        assert "al menos 2 caracteres" in errors[0]
+    
+    def test_invalid_email_fails_validation(self):
+        cliente = Cliente(id=None, codigo="CLI001", nombre="Test", email="invalid")
+        errors = cliente.validate()
+        assert "email no es válido" in errors[0]
 ```
-
-### 4.5 Configuration Management
-
-Environment-based configuration using classes:
 
 ```python
-# config/config.py
-class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY')
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+# tests/features/clientes/application/test_commands.py
+import pytest
+from unittest.mock import Mock
 
-class DevelopmentConfig(Config):
-    DEBUG = True
+from app.features.clientes.application.commands import (
+    CrearClienteCommand, CrearClienteHandler
+)
+from app.features.clientes.domain.models import Cliente
 
-class ProductionConfig(Config):
-    DEBUG = False
+class TestCrearClienteHandler:
+    """Unit tests for CrearCliente use case"""
+    
+    def setup_method(self):
+        self.mock_repo = Mock()
+        self.handler = CrearClienteHandler(self.mock_repo)
+    
+    def test_creates_cliente_successfully(self):
+        self.mock_repo.exists_by_codigo.return_value = False
+        
+        command = CrearClienteCommand(
+            codigo="CLI001",
+            nombre="Test Client"
+        )
+        result = self.handler.execute(command)
+        
+        assert result.is_success
+        assert result.value.codigo == "CLI001"
+        self.mock_repo.save.assert_called_once()
+    
+    def test_fails_when_codigo_already_exists(self):
+        self.mock_repo.exists_by_codigo.return_value = True
+        
+        command = CrearClienteCommand(
+            codigo="CLI001",
+            nombre="Test Client"
+        )
+        result = self.handler.execute(command)
+        
+        assert not result.is_success
+        assert "ya existe" in result.errors[0]
+        self.mock_repo.save.assert_not_called()
+    
+    def test_fails_when_validation_fails(self):
+        command = CrearClienteCommand(codigo="AB", nombre="")  # Invalid
+        result = self.handler.execute(command)
+        
+        assert not result.is_success
+        assert len(result.errors) == 2  # codigo and nombre errors
 ```
 
-### 4.6 Template Inheritance
+### Integration Tests - Infrastructure
 
-Base template with blocks for child templates:
+Integration tests verify the repository implementations work with a real database.
 
-```html
-<!-- templates/base.html -->
-<!DOCTYPE html>
-<html>
-<head>{% block head %}{% endblock %}</head>
-<body>
-    {% block content %}{% endblock %}
-</body>
-</html>
+```python
+# tests/features/clientes/infrastructure/test_sql_repository.py
+import pytest
 
-<!-- templates/pages/clientes/index.html -->
-{% extends "base.html" %}
-{% block content %}
-    <h1>Clientes</h1>
-{% endblock %}
+from app.features.clientes.domain.models import Cliente
+from app.features.clientes.infrastructure.persistence.sql_repository import (
+    SQLClienteRepository
+)
+
+class TestSQLClienteRepository:
+    """Integration tests for SQLClienteRepository"""
+    
+    def setup_method(self):
+        # Using test database fixture
+        self.session = get_test_session()
+        self.repo = SQLClienteRepository(self.session)
+    
+    def teardown_method(self):
+        self.session.rollback()
+    
+    def test_save_and_retrieve_cliente(self):
+        cliente = Cliente(id=None, codigo="CLI001", nombre="Test")
+        
+        saved = self.repo.save(cliente)
+        self.session.commit()
+        
+        retrieved = self.repo.get_by_id(saved.id)
+        assert retrieved.codigo == "CLI001"
+        assert retrieved.nombre == "Test"
+    
+    def test_exists_by_codigo(self):
+        cliente = Cliente(id=None, codigo="CLI001", nombre="Test")
+        self.repo.save(cliente)
+        self.session.commit()
+        
+        assert self.repo.exists_by_codigo("CLI001")
+        assert not self.repo.exists_by_codigo("NONEXISTENT")
+    
+    def test_list_with_pagination(self):
+        # Create multiple clients
+        for i in range(10):
+            cliente = Cliente(id=None, codigo=f"CLI{i:03d}", nombre=f"Client {i}")
+            self.repo.save(cliente)
+        self.session.commit()
+        
+        page1 = self.repo.list(page=1, page_size=5)
+        assert len(page1) == 5
+        
+        page2 = self.repo.list(page=2, page_size=5)
+        assert len(page2) == 5
+```
+
+### E2E Tests
+
+E2E tests verify the complete request-response cycle.
+
+```python
+# tests/e2e/test_clientes.py
+import pytest
+
+class TestClientesE2E:
+    """End-to-end tests for clientes feature"""
+    
+    def test_create_cliente_flow(self, client):
+        # GET new client form
+        response = client.get('/clientes/new')
+        assert response.status_code == 200
+        
+        # POST create cliente
+        response = client.post('/clientes/', data={
+            'codigo': 'CLI001',
+            'nombre': 'Test Client',
+            'email': 'test@example.com'
+        }, follow_redirects=True)
+        
+        assert response.status_code == 200
+        assert b'creado exitosamente' in response.data
+    
+    def test_list_clientes(self, client):
+        response = client.get('/clientes/')
+        assert response.status_code == 200
+```
+
+### Test Structure
+
+```
+tests/
+├── conftest.py                    # Shared fixtures
+├── unit/                          # Fast unit tests
+│   ├── core/
+│   │   └── test_result.py
+│   └── features/
+│       └── clientes/
+│           ├── domain/
+│           │   └── test_models.py
+│           └── application/
+│               └── test_commands.py
+├── integration/                   # Tests with real DB
+│   └── features/
+│       └── clientes/
+│           └── infrastructure/
+│               └── test_sql_repository.py
+└── e2e/                          # Full application tests
+    └── test_clientes.py
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+pytest
+
+# Run only unit tests (fast)
+pytest tests/unit
+
+# Run only integration tests
+pytest tests/integration
+
+# Run with coverage
+pytest --cov=app --cov-report=html
+
+# Run specific test file
+pytest tests/unit/features/clientes/domain/test_models.py -v
 ```
 
 ---
 
-## 5. Security Considerations
+## 7. Migration from Access
 
-### 5.1 Implemented
-- SQL Injection Prevention (SQLAlchemy ORM)
-- CSRF Protection (session-based)
-- Secure Session Configuration
-- Environment-based SECRET_KEY
+### How Each Access Table Becomes a Feature
 
-### 5.2 Future Implementation
-- User authentication and authorization
-- Password hashing (bcrypt)
-- HTTPS enforcement
-- Rate limiting
-- Input validation (WTForms)
-- XSS protection headers
+Microsoft Access tables are migrated to Hexagonal Architecture features:
 
----
+| Access Table | Feature | Status |
+|--------------|---------|--------|
+| tblClientes | clientes | ✅ Completed |
+| tblPedidos | pedidos | 🔄 Next |
+| tblOrdenesTrabajo | ordenes_trabajo | ⏳ Pending |
+| tblResultados | resultados | ⏳ Pending |
+| tblParametros | parametros | ⏳ Pending |
 
-## 6. Performance Considerations
+### Migration Process
 
-### 6.1 Database
-- Indexes on frequently queried columns (codigo, numero_pedido, numero)
-- Lazy loading for relationships
-- Query optimization with SQLAlchemy
+For each Access table:
 
-### 6.2 Caching Opportunities
-- Template caching in production
-- Query result caching for dashboard metrics
-- Static file caching (Nginx/CDN)
+1. **Analyze** - Understand table structure, relationships, business rules
+2. **Design Domain** - Create pure Python entity with validation
+3. **Define Repository** - Create repository interface (Port)
+4. **Build Infrastructure** - Implement SQLAlchemy repository and Flask routes
+5. **Write Tests** - Unit tests for domain, integration tests for repository
+6. **Migrate Data** - Script to transfer data from Access to PostgreSQL
 
-### 6.3 Frontend
-- Minified CSS/JS in production
-- Image optimization
-- Lazy loading for data tables
+### Example Migration for tblClientes
 
----
+```python
+# migration_scripts/migrate_clientes.py
+"""Script to migrate clients from Access to PostgreSQL"""
 
-## 7. Scalability Roadmap
+import pyodbc
+from app import create_app
+from app.database.database import db
+from app.features.clientes.infrastructure.persistence.sql_repository import (
+    SQLClienteRepository
+)
+from app.features.clientes.domain.models import Cliente
 
-### Current (Phase 1)
-- Single Flask instance
-- SQLite/PostgreSQL database
-- Synchronous request handling
+def migrate_clientes():
+    # Connect to Access database
+    access_conn = pyodbc.connect(
+        r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};'
+        r'DBQ=C:\DataLab\Legacy\DataLab.mdb;'
+    )
+    cursor = access_conn.cursor()
+    
+    # Fetch all clients
+    cursor.execute("SELECT Codigo, Nombre, Email, Telefono, Direccion FROM tblClientes")
+    
+    app = create_app()
+    with app.app_context():
+        repo = SQLClienteRepository(db.session)
+        
+        for row in cursor.fetchall():
+            cliente = Cliente(
+                id=None,
+                codigo=row.Codigo,
+                nombre=row.Nombre,
+                email=row.Email,
+                telefono=row.Telefono,
+                direccion=row.Direccion,
+                activo=True
+            )
+            
+            # Validate before saving
+            errors = cliente.validate()
+            if errors:
+                print(f"Skipping {row.Codigo}: {errors}")
+                continue
+            
+            repo.save(cliente)
+        
+        db.session.commit()
+        print("Migration complete!")
 
-### Phase 2 (Future)
-- Application factory for multiple workers
-- Redis for session storage
-- Background task queue (Celery)
+if __name__ == '__main__':
+    migrate_clientes()
+```
 
-### Phase 3 (Future)
-- Microservices architecture
-- API Gateway
-- Containerization (Docker/Kubernetes)
+### Progressive Migration Strategy
+
+1. **Phase 1: Feature Pilot (Clientes)** ✅
+   - Implement full hexagonal architecture for one feature
+   - Validate the pattern works for the team
+   - Document lessons learned
+
+2. **Phase 2: Core Features**
+   - Pedidos (Orders)
+   - Ordenes de Trabajo (Work Orders)
+   - Establish patterns for related entities
+
+3. **Phase 3: Supporting Features**
+   - Resultados (Results)
+   - Parametros (Parameters)
+   - Configuracion (Configuration)
+
+4. **Phase 4: Legacy Bridge**
+   - Synchronization layer for phased cutover
+   - Allow running Access and DataLab in parallel
+
+### Feature Pilot: Clientes ✅
+
+The **Clientes** feature has been completed as the architecture pilot:
+
+- ✅ Domain entity with validation
+- ✅ Repository interface and SQLAlchemy implementation
+- ✅ Command and Query handlers
+- ✅ Flask routes with forms
+- ✅ Full CRUD operations
+- ✅ Unit tests
+- ✅ Integration tests
+- ✅ Templates and UI
+
+Lessons learned from the pilot:
+- Repository pattern works well for testability
+- DTOs add boilerplate but improve API clarity
+- Result pattern is cleaner than exceptions for business errors
+- Feature folders make the codebase easier to navigate
 
 ---
 
 ## 8. Architecture Decision Records (ADRs)
 
-### ADR 1: Flask over Django
-**Decision:** Use Flask instead of Django  
-**Rationale:** Lighter weight, more flexible for custom requirements, easier to learn for small team  
-**Status:** Accepted
+### ADR 5: Hexagonal Architecture
+**Decision:** Adopt Hexagonal (Ports & Adapters) Architecture
+**Rationale:**
+- Clear separation of concerns
+- Testability without database
+- Easier migration from legacy Access database
+- Framework independence
+**Status:** ✅ Accepted - Pilot completed with Clientes feature
 
-### ADR 2: SQLAlchemy ORM
-**Decision:** Use SQLAlchemy as ORM  
-**Rationale:** Industry standard for Flask, supports multiple databases, powerful query capabilities  
-**Status:** Accepted
+### ADR 6: CQRS for Application Layer
+**Decision:** Use Command Query Responsibility Segregation
+**Rationale:**
+- Clear distinction between reads and writes
+- Optimized query handlers for complex reads
+- Commands can enforce business rules strictly
+**Status:** ✅ Accepted
 
-### ADR 3: Server-Side Rendering
-**Decision:** Use Jinja2 templates over SPA framework  
-**Rationale:** Simpler architecture, better for SEO, faster initial page load, less JavaScript complexity  
-**Status:** Accepted
+### ADR 7: Repository Pattern
+**Decision:** Use Repository pattern with explicit interfaces
+**Rationale:**
+- Abstracts database details from domain
+- Enables testing with mocks
+- Can swap ORM without changing domain
+**Status:** ✅ Accepted
 
-### ADR 4: SQLite for Development
-**Decision:** Use SQLite in development, PostgreSQL in production  
-**Rationale:** Zero configuration for developers, easy setup, production parity with config change  
-**Status:** Accepted
+### ADR 8: Feature-Based Organization
+**Decision:** Organize code by feature, not by layer
+**Rationale:**
+- Easier to navigate and understand
+- Feature changes are localized
+- Clear boundaries between features
+**Status:** ✅ Accepted
+
+---
+
+## 9. Quick Reference
+
+### Adding a New Feature
+
+1. Create feature structure:
+```bash
+mkdir -p app/features/{nombre}/domain
+mkdir -p app/features/{nombre}/application
+mkdir -p app/features/{nombre}/infrastructure/persistence
+mkdir -p app/features/{nombre}/infrastructure/web/templates/pages/{nombre}
+```
+
+2. Implement in order:
+   - `domain/models.py` - Entity with validation
+   - `domain/repositories.py` - Repository interface
+   - `application/dtos.py` - Input/output DTOs
+   - `application/commands.py` - Write operations
+   - `application/queries.py` - Read operations
+   - `infrastructure/persistence/models.py` - SQLAlchemy ORM
+   - `infrastructure/persistence/sql_repository.py` - Repository impl
+   - `infrastructure/web/routes.py` - Flask routes
+
+3. Register blueprint in `app/routes/__init__.py`
+
+4. Write tests:
+   - `tests/unit/features/{nombre}/domain/`
+   - `tests/unit/features/{nombre}/application/`
+   - `tests/integration/features/{nombre}/infrastructure/`
 
 ---
 

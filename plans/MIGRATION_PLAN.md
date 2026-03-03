@@ -1,5 +1,5 @@
 # DataLab Access to Web Migration Plan
-## Laboratory Information Management System (LIMS) Migration Strategy
+## Laboratory Information Management System (LIMS) Feature-Based Migration Strategy
 
 **Migration Date:** March 2026  
 **Estimated Duration:** 14 Weeks  
@@ -11,7 +11,7 @@
 
 ## Executive Summary
 
-This migration plan outlines the complete transition of the Access-based RM2026 laboratory management system to a modern web-based DataLab application. The migration follows a phased approach to minimize risk and ensure business continuity.
+This migration plan outlines the complete transition of the Access-based RM2026 laboratory management system to a modern web-based DataLab application. The migration follows a **Feature-based approach** to minimize risk and ensure business continuity, delivering value incrementally with each feature.
 
 **Current State:**
 - Split Access architecture (frontend + backend)
@@ -26,24 +26,85 @@ This migration plan outlines the complete transition of the Access-based RM2026 
 - Advanced reporting and analytics
 - Multi-user concurrent access
 
+**Migration Strategy:**
+- Feature-based incremental delivery
+- Each Access table → One Domain Feature
+- Dependencies mapped and respected
+- Pilot feature (Clientes) completed successfully
+
+---
+
+## Feature Dependency Map
+
+The system is organized into independent and dependent features based on domain relationships:
+
+```
+Reference Data (independent)
+├── areas (4 rows)              → All features
+├── organismos (12 rows)        → Clientes
+├── provincias (4 rows)         → Fabricas
+├── destinos (7 rows)           → Productos
+├── ramas (13 rows)             → Productos
+├── meses (12 rows)             → Ordenes, Entradas, Informes
+├── annos (10 rows)             → Ordenes, Entradas, Informes
+├── unidades_medida (3 rows)    → Ensayos
+└── tipo_es (4 rows)            → EnsayosES
+
+Master Data (depends on Reference Data)
+├── Clientes (166 rows)         → Depends on organismos
+│   └── Factory → Clientes
+└── Productos (160 rows)        → Depends on ramas, destinos
+
+Test Catalogs (depends on Reference Data)
+├── Ensayos (143 rows)          → Depends on areas
+└── EnsayosES (29 rows)         → Depends on areas, tipo_es
+
+Transactional Data (depends on Master Data & Test Catalogs)
+├── Ordenes de Trabajo (37 rows) → Depends on clientes
+├── Pedidos (49 rows)            → Depends on clientes, productos, OT
+├── Entradas (109 rows)          → Depends on pedidos, fabricas, productos
+├── Detalles de Ensayos (563 rows) → Depends on entradas, ensayos
+├── Utilizado (632 rows)         → Depends on entradas, ensayos
+└── Informes (20 rows)           → Depends on entradas
+```
+
+### Feature Dependency Matrix
+
+| Feature | Dependencies | Dependents |
+|---------|--------------|------------|
+| Areas | None | All features |
+| Clientes | organismos, areas | Fabricas, Pedidos, Ordenes, Entradas |
+| Fabricas | clientes, provincias | Entradas |
+| Productos | ramas, destinos | Pedidos, Entradas |
+| Ensayos | areas, unidades_medida | Detalles de Ensayos |
+| EnsayosES | areas, tipo_es | Detalles de Ensayos |
+| Ordenes de Trabajo | clientes | Pedidos |
+| Pedidos | clientes, productos, ordenes | Entradas |
+| Entradas | pedidos, fabricas, productos | Detalles de Ensayos, Informes |
+| Detalles de Ensayos | entradas, ensayos | Utilizado, Informes |
+| Utilizado | entradas, ensayos, detalles_ensayos | Reports |
+| Informes | entradas, detalles_ensayos | Reports |
+
 ---
 
 ## Migration Phases Overview
 
-| Phase | Duration | Priority | Focus Area |
-|-------|----------|----------|------------|
-| Phase 1 | Weeks 1-2 | CRITICAL | Foundation & Schema |
-| Phase 2 | Weeks 3-4 | HIGH | Core Entities & CRUD |
-| Phase 3 | Weeks 5-6 | HIGH | Sample Management |
-| Phase 4 | Weeks 7-8 | HIGH | Test Management |
-| Phase 5 | Weeks 9-10 | MEDIUM | Reporting & Billing |
-| Phase 6 | Weeks 11-12 | MEDIUM | Advanced Features |
-| Phase 7 | Weeks 13-14 | CRITICAL | Testing & Go-Live |
+| Phase | Duration | Feature | Status | Focus Area |
+|-------|----------|---------|--------|------------|
+| Phase 1 | Weeks 1-2 | Core Infrastructure + Reference Data | ✅ Complete | Foundation & Schema |
+| Phase 2 | Weeks 3-4 | Clientes Feature | ✅ Completed Pilot | CRUD + Data Migration |
+| Phase 3 | Weeks 5-6 | Muestras Feature | 🔄 Pending | Sample Management |
+| Phase 4 | Weeks 7-8 | Ensayos Feature | 📋 Pending | Test Management |
+| Phase 5 | Weeks 9-10 | Ordenes y Reportes | 📋 Pending | Orders & Reports |
+| Phase 6 | Weeks 11-12 | Data Migration from Access | 📋 Pending | Per-feature migration |
+| Phase 7 | Weeks 13-14 | Testing & Go-Live | 📋 Pending | UAT & Production |
 
 ---
 
-## Phase 1: Foundation & Schema (Weeks 1-2)
+## Phase 1: Core Infrastructure + Reference Data (Weeks 1-2)
+
 **Priority:** CRITICAL  
+**Status:** ✅ Complete  
 **Success Criteria:** Database schema deployed, reference data migrated, basic connectivity verified
 
 ### 1.1 Database Schema Creation
@@ -52,12 +113,13 @@ This migration plan outlines the complete transition of the Access-based RM2026 
 | Task | Duration | Owner | Deliverable |
 |------|----------|-------|-------------|
 | Create PostgreSQL database | 1 day | DBA | Empty database |
-| Implement reference tables | 2 days | Backend | 8 reference tables |
-| Implement core business tables | 2 days | Backend | Clientes, Fabricas, Productos |
+| Implement reference tables | 2 days | Backend | 9 reference tables |
 | Create foreign key relationships | 1 day | Backend | Complete FK graph |
 | Add indexes and constraints | 1 day | DBA | Optimized schema |
+| Implement audit trail tables | 1 day | Backend | Audit logging schema |
+| Create migration scripts | 2 days | DBA | Automated migration tools |
 
-**Reference Tables to Create:**
+**Reference Tables Created:**
 ```sql
 -- Priority: HIGH (Load First)
 areas (4 rows)           - Laboratory areas (FQ, MB, ES, OS)
@@ -71,201 +133,220 @@ unidades_medida (3 rows) - Measurement units
 tipo_es (4 rows)         - Sensory evaluation types
 ```
 
-**Core Business Tables:**
-```sql
--- Priority: HIGH (Load Second)
-clientes (166 rows)      - Client registry
-fabricas (403 rows)      - Factory locations
-productos (160 rows)     - Product catalog
-```
-
-#### Week 2: Test Catalogs & Audit Infrastructure
-| Task | Duration | Owner | Deliverable |
-|------|----------|-------|-------------|
-| Create test catalog tables | 2 days | Backend | Ensayos, EnsayosES |
-| Implement audit trail tables | 1 day | Backend | Audit logging schema |
-| Create migration scripts | 2 days | DBA | Automated migration tools |
-| Schema validation | 1 day | QA | Validated schema |
-
-**Test Catalog Tables:**
-```sql
-ensayos (143 rows)       - Physical-chemical tests (FQ area)
-ensayos_es (29 rows)     - Sensory evaluation tests (ES area)
-```
-
 ### 1.2 Data Migration - Phase 1
 
 **Migration Order:**
 1. Reference data (78 rows total)
-2. Master data (729 rows total)
-3. Verify row counts and FK integrity
+2. Verify row counts and FK integrity
 
 **Validation Checkpoints:**
-- [ ] All 8 reference tables loaded
-- [ ] 166 clients migrated with organizations
-- [ ] 403 factories linked to clients and provinces
-- [ ] 160 products with destinations
-- [ ] 143 FQ tests with pricing
-- [ ] 29 sensory tests with pricing
-- [ ] Foreign key relationships validated
+- [x] All 9 reference tables loaded
+- [x] Foreign key relationships validated
+- [x] Indexes created
 
 ### 1.3 Success Criteria
-| Criteria | Target | Measurement |
-|----------|--------|-------------|
-| Schema deployment | 100% | All tables created |
-| Data accuracy | 100% | Row count match |
-| FK integrity | 100% | No orphaned records |
-| Query performance | <100ms | Standard queries |
+| Criteria | Target | Status |
+|----------|--------|--------|
+| Schema deployment | 100% | ✅ Complete |
+| Data accuracy | 100% | ✅ Row count match |
+| FK integrity | 100% | ✅ No orphaned records |
+| Query performance | <100ms | ✅ Standard queries |
 
 ---
 
-## Phase 2: Core Entities (Weeks 3-4)
+## Phase 2: Clientes Feature (Weeks 3-4)
+
 **Priority:** HIGH  
-**Success Criteria:** Full CRUD for clients, factories, products; user authentication working
+**Status:** ✅ Completed (Pilot Feature)  
+**Success Criteria:** Full CRUD for clients, factories; user authentication working; domain-driven architecture established
 
-### 2.1 CRUD Implementation
+### 2.1 Feature Implementation Pattern Established
 
-#### Week 3: Client Management Module
-| Feature | Description | Acceptance Criteria |
-|---------|-------------|---------------------|
-| Client List | Paginated client directory | Search, filter, sort |
-| Create Client | New client registration | Validation, duplicate check |
-| Edit Client | Modify client details | Audit trail |
-| Delete Client | Soft delete | Preserve history |
-| Client Detail | Full client view | Factory associations |
+The Clientes feature established the implementation pattern for all subsequent features:
 
-**Client Data Structure:**
-```python
-{
-  "id": 1,
-  "nombre": "Empresa Cárnica de Pinar del Río",
-  "organismo_id": 1,
-  "tipo_cliente": 1,
-  "activo": true,
-  "fabricas": [...],
-  "total_pedidos": 15
-}
+```
+Clientes Feature Structure:
+├── domain/
+│   ├── models.py          - Cliente, Fabrica entities with validation
+│   ├── repositories.py    - ClienteRepository, FabricaRepository (ports)
+│   └── exceptions.py      - Domain-specific exceptions
+├── application/
+│   ├── dtos.py           - ClienteDTO, FabricaDTO, ClienteListDTO
+│   ├── commands.py       - CreateClienteCommand, UpdateClienteCommand
+│   └── queries.py        - ListClientesQuery, GetClienteByIdQuery
+├── infrastructure/
+│   └── persistence/
+│       └── sql_repository.py - SQLClienteRepository, SQLFabricaRepository
+│   └── web/
+│       └── routes.py     - Flask routes for clientes, fabricas
+└── tests/
+    ├── unit/             - Domain tests (no DB)
+    └── integration/      - Repository tests (with DB)
 ```
 
-#### Week 3-4: Factory Management
-| Feature | Description | Acceptance Criteria |
-|---------|-------------|---------------------|
-| Factory CRUD | Manage factory locations | Linked to clients |
-| Province Filter | Filter by province | 4 provinces supported |
-| Factory History | View associated samples | Timeline view |
+### 2.2 Clientes Domain
 
-**Factory Statistics:**
-- Total: 403 factories
-- Average per client: 2.4 factories
-- By province: Distribution maintained
+**Entities:**
+```python
+# domain/models.py
+class Cliente:
+    id: int
+    nombre: str
+    organismo_id: int
+    tipo_cliente: int
+    activo: bool
+    fabricas: List[Fabrica]
 
-#### Week 4: Product Catalog
-| Feature | Description | Acceptance Criteria |
-|---------|-------------|---------------------|
-| Product CRUD | Manage product catalog | 160 products |
-| Sector Classification | Assign to ramas | 13 sectors |
-| Destination Tracking | Product destinations | 7 destinations |
-| Test Associations | Link tests to products | FQ, MB, ES tests |
+class Fabrica:
+    id: int
+    nombre: str
+    cliente_id: int
+    provincia_id: int
+    direccion: Optional[str]
+```
 
-### 2.2 Data Migration - Phase 2
+**Repository Port:**
+```python
+# domain/repositories.py
+class ClienteRepository(ABC):
+    @abstractmethod
+    def get_by_id(self, id: int) -> Optional[Cliente]: ...
+    @abstractmethod
+    def list_all(self) -> List[Cliente]: ...
+    @abstractmethod
+    def save(self, cliente: Cliente) -> Cliente: ...
+    @abstractmethod
+    def delete(self, id: int) -> bool: ...
+```
+
+### 2.3 Data Migration - Clientes Feature
 
 **Master Data Migration:**
 | Table | Rows | Migration Method | Validation |
 |-------|------|------------------|------------|
 | clientes | 166 | CSV export/import | Row count + sample validation |
 | fabricas | 403 | CSV export/import | FK to clientes verified |
-| productos | 160 | CSV export/import | FK to destinos verified |
 
-### 2.3 User Authentication System
+**Migration Statistics:**
+- Total: 569 records (166 clients + 403 factories)
+- Average factories per client: 2.4
+- By province: Distribution maintained
 
-| Component | Implementation | Priority |
-|-----------|----------------|----------|
-| User Model | Flask-Login + SQLAlchemy | HIGH |
-| Login/Logout | Session-based auth | HIGH |
-| Role Management | Admin, Technician, Client | HIGH |
-| Password Security | Bcrypt hashing | CRITICAL |
+### 2.4 User Authentication System
+
+| Component | Implementation | Priority | Status |
+|-----------|----------------|----------|--------|
+| User Model | Flask-Login + SQLAlchemy | HIGH | ✅ Complete |
+| Login/Logout | Session-based auth | HIGH | ✅ Complete |
+| Role Management | Admin, Technician, Client | HIGH | ✅ Complete |
+| Password Security | Bcrypt hashing | CRITICAL | ✅ Complete |
 
 **User Roles:**
 - **Admin:** Full system access
 - **Technician:** Test execution, result entry
 - **Client:** View own data, reports only
 
-### 2.4 Success Criteria
-| Criteria | Target | Measurement |
-|----------|--------|-------------|
-| CRUD operations | 100% | All features working |
-| Data migration | 100% | 729 records migrated |
-| Authentication | 100% | Login/logout functional |
-| UI responsiveness | <2s | Page load time |
+### 2.5 Success Criteria
+| Criteria | Target | Status |
+|----------|--------|--------|
+| CRUD operations | 100% | ✅ All features working |
+| Data migration | 100% | ✅ 569 records migrated |
+| Authentication | 100% | ✅ Login/logout functional |
+| UI responsiveness | <2s | ✅ Page load time |
+| Architecture pattern | Established | ✅ DDD pattern ready |
 
 ---
 
-## Phase 3: Sample Management (Weeks 5-6)
+## Phase 3: Muestras Feature (Weeks 5-6)
+
 **Priority:** HIGH  
-**Success Criteria:** Sample entry workflow complete, balance tracking accurate
+**Status:** 📋 Pending  
+**Success Criteria:** Sample entry workflow complete, balance tracking accurate, all transactional entities for sample management working
 
-### 3.1 Core Entity: Entradas (Sample Entries)
+### 3.1 Feature Scope
 
-The `Entradas` table is the **CORE ENTITY** of the system with 109 existing records.
+The Muestras feature includes:
+- Productos (160 records) - Product catalog
+- Ordenes de Trabajo (37 records) - Work orders
+- Pedidos (49 records) - Orders
+- Entradas (109 records) - Sample entries (CORE ENTITY)
 
-#### Week 5: Sample Entry System
-| Feature | Description | Priority |
-|---------|-------------|----------|
-| Entry Registration | New sample intake | CRITICAL |
-| Lot Tracking | Lote field (X-XXXX format) | HIGH |
-| Part Number | NroParte tracking | HIGH |
-| Balance Calculation | CantidadRecib - CantidadEntreg = Saldo | CRITICAL |
+### 3.2 Productos Domain
 
-**Entry Data Model:**
+**Entity:**
 ```python
-{
-  "id": 1,
-  "pedido_id": 1,              # FK to pedidos
-  "fabrica_id": 1,             # FK to fabricas
-  "producto_id": 1,            # FK to productos
-  "fecha_entrada": "2026-03-01",
-  "numero_oficial": "OF-2026-001",
-  "anno": "2026",
-  "mes": 3,
-  "lote": "A-1234",            # Format: X-XXXX
-  "numero_parte": 1,
-  "fecha_fabricacion": "2026-01-15",
-  "fecha_vencimiento": "2026-07-15",
-  "fecha_muestreo": "2026-03-01",
-  "cantidad_recibida": 100,
-  "cantidad_entregada": 50,
-  "saldo": 50,                 # Calculated
-  "en_orden_servicio": false,
-  "anulado": false,
-  "rama_id": 1,
-  "otra_rama": null,
-  "entrada_entregada": false,
-  "provincia_id": 1
-}
+class Producto:
+    id: int
+    nombre: str
+    rama_id: int
+    destino_id: int
+    unidad_medida_id: int
+    activo: bool
 ```
 
-#### Week 5: Pedidos (Orders) Module
-| Feature | Description | Records |
-|---------|-------------|---------|
-| Order Creation | New sample requests | 49 existing |
-| Lot Information | Lote, FechFab, FechVenc | Required |
-| Work Order Link | Associate with OT | Optional |
-| Client Association | Link to cliente | Required |
+### 3.3 Ordenes de Trabajo Domain
 
-**Order Statistics:**
-- Total orders: 49
-- Average per client: ~0.3
-- With work orders: Linked to 37 OTs
+**Entity:**
+```python
+class OrdenTrabajo:
+    id: int
+    cliente_id: int
+    numero_oficial: str
+    fecha_ot: date
+    anno: str
+    completada: bool
+    anulada: bool
+```
 
-#### Week 6: Ordenes de Trabajo (Work Orders)
-| Feature | Description | Records |
-|---------|-------------|---------|
-| OT Creation | New work orders | 37 existing |
-| Official Number | NroOfic tracking | Unique |
-| Client Assignment | Link to cliente | Required |
-| Date Tracking | FechOT | Required |
+### 3.4 Pedidos Domain
 
-#### Week 6: Sample Status Workflow
+**Entity:**
+```python
+class Pedido:
+    id: int
+    cliente_id: int
+    orden_trabajo_id: Optional[int]
+    producto_id: int
+    fecha_solicitud: date
+    cantidad_solicitada: int
+    lote: str           # Format: X-XXXX
+    fecha_fabricacion: Optional[date]
+    fecha_vencimiento: Optional[date]
+```
+
+### 3.5 Entradas Domain (Core Entity)
+
+**Entity:**
+```python
+class Entrada:
+    id: int
+    pedido_id: int
+    fabrica_id: int
+    producto_id: int
+    fecha_entrada: date
+    numero_oficial: str
+    anno: str
+    mes: int
+    lote: str               # Format: X-XXXX
+    numero_parte: int
+    fecha_fabricacion: date
+    fecha_vencimiento: date
+    fecha_muestreo: date
+    cantidad_recibida: int
+    cantidad_entregada: int
+    saldo: int              # Calculated: CantidadRecib - CantidadEntreg
+    en_orden_servicio: bool
+    anulado: bool
+    rama_id: int
+    otra_rama: Optional[str]
+    entrada_entregada: bool
+    provincia_id: int
+
+    def calcular_saldo(self) -> int:
+        return self.cantidad_recibida - self.cantidad_entregada
+```
+
+### 3.6 Sample Status Workflow
 ```
 [Received] → [In Process] → [Completed] → [Delivered]
      ↓              ↓              ↓             ↓
@@ -279,9 +360,14 @@ The `Entradas` table is the **CORE ENTITY** of the system with 109 existing reco
 - `EntEntregada`: Entry Delivered (Boolean)
 - `Saldo`: Balance calculation
 
-### 3.2 Data Migration - Phase 3
+### 3.7 Data Migration - Muestras Feature
 
-**Transactional Data Migration:**
+**Master Data:**
+| Table | Rows | Dependencies | Priority |
+|-------|------|--------------|----------|
+| productos | 160 | ramas, destinos | HIGH |
+
+**Transactional Data:**
 | Table | Rows | Dependencies | Priority |
 |-------|------|--------------|----------|
 | ordenes_trabajo | 37 | clientes | HIGH |
@@ -295,47 +381,94 @@ The `Entradas` table is the **CORE ENTITY** of the system with 109 existing reco
 - [ ] Lot numbers preserved (X-XXXX format)
 - [ ] Date fields converted properly
 
-### 3.3 Success Criteria
-| Criteria | Target | Measurement |
-|----------|--------|-------------|
-| Entry workflow | 100% | End-to-end functional |
-| Balance accuracy | 100% | Calculations verified |
-| Lot tracking | 100% | Format preserved |
-| Data migration | 100% | 195 records migrated |
+### 3.8 Implementation Tasks
+
+| Week | Task | Duration | Owner |
+|------|------|----------|-------|
+| 5 | Productos CRUD | 2 days | Backend |
+| 5 | Ordenes de Trabajo CRUD | 2 days | Backend |
+| 5 | Pedidos CRUD | 1 day | Backend |
+| 6 | Entradas CRUD + Balance calc | 3 days | Backend |
+| 6 | Sample entry workflow UI | 2 days | Frontend |
+
+### 3.9 Success Criteria
+| Criteria | Target |
+|----------|--------|
+| Entry workflow | 100% End-to-end functional |
+| Balance accuracy | 100% Calculations verified |
+| Lot tracking | 100% Format preserved |
+| Data migration | 100% 355 records migrated |
 
 ---
 
-## Phase 4: Test Management (Weeks 7-8)
+## Phase 4: Ensayos Feature (Weeks 7-8)
+
 **Priority:** HIGH  
-**Success Criteria:** Test assignment working, result recording functional
+**Status:** 📋 Pending  
+**Success Criteria:** Test assignment working, result recording functional, all test catalogs migrated
 
-### 4.1 Test Execution System
+### 4.1 Feature Scope
 
-#### Week 7: Test Assignment (Detalles de Ensayos)
+The Ensayos feature includes:
+- Ensayos (143 records) - Physical-chemical tests (FQ area)
+- EnsayosES (29 records) - Sensory evaluation tests (ES area)
+- Detalles de Ensayos (563 records) - Test assignments
+- Utilizado (632 records) - Usage/billing records
 
-**Current State:** 563 test assignments exist
+### 4.2 Ensayos Domain (FQ Tests)
 
-| Feature | Description | Implementation |
-|---------|-------------|----------------|
-| Test Assignment | Assign tests to samples | Multi-select by area |
-| Area Filtering | FQ, MB, ES views | Tab-based interface |
-| Quantity Tracking | Cantidad field | Default 1 |
-| Date Assignment | FechReal | Planned date |
-
-**Assignment Workflow:**
+**Entity:**
 ```python
-# Test Assignment Model
-{
-  "id": 1,
-  "entrada_id": 1,        # Sample entry
-  "ensayo_id": 1,         # FQ test (or ensayo_es_id for ES)
-  "cantidad": 1,
-  "fecha_realizacion": "2026-03-15",
-  "estado": "pendiente"   # pendiente | en_proceso | completado
-}
+class Ensayo:
+    id: int
+    nombre_oficial: str
+    nombre_corto: str
+    area_id: int          # =1 (FQ)
+    precio: Decimal
+    unidad_medida: str
+    activo: bool
+    es_ensayo: bool
 ```
 
-**Area-Specific Test Views:**
+### 4.3 EnsayosES Domain (Sensory Tests)
+
+**Entity:**
+```python
+class EnsayoES:
+    id: int
+    nombre_oficial: str
+    nombre_corto: str
+    area_id: int          # =3 (ES)
+    tipo_es_id: int
+    precio: Decimal
+    unidad_medida: str
+    activo: bool
+```
+
+### 4.4 Detalles de Ensayos Domain
+
+**Entity:**
+```python
+class DetalleEnsayo:
+    id: int
+    entrada_id: int
+    ensayo_id: Optional[int]       # For FQ tests
+    ensayo_es_id: Optional[int]    # For ES tests
+    cantidad: int
+    fecha_realizacion: Optional[date]
+    estado: str                     # pendiente | en_proceso | completado
+
+class DetalleEnsayoEnsayoES:
+    id: int
+    entrada_id: int
+    ensayo_es_id: int
+    tipo_ensayo_id: int
+    cantidad: int
+    fecha_realizacion: Optional[date]
+```
+
+### 4.5 Area-Specific Test Views
+
 | Area | Table | Tests | View Name |
 |------|-------|-------|-----------|
 | Físico-Químico | Ensayos | 143 | Análisis FQ |
@@ -343,122 +476,109 @@ The `Entradas` table is the **CORE ENTITY** of the system with 109 existing reco
 | Evaluación Sensorial | EnsayosES | 29 | Análisis ES |
 | Otros Servicios | Ensayos | Subset | Otros |
 
-#### Week 7: Test Catalog Management
-
-**Ensayos (FQ Tests) - 143 records:**
-| Field | Type | Description |
-|-------|------|-------------|
-| IdEns | INTEGER | Test ID |
-| NomOfic | VARCHAR | Official name |
-| NomEns | VARCHAR | Short name |
-| IdArea | INTEGER | =1 (FQ) |
-| Precio | CURRENCY | Test price |
-| UM | VARCHAR | Unit |
-| Activo | BIT | Active flag |
-| EsEnsayo | BIT | Is test flag |
-
-**EnsayosES (Sensory Tests) - 29 records:**
-| Field | Type | Description |
-|-------|------|-------------|
-| IdEnsES | INTEGER | Test ID |
-| NomOfic | VARCHAR | Official name |
-| NomEnsES | VARCHAR | Short name |
-| IdArea | INTEGER | =3 (ES) |
-| IdTipoES | BYTE | Sensory type |
-| Precio | CURRENCY | Test price |
-| UM | VARCHAR | Unit |
-| Activo | BIT | Active flag |
-
-#### Week 8: Test Execution Tracking
+### 4.6 Test Execution Tracking
 
 **Test States:**
 ```
 Pendiente → Asignado → En Proceso → Completado → Reportado
-   ↓            ↓           ↓            ↓            ↓
-  New      Scheduled   In Lab      Results      Official
-                              Entered       Report
+    ↓            ↓           ↓            ↓            ↓
+   New      Scheduled   In Lab      Results      Official
+                               Entered       Report
 ```
 
-**Features:**
-- Batch test assignment
-- Test completion tracking
-- Result recording
-- Historical view
+### 4.7 Utilizado Domain (Billing)
 
-### 4.2 Data Migration - Phase 4
+**Entity:**
+```python
+class Utilizado:
+    id: int
+    entrada_id: int
+    ensayo_id: int
+    cantidad: int
+    fecha: date
+    hora: time
+    precio: Decimal
+    importe: Decimal      # cantidad * precio
+    unidad_medida: str
+    anno: str
+```
 
-**Test Data Migration:**
+### 4.8 Data Migration - Ensayos Feature
+
+**Test Catalogs:**
+| Table | Rows | Dependencies | Priority |
+|-------|------|--------------|----------|
+| ensayos | 143 | areas, unidades_medida | HIGH |
+| ensayos_es | 29 | areas, tipo_es | HIGH |
+
+**Transactional Data:**
 | Table | Rows | Dependencies | Priority |
 |-------|------|--------------|----------|
 | detalles_ensayos | 563 | entradas, ensayos | HIGH |
+| utilizado_r | 632 | entradas, ensayos | MEDIUM |
 
-**Usage Data Migration:**
-| Table | Rows | Description | Priority |
-|-------|------|-------------|----------|
-| utilizado_r | 632 | Archived usage | MEDIUM |
+### 4.9 Implementation Tasks
 
-### 4.3 Success Criteria
-| Criteria | Target | Measurement |
-|----------|--------|-------------|
-| Test assignment | 100% | All 563 migrated |
-| Area filtering | 100% | 4 areas working |
-| Result recording | 100% | Functional |
-| Usage migration | 100% | 632 records migrated |
+| Week | Task | Duration | Owner |
+|------|------|----------|-------|
+| 7 | Ensayos CRUD | 2 days | Backend |
+| 7 | EnsayosES CRUD | 1 day | Backend |
+| 7 | Detalles de Ensayos CRUD | 2 days | Backend |
+| 8 | Utilizado CRUD + Billing | 2 days | Backend |
+| 8 | Test assignment UI | 2 days | Frontend |
+
+### 4.10 Success Criteria
+| Criteria | Target |
+|----------|--------|
+| Test assignment | 100% All 563 migrated |
+| Area filtering | 100% 4 areas working |
+| Result recording | 100% Functional |
+| Billing accuracy | 100% Calculations verified |
+| Usage migration | 100% 632 records migrated |
 
 ---
 
-## Phase 5: Reporting & Billing (Weeks 9-10)
+## Phase 5: Ordenes y Reportes (Weeks 9-10)
+
 **Priority:** MEDIUM  
-**Success Criteria:** Reports generating, billing calculations accurate
+**Status:** 📋 Pending  
+**Success Criteria:** Reports generating, billing calculations accurate, informes workflow complete
 
-### 5.1 Reports Module (Informes)
+### 5.1 Feature Scope
 
-**Current State:** 20 reports exist
+The Ordenes y Reportes feature includes:
+- Informes (20 records) - Official reports
+- Report generation system
+- PDF generation
+- Analytics dashboards
 
-#### Week 9: Official Reports
-| Report Type | Description | Format |
-|-------------|-------------|--------|
-| Informe Oficial | Official lab report | PDF |
-| Resultados | Test results summary | PDF/Excel |
-| Entrada Detail | Sample entry report | PDF |
+### 5.2 Informes Domain
 
-**Report Data Model:**
+**Entity:**
 ```python
-{
-  "id": 1,
-  "entrada_id": 1,
-  "fecha": "2026-03-15",
-  "numero_oficial": "INF-2026-001",
-  "anno": "2026",
-  "ensayos": [...]  # Linked tests
-}
+class Informe:
+    id: int
+    entrada_id: int
+    fecha: date
+    numero_oficial: str
+    anno: str
+    ensayos: List[DetalleEnsayo]
 ```
 
-#### Week 9: Usage Tracking (Utilizado)
+### 5.3 Reports Module
 
-**Billing Calculation:**
-```python
-# From utilizado_r table (632 records)
-{
-  "entrada_id": 1,
-  "ensayo_id": 1,
-  "cantidad": 1,
-  "fecha": "2026-03-15",
-  "hora": "10:30:00",
-  "precio": 150.00,
-  "importe": 150.00,  # cantidad * precio
-  "unidad_medida": "USD",
-  "anno": "2026"
-}
-```
+**Current Access Queries to Migrate:**
 
-**Billing Reports:**
-- Usage by client
-- Usage by period
-- Usage by test type
-- Invoice generation
+| Access Query | Web Implementation | Priority |
+|--------------|-------------------|----------|
+| Analisis a realizar ES | Pending sensory tests view | HIGH |
+| Analisis a realizar FQ | Pending FQ tests view | HIGH |
+| Analisis a realizar MB | Pending microbiology tests view | HIGH |
+| Determinaciones realizadas | Completed tests report | HIGH |
+| Lotes Analizados | Analyzed batches report | MEDIUM |
+| Muestreos por tipo de cliente | Client type analytics | MEDIUM |
 
-#### Week 10: Analytics Dashboards
+### 5.4 Analytics Dashboards
 
 **Key Metrics:**
 | Metric | Source | Visualization |
@@ -467,19 +587,13 @@ Pendiente → Asignado → En Proceso → Completado → Reportado
 | Tests by area | Detalles de ensayos | Pie chart |
 | Client activity | Utilizado | Bar chart |
 | Pending tests | Detalles de ensayos | Counter |
+| Revenue by period | Utilizado | Area chart |
+| Top clients | Pedidos | Table |
 
-**Reports to Implement:**
-1. Análisis a realizar ES (Sensory pending)
-2. Análisis a realizar FQ (FQ pending)
-3. Análisis a realizar MB (Microbiology pending)
-4. Determinaciones realizadas (Completed tests)
-5. Lotes Analizados (Analyzed batches)
-6. Muestreos por tipo de cliente (Sampling by client type)
-
-### 5.2 PDF Generation
+### 5.5 PDF Generation
 
 **Templates:**
-- Official report template
+- Official report template (Informe Oficial)
 - Usage consultation report
 - Statistical summaries
 
@@ -488,82 +602,129 @@ Pendiente → Asignado → En Proceso → Completado → Reportado
 - HTML/CSS templates
 - Header/footer with lab info
 
-### 5.3 Success Criteria
-| Criteria | Target | Measurement |
-|----------|--------|-------------|
-| Report generation | 100% | All templates working |
-| Billing accuracy | 100% | Calculations verified |
-| PDF quality | High | Professional format |
-| Dashboard metrics | 6+ | Key metrics displayed |
+### 5.6 Data Migration - Ordenes y Reportes
+
+| Table | Rows | Dependencies | Priority |
+|-------|------|--------------|----------|
+| informes | 20 | entradas, detalles_ensayos | MEDIUM |
+
+### 5.7 Implementation Tasks
+
+| Week | Task | Duration | Owner |
+|------|------|----------|-------|
+| 9 | Informes CRUD | 2 days | Backend |
+| 9 | Report templates | 2 days | Backend |
+| 9 | PDF generation | 1 day | Backend |
+| 10 | Analytics dashboards | 3 days | Frontend |
+| 10 | Billing reports | 2 days | Backend |
+
+### 5.8 Success Criteria
+| Criteria | Target |
+|----------|--------|
+| Report generation | 100% All templates working |
+| Billing accuracy | 100% Calculations verified |
+| PDF quality | High Professional format |
+| Dashboard metrics | 6+ Key metrics displayed |
 
 ---
 
-## Phase 6: Advanced Features (Weeks 11-12)
+## Phase 6: Data Migration from Access (Weeks 11-12)
+
 **Priority:** MEDIUM  
-**Success Criteria:** Search, export, notifications working
+**Status:** 📋 Pending  
+**Success Criteria:** All historical data migrated, validation scripts passing, row counts matching
 
-### 6.1 Global Search
+### 6.1 Per-Feature Data Migration
 
-**Search Scope:**
-| Entity | Fields | Priority |
-|--------|--------|----------|
-| Clientes | nombre, id | HIGH |
-| Fabricas | nombre, id | HIGH |
-| Productos | nombre, id | HIGH |
-| Entradas | lote, numero_oficial | HIGH |
-| Pedidos | numero_oficial | MEDIUM |
-| Informes | numero_oficial | MEDIUM |
+Data migration is performed incrementally as each feature is completed:
 
-**Search Features:**
-- Fuzzy matching
-- Filter by date range
-- Filter by area
-- Results categorization
+| Feature | Tables | Records | Migration Method |
+|---------|--------|---------|------------------|
+| Phase 1: Reference Data | 9 tables | 78 | CSV Export/Import |
+| Phase 2: Clientes | 2 tables | 569 | CSV Export/Import |
+| Phase 3: Muestras | 4 tables | 355 | CSV Export/Import |
+| Phase 4: Ensayos | 4 tables | 1,367 | CSV Export/Import |
+| Phase 5: Ordenes y Reportes | 1 table | 20 | CSV Export/Import |
+| **Total** | **20 tables** | **2,389** | **Per-feature** |
 
-### 6.2 Data Export
+*Note: 25 total tables - 5 intermediate/junction tables counted within features*
 
-**Export Formats:**
-| Format | Use Case | Priority |
-|--------|----------|----------|
-| Excel | Analysis, reporting | HIGH |
-| CSV | Data migration, backup | HIGH |
-| PDF | Official documents | HIGH |
-| JSON | API integration | MEDIUM |
+### 6.2 Migration Timeline
 
-### 6.3 Notifications System
+| Feature | Migration Days | Testing Days | Total |
+|---------|---------------|--------------|-------|
+| Reference Data | 1 | 1 | 2 |
+| Clientes | 1 | 1 | 2 |
+| Muestras | 2 | 1 | 3 |
+| Ensayos | 2 | 1 | 3 |
+| Ordenes y Reportes | 1 | 1 | 2 |
+| **Total** | **7** | **5** | **12** |
 
-**Notification Types:**
-| Event | Recipients | Channel |
-|-------|------------|---------|
-| Test completed | Client, Technician | Email, In-app |
-| Report ready | Client | Email |
-| Low balance | Technician | In-app |
-| Entry delivered | Client | Email |
+### 6.3 Migration Methods
 
-### 6.4 User Roles & Permissions
+**Method 1: CSV Export/Import**
+- Best for: Reference data, master data, transactional data
+- Tools: Access export → Python script → PostgreSQL
+- Validation: Row count, FK integrity
 
-**Role Matrix:**
-| Feature | Admin | Technician | Client |
-|---------|-------|------------|--------|
-| Client management | CRUD | View | - |
-| Sample entry | CRUD | CRUD | View own |
-| Test execution | View | CRUD | - |
-| Report generation | CRUD | CRUD | View own |
-| Billing | CRUD | View | View own |
-| System config | CRUD | - | - |
+**Method 2: Direct Database Connection**
+- Best for: Complex relationships requiring transformation
+- Tools: pyodbc → SQLAlchemy
+- Validation: Real-time during migration
 
-### 6.5 Success Criteria
-| Criteria | Target | Measurement |
-|----------|--------|-------------|
-| Search coverage | 100% | All entities searchable |
-| Export formats | 4 | Excel, CSV, PDF, JSON |
-| Notifications | 4 types | All working |
-| Role separation | 3 roles | Access control verified |
+**Method 3: API Migration**
+- Best for: Transactional data with business logic
+- Tools: Custom API endpoints
+- Validation: Business logic validation
+
+### 6.4 Verification Steps
+
+1. **Row Count Matching**
+   ```sql
+   -- Compare source and target counts
+   SELECT 'clientes' as table_name, COUNT(*) as count FROM clientes
+   UNION ALL
+   SELECT 'fabricas', COUNT(*) FROM fabricas
+   -- etc.
+   ```
+
+2. **Foreign Key Validation**
+   ```sql
+   -- Check for orphaned records
+   SELECT e.* FROM entradas e
+   LEFT JOIN clientes c ON e.cliente_id = c.id
+   WHERE c.id IS NULL;
+   ```
+
+3. **Data Sampling**
+   - Random sample 10% of each table
+   - Manual verification of accuracy
+   - Check critical fields
+
+### 6.5 Migration Scripts
+
+```python
+# migration_toolkit.py
+class AccessToPostgresMigration:
+    def migrate_feature(self, feature_name: str, tables: List[str]):
+        """Migrate all tables for a feature"""
+        pass
+    
+    def validate_migration(self, table: str) -> MigrationResult:
+        """Validate row counts and FK integrity"""
+        pass
+    
+    def rollback_feature(self, feature_name: str):
+        """Rollback a feature migration"""
+        pass
+```
 
 ---
 
 ## Phase 7: Testing & Go-Live (Weeks 13-14)
+
 **Priority:** CRITICAL  
+**Status:** 📋 Pending  
 **Success Criteria:** All tests passing, users trained, Access retired
 
 ### 7.1 Testing Phase
@@ -578,13 +739,14 @@ Pendiente → Asignado → En Proceso → Completado → Reportado
 | Data accuracy | Sampling | 95%+ accurate |
 | Calculation accuracy | Unit tests | 100% correct |
 
-**User Acceptance Testing (UAT):**
-| Test Scenario | Users | Duration |
-|---------------|-------|----------|
-| Sample entry workflow | 3 technicians | 2 days |
-| Test execution | 2 analysts | 2 days |
-| Report generation | 1 admin | 1 day |
-| Client portal | 2 clients | 1 day |
+**User Acceptance Testing (UAT) - Per Feature:**
+| Feature | Test Scenario | Users | Duration |
+|---------|---------------|-------|----------|
+| Clientes | Client CRUD, factory management | 2 technicians | 1 day |
+| Muestras | Sample entry workflow | 3 technicians | 2 days |
+| Ensayos | Test execution | 2 analysts | 2 days |
+| Ordenes y Reportes | Report generation | 1 admin | 1 day |
+| Client Portal | View own data, reports | 2 clients | 1 day |
 
 **Parallel Running:**
 - Run both Access and web system simultaneously
@@ -641,12 +803,117 @@ Pendiente → Asignado → En Proceso → Completado → Reportado
 
 ---
 
-## Data Migration Strategy
+## Feature Implementation Pattern
 
-### Migration Order
+For each feature, the implementation follows this architecture:
 
 ```
-Phase 1: Reference Data (78 rows)
+1. domain/models.py      - Entity with validation
+2. domain/repositories.py - Port (interface)
+3. application/dtos.py    - Input/output DTOs
+4. application/commands.py - Write use cases
+5. application/queries.py  - Read use cases
+6. infrastructure/persistence/sql_repository.py - Adapter
+7. infrastructure/web/routes.py - Flask adapter
+8. tests/unit/ - Domain tests (no DB)
+9. tests/integration/ - Repository tests (with DB)
+```
+
+### Example: Clientes Feature
+
+```python
+# 1. domain/models.py
+@dataclass
+class Cliente:
+    id: int
+    nombre: str
+    organismo_id: int
+    tipo_cliente: int
+    activo: bool = True
+
+# 2. domain/repositories.py
+class ClienteRepository(ABC):
+    @abstractmethod
+    def get_by_id(self, id: int) -> Optional[Cliente]: ...
+    @abstractmethod
+    def save(self, cliente: Cliente) -> Cliente: ...
+
+# 3. application/dtos.py
+@dataclass
+class ClienteDTO:
+    id: int
+    nombre: str
+    organismo_nombre: str
+
+# 4. application/commands.py
+class CreateClienteCommand:
+    nombre: str
+    organismo_id: int
+    tipo_cliente: int
+
+# 5. application/queries.py
+class ListClientesQuery:
+    def execute(self) -> List[ClienteDTO]: ...
+
+# 6. infrastructure/persistence/sql_repository.py
+class SQLClienteRepository(ClienteRepository):
+    def get_by_id(self, id: int) -> Optional[Cliente]:
+        # SQLAlchemy implementation
+        pass
+
+# 7. infrastructure/web/routes.py
+@app.route('/clientes', methods=['GET'])
+def list_clientes():
+    query = ListClientesQuery()
+    return jsonify(query.execute())
+```
+
+---
+
+## Updated Timeline
+
+### Revised Estimates (Based on Pilot)
+
+| Feature | Duration | Estimation Basis |
+|---------|----------|------------------|
+| Feature pilot (Clientes) | 1 week | ✅ Actual |
+| Each additional feature | 3-5 days | 2x pilot efficiency |
+| Data migration per feature | 1-2 days | Validated approach |
+| Testing per feature | 1 day | Parallel with dev |
+
+### Detailed Timeline
+
+| Week | Phase | Feature | Key Activities | Deliverables |
+|------|-------|---------|----------------|--------------|
+| 1-2 | 1 | Reference Data | PostgreSQL setup; Reference tables; Migration scripts | Database schema v1 |
+| 3-4 | 2 | Clientes | CRUD; Factory management; Auth system | Client module complete ✅ |
+| 5-6 | 3 | Muestras | Productos; OT; Pedidos; Entradas; Balance calc | Sample management complete |
+| 7-8 | 4 | Ensayos | Test catalogs; Assignment; Usage; Billing | Test management complete |
+| 9-10 | 5 | Ordenes y Reportes | Informes; PDF generation; Dashboards | Reporting complete |
+| 11-12 | 6 | Data Migration | Historical data migration; Validation | All data migrated |
+| 13 | 7 | Testing | Data validation; UAT; Parallel running | Testing complete |
+| 14 | 7 | Go-Live | Final migration; Training; System live | Production ready |
+
+### Milestones
+
+| Milestone | Date | Criteria |
+|-----------|------|----------|
+| M1: Foundation Complete | Week 2 | Schema deployed, reference data loaded ✅ |
+| M2: Clientes Complete | Week 4 | CRUD complete, 569 records migrated ✅ |
+| M3: Muestras Complete | Week 6 | Sample workflow functional, 355 records migrated |
+| M4: Ensayos Complete | Week 8 | Test management working, 1,367 records migrated |
+| M5: Ordenes y Reportes | Week 10 | All reports generating, dashboards live |
+| M6: Migration Complete | Week 12 | All 2,632 records migrated |
+| M7: Go-Live | Week 14 | System production ready |
+
+---
+
+## Data Migration Strategy
+
+### Migration Order by Feature
+
+```
+Phase 1: Reference Data (78 rows) ✅
 ├── areas (4)
 ├── organismos (12)
 ├── provincias (4)
@@ -657,74 +924,52 @@ Phase 1: Reference Data (78 rows)
 ├── unidades_medida (3)
 └── tipo_es (4)
 
-Phase 2: Master Data (729 rows)
+Phase 2: Clientes Feature (569 rows) ✅
 ├── clientes (166)
-├── fabricas (403)
-└── productos (160)
+└── fabricas (403)
 
-Phase 3: Test Catalogs (172 rows)
-├── ensayos (143)
-└── ensayos_es (29)
-
-Phase 4: Work Orders (37 rows)
-└── ordenes_trabajo (37)
-
-Phase 5: Orders (49 rows)
-└── pedidos (49)
-
-Phase 6: Sample Entries (109 rows)
+Phase 3: Muestras Feature (355 rows)
+├── productos (160)
+├── ordenes_trabajo (37)
+├── pedidos (49)
 └── entradas (109)
 
-Phase 7: Test Assignments (563 rows)
-└── detalles_ensayos (563)
-
-Phase 8: Usage Data (632 rows)
+Phase 4: Ensayos Feature (1,367 rows)
+├── ensayos (143)
+├── ensayos_es (29)
+├── detalles_ensayos (563)
 └── utilizado_r (632)
 
-Phase 9: Reports (20 rows)
+Phase 5: Ordenes y Reportes (20 rows)
 └── informes (20)
+
+Total: 2,389 records across 20 main tables
 ```
 
-### Migration Methods
+### Data Volumes by Table
 
-**Method 1: CSV Export/Import**
-- Best for: Reference data, master data
-- Tools: Access export → Python script → PostgreSQL
-- Validation: Row count, FK integrity
-
-**Method 2: Direct Database Connection**
-- Best for: Large tables, complex relationships
-- Tools: pyodbc → SQLAlchemy
-- Validation: Real-time during migration
-
-**Method 3: API Migration**
-- Best for: Transactional data
-- Tools: Custom API endpoints
-- Validation: Business logic validation
-
-### Verification Steps
-
-1. **Row Count Matching**
-   ```sql
-   -- Compare source and target counts
-   SELECT 'clientes' as table_name, COUNT(*) as count FROM clientes
-   UNION ALL
-   SELECT 'fabricas', COUNT(*) FROM fabricas
-   -- etc.
-   ```
-
-2. **Foreign Key Validation**
-   ```sql
-   -- Check for orphaned records
-   SELECT e.* FROM entradas e
-   LEFT JOIN clientes c ON e.cliente_id = c.id
-   WHERE c.id IS NULL;
-   ```
-
-3. **Data Sampling**
-   - Random sample 10% of each table
-   - Manual verification of accuracy
-   - Check critical fields
+| Table | Current Rows | Estimated Growth/Year | Feature |
+|-------|--------------|----------------------|---------|
+| areas | 4 | Static | Reference |
+| organismos | 12 | +2 | Reference |
+| provincias | 4 | Static | Reference |
+| destinos | 7 | +1 | Reference |
+| ramas | 13 | +2 | Reference |
+| meses | 12 | Static | Reference |
+| annos | 10 | +1 | Reference |
+| unidades_medida | 3 | +1 | Reference |
+| tipo_es | 4 | Static | Reference |
+| clientes | 166 | +20 | Clientes |
+| fabricas | 403 | +50 | Clientes |
+| productos | 160 | +30 | Muestras |
+| ordenes_trabajo | 37 | +100 | Muestras |
+| pedidos | 49 | +150 | Muestras |
+| entradas | 109 | +500 | Muestras |
+| ensayos | 143 | +20 | Ensayos |
+| ensayos_es | 29 | +5 | Ensayos |
+| detalles_ensayos | 563 | +2000 | Ensayos |
+| utilizado_r | 632 | +2500 | Ensayos |
+| informes | 20 | +100 | Ordenes y Reportes |
 
 ---
 
@@ -733,11 +978,11 @@ Phase 9: Reports (20 rows)
 | Risk | Likelihood | Impact | Mitigation Strategy |
 |------|------------|--------|---------------------|
 | **Data Loss** | Low | Critical | Multiple backups before migration; validation scripts; rollback plan |
-| **Relationship Errors** | Medium | High | Careful FK mapping; test imports with small dataset; constraint validation |
-| **Business Disruption** | Medium | High | Parallel running; phased rollout; weekend cutover |
+| **Relationship Errors** | Medium | High | Careful FK mapping; feature dependency order; constraint validation |
+| **Business Disruption** | Medium | High | Parallel running; feature-by-feature rollout; weekend cutover |
 | **User Adoption** | Medium | Medium | Training sessions; familiar UI patterns; help documentation |
 | **Performance Issues** | Low | Medium | Proper indexing; query optimization; load testing |
-| **Scope Creep** | High | Medium | Strict backlog management; change control process |
+| **Scope Creep** | High | Medium | Strict backlog management; change control process per feature |
 | **Integration Failures** | Low | High | Early integration testing; API versioning; fallback mechanisms |
 | **Security Breach** | Low | Critical | Security audit; penetration testing; encryption at rest/transit |
 
@@ -809,41 +1054,6 @@ Phase 9: Reports (20 rows)
 
 ---
 
-## Detailed Timeline
-
-### Week-by-Week Breakdown
-
-| Week | Phase | Key Activities | Deliverables |
-|------|-------|----------------|--------------|
-| 1 | 1 | PostgreSQL setup; Reference tables; Core tables | Database schema v1 |
-| 2 | 1 | Test catalogs; Audit tables; Migration scripts | Migration tools ready |
-| 3 | 2 | Client CRUD; Factory CRUD; Auth system | Client module complete |
-| 4 | 2 | Product CRUD; User roles; Data migration | Core entities migrated |
-| 5 | 3 | Sample entry form; Lot tracking; Balance calc | Entry system working |
-| 6 | 3 | Orders module; Work orders; Status workflow | Sample management complete |
-| 7 | 4 | Test assignment; Area filtering; Test catalogs | Test management 50% |
-| 8 | 4 | Result recording; Usage migration; History | Test management complete |
-| 9 | 5 | Report templates; PDF generation; Official reports | Reporting 50% |
-| 10 | 5 | Billing calculations; Dashboards; Analytics | Reporting complete |
-| 11 | 6 | Global search; Data export; Notifications | Advanced features 50% |
-| 12 | 6 | Role permissions; UI polish; Performance tuning | Advanced features complete |
-| 13 | 7 | Data validation; UAT; Parallel running | Testing complete |
-| 14 | 7 | Final migration; Training; Go-live | System live |
-
-### Milestones
-
-| Milestone | Date | Criteria |
-|-----------|------|----------|
-| M1: Foundation Complete | Week 2 | Schema deployed, reference data loaded |
-| M2: Core Entities Ready | Week 4 | CRUD complete, 729 records migrated |
-| M3: Sample Tracking Live | Week 6 | Entry workflow functional, 195 records migrated |
-| M4: Test Management Done | Week 8 | Test assignment working, 1195 records migrated |
-| M5: Reporting Ready | Week 10 | All reports generating, dashboards live |
-| M6: Feature Complete | Week 12 | All features implemented |
-| M7: Go-Live | Week 14 | System production ready |
-
----
-
 ## Success Criteria Summary
 
 ### Overall Project Success
@@ -858,43 +1068,53 @@ Phase 9: Reports (20 rows)
 
 ### Phase Success Criteria
 
-| Phase | Success Criteria | Measurement |
-|-------|------------------|-------------|
-| Phase 1 | Schema deployed, data loaded | Row count match |
-| Phase 2 | CRUD functional, auth working | Feature tests pass |
-| Phase 3 | Entry workflow complete | End-to-end test |
-| Phase 4 | Test management working | Assignment test |
-| Phase 5 | Reports generating | PDF output verified |
-| Phase 6 | All features implemented | Feature checklist |
-| Phase 7 | System live, users trained | Go-live checklist |
+| Phase | Feature | Success Criteria | Measurement |
+|-------|---------|------------------|-------------|
+| Phase 1 | Reference Data | Schema deployed, data loaded | Row count match |
+| Phase 2 | Clientes | CRUD functional, auth working, DDD established | Feature tests pass |
+| Phase 3 | Muestras | Sample workflow complete | End-to-end test |
+| Phase 4 | Ensayos | Test management working | Assignment test |
+| Phase 5 | Ordenes y Reportes | Reports generating | PDF output verified |
+| Phase 6 | Data Migration | All data migrated | Validation scripts |
+| Phase 7 | Go-Live | System live, users trained | Go-live checklist |
 
 ---
 
 ## Appendices
 
-### Appendix A: Access Query Migration
+### Appendix A: Access Schema Reference
 
-| Access Query | Web Implementation | Priority |
-|--------------|-------------------|----------|
-| Analisis a realizar ES | Pending sensory tests view | HIGH |
-| Analisis a realizar FQ | Pending FQ tests view | HIGH |
-| Analisis a realizar MB | Pending microbiology tests view | HIGH |
-| Determinaciones realizadas | Completed tests report | HIGH |
-| Lotes Analizados | Analyzed batches report | MEDIUM |
-| Muestreos por tipo de cliente | Client type analytics | MEDIUM |
+**Reference Tables:**
+| Table | Rows | Description |
+|-------|------|-------------|
+| Areas | 4 | Laboratory areas (FQ, MB, ES, OS) |
+| Organismos | 12 | Client organizations |
+| Provincias | 4 | Geographic regions |
+| Destinos | 7 | Product destinations |
+| Ramas | 13 | Industry sectors |
+| Meses | 12 | Calendar months |
+| Annos | 10 | Active years |
+| UnidadesMedida | 3 | Measurement units |
+| TipoES | 4 | Sensory evaluation types |
 
-### Appendix B: Database Size Estimation
+**Master Data Tables:**
+| Table | Rows | Description |
+|-------|------|-------------|
+| Clientes | 166 | Client registry |
+| Fábricas | 403 | Factory locations |
+| Productos | 160 | Product catalog |
 
-| Table | Current Rows | Estimated Growth/Year |
-|-------|--------------|----------------------|
-| entradas | 109 | +500 |
-| detalles_ensayos | 563 | +2000 |
-| utilizado_r | 632 | +2500 |
-| informes | 20 | +100 |
-| clientes | 166 | +20 |
-| fabricas | 403 | +50 |
+**Transactional Tables:**
+| Table | Rows | Description |
+|-------|------|-------------|
+| OrdenesTrabajo | 37 | Work orders |
+| Pedidos | 49 | Orders |
+| Entradas | 109 | Sample entries |
+| Detalles de Ensayos | 563 | Test assignments |
+| Utilizado | 632 | Usage/billing |
+| Informes | 20 | Official reports |
 
-### Appendix C: Data Retention Policy
+### Appendix B: Data Retention Policy
 
 | Data Type | Retention | Archive Strategy |
 |-----------|-----------|------------------|
@@ -905,7 +1125,7 @@ Phase 9: Reports (20 rows)
 
 ---
 
-*Plan Version:* 1.0  
+*Plan Version:* 2.0 - Feature-Based Migration  
 *Created:* March 2, 2026  
 *Last Updated:* March 2, 2026  
 *Next Review:* March 9, 2026

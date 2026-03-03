@@ -16,6 +16,19 @@
 | **Frontend** | Jinja2 Templates + Vanilla CSS + JavaScript |
 | **Migrations** | Flask-Migrate |
 | **Visualization** | Plotly 5.17.0 |
+| **Architecture** | Hexagonal Architecture (Ports & Adapters) |
+
+### Architecture Overview
+
+The project follows **Hexagonal Architecture** (also known as Ports and Adapters) combined with **Clean Architecture** principles:
+
+- **Domain Layer**: Pure Python entities with no framework dependencies
+- **Application Layer**: Use cases, DTOs, commands/queries with business logic
+- **Infrastructure Layer**: Flask routes, SQLAlchemy repositories, external adapters
+
+**Dependency Direction**: Infrastructure → Application → Domain (inward dependencies only)
+
+See [Hexagonal Architecture Implementation](#hexagonal-architecture-implementation) for detailed documentation.
 
 ---
 
@@ -23,17 +36,26 @@
 
 ```
 datalab/
-├── app/                   # Main application
-│   ├── core/             # Core models (SystemConfig)
-│   ├── database/         # DB Models (Cliente, Pedido, OrdenTrabajo)
-│   ├── routes/           # Blueprints (dashboard, pedidos, clientes, search)
-│   ├── services/         # Business logic (empty)
-│   ├── static/           # CSS, JS, images
-│   ├── templates/        # Jinja2 templates
-│   └── utils/            # Utilities (flash messages)
-├── config/               # Flask configuration
-└── docs/                 # Existing documentation
+├── app/                     # Main application
+│   ├── core/                # Shared Kernel
+│   │   ├── domain/          # Entity, Repository ABC, AuditMixin
+│   │   └── infrastructure/  # Database adapters (SQLAlchemy)
+│   ├── features/            # Business domains
+│   │   ├── clientes/        # Feature: Clientes
+│   │   │   ├── domain/      # models.py (pure Python)
+│   │   │   ├── application/ # commands.py, queries.py, dtos.py
+│   │   │   └── infrastructure/ # sql_repository.py, routes.py
+│   │   └── muestras/        # Feature: Muestras (structure created)
+│   ├── routes/              # Legacy blueprints (migration in progress)
+│   ├── services/            # Legacy services (migration in progress)
+│   ├── static/              # CSS, JS, images
+│   ├── templates/           # Jinja2 templates
+│   └── utils/               # Utilities
+├── config/                  # Flask configuration
+└── docs/                    # Documentation
 ```
+
+**Note:** The old structure with `app/database/models.py` is being migrated to the feature-based hexagonal structure.
 
 ---
 
@@ -176,12 +198,99 @@ Ensayos (143) linked to Detalles
 8. ❌ Missing report generation
 9. ❌ Missing authentication
 
+---
+
+## Hexagonal Architecture Implementation
+
+The project has adopted **Hexagonal Architecture** (Ports & Adapters) combined with **Clean Architecture** principles to achieve:
+- **Testability**: Business logic isolated from frameworks
+- **Maintainability**: Clear separation of concerns
+- **Flexibility**: Easy to swap adapters (e.g., SQLite ↔ PostgreSQL)
+
+### The Three Layers
+
+#### 1. Domain Layer (Innermost)
+- **Pure Python entities** with no framework dependencies
+- **Repository interfaces** (abstract base classes)
+- **Domain events** and business rules
+- Location: `features/{feature}/domain/`
+- Example: `Cliente` entity with validation logic
+
+#### 2. Application Layer (Middle)
+- **Use cases** (Commands and Queries)
+- **DTOs** for data transfer
+- **Application services** orchestrating domain objects
+- Location: `features/{feature}/application/`
+- Examples: `CrearClienteCommand`, `ListarClientesQuery`, `ClienteDTO`
+
+#### 3. Infrastructure Layer (Outermost)
+- **Adapters** implementing domain interfaces
+- **Flask routes** (HTTP adapters)
+- **SQLAlchemy repositories** (database adapters)
+- **External service integrations**
+- Location: `features/{feature}/infrastructure/`
+- Examples: `ClienteSQLRepository`, `clientes_bp` routes
+
+### Dependency Rule
+Dependencies point **inward only**:
+```
+Infrastructure → Application → Domain
+     (Flask)        (Use Cases)   (Entities)
+```
+
+### Detailed Project Structure
+
+```
+app/
+├── core/                    # Shared Kernel
+│   ├── domain/
+│   │   ├── base.py          # Entity base class, Repository ABC
+│   │   └── audit.py         # AuditMixin for created_at/updated_at
+│   └── infrastructure/
+│       └── db.py            # SQLAlchemy adapters
+├── features/                # Business domains
+│   ├── clientes/            # ✅ Feature piloto (complete)
+│   │   ├── domain/
+│   │   │   └── models.py    # Cliente entity (pure Python)
+│   │   ├── application/
+│   │   │   ├── commands.py  # CrearClienteCommand
+│   │   │   ├── queries.py   # ListarClientesQuery
+│   │   │   └── dtos.py      # ClienteDTO
+│   │   └── infrastructure/
+│   │       ├── sql_repository.py  # SQLAlchemy adapter
+│   │       └── routes.py          # Flask blueprint
+│   ├── muestras/            # 🟡 Structure created
+│   ├── ensayos/             # 🟡 Structure created
+│   ├── ordenes/             # 🟡 Structure created
+│   └── reportes/            # 🟡 Structure created
+└── config.py
+```
+
+### Migration Strategy
+
+The migration from the old structure follows a **feature-by-feature** approach:
+
+1. **Each Access table** becomes a domain feature
+2. **Clientes feature** is the completed pilot demonstrating the pattern
+3. **Other features** have directory structure created and need implementation
+4. **Legacy code** in `app/routes/` and `app/services/` will be gradually migrated
+
+### Feature Status
+
+| Feature | Domain | Application | Infrastructure | Status |
+|---------|--------|-------------|----------------|--------|
+| Clientes | ✅ Models | ✅ Commands/Queries/DTOs | ✅ Repository + Routes | ✅ Complete |
+| Muestras | 🟡 Empty | 🟡 Empty | 🟡 Empty | 🟡 Structure only |
+| Ensayos | 🟡 Empty | 🟡 Empty | 🟡 Empty | 🟡 Structure only |
+| Ordenes | 🟡 Empty | 🟡 Empty | 🟡 Empty | 🟡 Structure only |
+| Reportes | 🟡 Empty | 🟡 Empty | 🟡 Empty | 🟡 Structure only |
+
 ### Recommended Model Updates
 
-The current Flask models (Cliente, Pedido, OrdenTrabajo) need significant expansion:
+The current Flask models (Cliente, Pedido, OrdenTrabajo) are being migrated to the hexagonal structure. Each Access table will become a feature that needs:
 - Add all reference tables
 - Add Fabrica model
-- Add Producto model  
+- Add Producto model
 - Add Ensayo and EnsayoES models
 - Expand Entrada model with all fields
 - Add DetalleEnsayo model
@@ -193,3 +302,9 @@ The current Flask models (Cliente, Pedido, OrdenTrabajo) need significant expans
 - **Medium**: Master data (clients, factories, products)
 - **High**: Transactions (entries, test details, usage)
 - **Critical**: Ensuring FK integrity during migration
+
+### Next Steps for Architecture Rollout
+1. Implement remaining features following the Clientes pattern
+2. Migrate legacy routes to infrastructure layer
+3. Add comprehensive tests for domain layer
+4. Implement integration tests for infrastructure adapters

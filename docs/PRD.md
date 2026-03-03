@@ -364,17 +364,89 @@ The system supports four distinct laboratory areas:
 | Component | Version | Purpose |
 |-----------|---------|---------|
 | Python | 3.11+ | Core language |
-| Flask | 3.0.0 | Web framework |
-| Flask-SQLAlchemy | 3.1.1 | ORM and database abstraction |
-| Flask-Migrate | 4.0.5 | Database migrations |
-| Flask-Login | 0.6.x | User session management |
-| Flask-WTF | 1.2.x | Form handling and CSRF protection |
-| Flask-Mail | 0.10.x | Email notifications |
-| SQLAlchemy | 2.0.35 | Database toolkit |
+| Flask | 3.0.0 | Web framework (Infrastructure layer only) |
+| Flask-SQLAlchemy | 3.1.1 | ORM and database abstraction (Infrastructure) |
+| Flask-Migrate | 4.0.5 | Database migrations (Infrastructure) |
+| Flask-Login | 0.6.x | User session management (Infrastructure) |
+| Flask-WTF | 1.2.x | Form handling and CSRF protection (Infrastructure) |
+| Flask-Mail | 0.10.x | Email notifications (Infrastructure) |
+| SQLAlchemy | 2.0.35 | Database toolkit (Infrastructure) |
 | Werkzeug | 3.0.1 | WSGI utilities |
 | psycopg2-binary | 2.9.x | PostgreSQL adapter |
 
-### 5.2 Frontend Stack
+### 5.1.1 Architecture Pattern
+
+**Hexagonal Architecture (Ports & Adapters)** with Clean Architecture principles:
+
+- **Domain Layer**: Pure Python, framework-agnostic business logic
+- **Application Layer**: Use cases and orchestration, depends only on Domain
+- **Infrastructure Layer**: Flask, database, external services (adapters)
+
+Dependency direction enforces inner layers know nothing of outer layers.
+
+### 5.1.2 Architecture Overview
+
+#### Dependency Direction
+
+```
+Infrastructure → Application → Domain
+                                   ↑
+                             (pure Python)
+```
+
+- **Domain Layer** (Center): Entities, Value Objects, Domain Services - no external dependencies
+- **Application Layer**: Use Cases, DTOs, Ports (interfaces) - depends only on Domain
+- **Infrastructure Layer** (Outer): Adapters, Web controllers, Repository implementations, External services
+
+#### Ports and Adapters
+
+| Concept | Description | Example |
+|---------|-------------|---------|
+| **Port** | Interface defining what the application needs from external systems | `IEntradaRepository` - interface for sample storage |
+| **Adapter** | Concrete implementation of a Port | `SQLEntradaRepository` - SQLAlchemy implementation |
+
+This pattern allows:
+- Swapping PostgreSQL for another database without changing Domain/Application
+- Testing business logic without real database (using mock adapters)
+- Framework independence - Flask can be replaced without touching Domain
+
+### 5.1.3 Architecture Benefits
+
+| Benefit | Description |
+|---------|-------------|
+| **Testability** | Domain and Application tests don't need database or Flask; use mock adapters for fast, deterministic unit tests |
+| **Framework Independence** | Flask, SQLAlchemy, and all external libraries are confined to Infrastructure layer; can change web framework without touching Domain |
+| **Parallel Development** | Features are isolated in their own directories; multiple developers can work on different features without conflicts |
+| **Progressive Migration** | Feature-by-feature migration from Access is enabled; each feature can be built and deployed independently |
+| **Maintainability** | Clear separation of concerns makes the codebase easier to understand, modify, and extend over time |
+| **Business Logic Protection** | Core business rules in Domain layer are protected from infrastructure changes and technical debt |
+
+### 5.2 Project Structure
+
+```
+app/
+├── core/                          # Shared Kernel
+│   ├── domain/                    # Base entities, value objects
+│   └── application/               # Shared DTOs, interfaces
+├── features/                      # Business features (bounded contexts)
+│   └── [feature]/                 # e.g., entradas, clientes, ensayos
+│       ├── domain/                # Entities, Value Objects, Domain Services
+│       ├── application/           # Use Cases, DTOs, Ports (interfaces)
+│       │   ├── ports/
+│       │   │   └── repository.py  # I[Feature]Repository interface
+│       │   └── use_cases/
+│       └── infrastructure/        # Adapters, Web controllers
+│           ├── persistence/
+│           │   └── repository.py  # SQL[Feature]Repository implementation
+│           └── web/
+│               ├── routes.py      # Flask routes
+│               └── forms.py       # WTForms
+├── static/                        # CSS, JS, images
+├── templates/                     # Jinja2 templates
+└── config.py                      # Application configuration
+```
+
+### 5.3 Frontend Stack
 
 | Component | Version | Purpose |
 |-----------|---------|---------|
@@ -384,7 +456,7 @@ The system supports four distinct laboratory areas:
 | DataTables | 1.13.x | Advanced table features |
 | FontAwesome | 6.x | Icons |
 
-### 5.3 Database Schema
+### 5.4 Database Schema
 
 **Primary Database:** PostgreSQL 14+ (Production)  
 **Development Database:** SQLite 3 (Local development)
@@ -420,7 +492,7 @@ The system supports four distinct laboratory areas:
 - resultados_ensayos       (Resultados de ensayos)
 ```
 
-### 5.4 Infrastructure Requirements
+### 5.5 Infrastructure Requirements
 
 | Component | Specification |
 |-----------|--------------|
@@ -431,7 +503,7 @@ The system supports four distinct laboratory areas:
 | File Storage | Local filesystem (Phase 1), S3-compatible (Phase 2) |
 | Email | SMTP server or service (SendGrid/AWS SES) |
 
-### 5.5 Security Requirements
+### 5.6 Security Requirements
 
 - HTTPS/TLS 1.3 in production
 - Secure session cookies (HttpOnly, Secure, SameSite)
@@ -442,7 +514,7 @@ The system supports four distinct laboratory areas:
 - Rate limiting on authentication endpoints
 - Regular security updates
 
-### 5.6 Performance Requirements
+### 5.7 Performance Requirements
 
 - Page load time: < 2 seconds (95th percentile)
 - API response time: < 500ms (95th percentile)
