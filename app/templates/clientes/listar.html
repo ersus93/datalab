@@ -1,0 +1,109 @@
+{% extends 'crud/base_list.html' %}
+{% from 'macros/tables.html' import action_buttons, pagination, empty_state %}
+
+{% block title %}{{ _('Clientes') }}{% endblock %}
+
+{% block list_title %}{{ _('Clientes') }}{% endblock %}
+
+{% block create_button %}
+<a href="{{ url_for('clientes.nuevo') }}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+    <i class="fas fa-plus mr-1"></i>
+    {{ _('Nuevo Cliente') }}
+</a>
+{% endblock %}
+
+{% block filters %}
+<form method="GET" class="mb-4 flex flex-wrap gap-4">
+    <div class="flex-1 min-w-[200px]">
+        <input type="text" name="q" value="{{ q }}" placeholder="{{ _('Buscar por nombre...') }}"
+               class="w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500">
+    </div>
+    <div>
+        <select name="organismo" class="px-3 py-2 border rounded focus:outline-none focus:border-blue-500">
+            <option value="">{{ _('Todos los organismos') }}</option>
+            {% for org in organismos %}
+            <option value="{{ org.id }}" {% if request.args.get('organismo')|int == org.id %}selected{% endif %}>
+                {{ org.nombre }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div>
+        <select name="estado" class="px-3 py-2 border rounded focus:outline-none focus:border-blue-500">
+            <option value="">{{ _('Todos los estados') }}</option>
+            <option value="activo" {% if request.args.get('estado') == 'activo' %}selected{% endif %}>{{ _('Activo') }}</option>
+            <option value="inactivo" {% if request.args.get('estado') == 'inactivo' %}selected{% endif %}>{{ _('Inactivo') }}</option>
+        </select>
+    </div>
+    <button type="submit" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
+        <i class="fas fa-search mr-1"></i>
+        {{ _('Filtrar') }}
+    </button>
+    {% if q or request.args.get('organismo') or request.args.get('estado') %}
+    <a href="{{ url_for('clientes.listar') }}" class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100">
+        <i class="fas fa-times mr-1"></i>
+        {{ _('Limpiar') }}
+    </a>
+    {% endif %}
+</form>
+{% endblock %}
+
+{% block table_headers %}
+<tr>
+    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Nombre') }}</th>
+    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Organismo') }}</th>
+    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Tipo') }}</th>
+    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Estado') }}</th>
+    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Fábricas') }}</th>
+    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Acciones') }}</th>
+</tr>
+{% endblock %}
+
+{% block table_rows %}
+{% for cliente in clientes.items %}
+<tr class="hover:bg-gray-50">
+    <td class="px-6 py-4 whitespace-nowrap">
+        <a href="{{ url_for('clientes.ver', id=cliente.id) }}" class="text-blue-600 hover:text-blue-800 font-medium">
+            {{ cliente.nombre }}
+        </a>
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+        {{ cliente.organismo.nombre if cliente.organismo else '-' }}
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+        {{ _('Tipo') }} {{ cliente.tipo_cliente }}
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap">
+        {% if cliente.activo %}
+        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+            {{ _('Activo') }}
+        </span>
+        {% else %}
+        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+            {{ _('Inactivo') }}
+        </span>
+        {% endif %}
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+        {{ cliente.fabricas|length }}
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+        {{ action_buttons(
+            url_for('clientes.editar', id=cliente.id),
+            url_for('clientes.desactivar', id=cliente.id),
+            _('¿Estás seguro de que deseas desactivar este cliente?')
+        ) }}
+    </td>
+</tr>
+{% else %}
+<tr>
+    <td colspan="6" class="px-6 py-4">
+        {{ empty_state(_('No hay clientes registrados')) }}
+    </td>
+</tr>
+{% endfor %}
+{% endblock %}
+
+{% block pagination %}
+{{ pagination(clientes, 'clientes.listar', q=q) }}
+{% endblock %}

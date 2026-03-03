@@ -1,0 +1,15 @@
+{% extends 'crud/base_form.html' %}
+{% from 'macros/forms.html' import render_field, render_select, render_checkbox %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block form_title %}{{ titulo }}{% endblock %}
+
+{% block cancel_url %}{{ url_for('clientes.listar') }}{% endblock %}
+
+{% block form_fields %}
+{{ render_field(form.nombre) }}
+{{ render_select(form.organismo_id) }}
+{{ render_select(form.tipo_cliente) }}
+{{ render_checkbox(form.activo) }}
+{% endblock %}
