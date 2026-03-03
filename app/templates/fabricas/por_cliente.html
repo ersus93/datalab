@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% from 'macros/tables.html' import pagination, empty_state %}
+
+{% block title %}{{ _('Fábricas de') }} {{ cliente.nombre }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">{{ _('Fábricas') }}</h1>
+            <p class="text-gray-600 mt-1">
+                {{ _('Cliente') }}: 
+                <a href="{{ url_for('clientes.ver', id=cliente.id) }}" class="text-blue-600 hover:text-blue-800">
+                    {{ cliente.nombre }}
+                </a>
+            </p>
+        </div>
+        <a href="{{ url_for('fabricas.nueva', cliente_id=cliente.id) }}" 
+           class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+            <i class="fas fa-plus mr-1"></i>
+            {{ _('Nueva Fábrica') }}
+        </a>
+    </div>
+
+    <!-- Tabla de Fábricas -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Nombre') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Provincia') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Estado') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Acciones') }}</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for fabrica in fabricas.items %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <a href="{{ url_for('fabricas.ver', id=fabrica.id) }}" class="text-blue-600 hover:text-blue-800 font-medium">
+                            {{ fabrica.nombre }}
+                        </a>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {{ fabrica.provincia.nombre if fabrica.provincia else '-' }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if fabrica.activo %}
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                            {{ _('Activa') }}
+                        </span>
+                        {% else %}
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                            {{ _('Inactiva') }}
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <a href="{{ url_for('fabricas.editar', id=fabrica.id) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">
+                            <i class="fas fa-edit"></i> {{ _('Editar') }}
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" class="px-6 py-4">
+                        {{ empty_state(_('Este cliente no tiene fábricas registradas')) }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Paginación -->
+    {% if fabricas.pages > 1 %}
+    <div class="mt-4">
+        {{ pagination(fabricas, 'fabricas.por_cliente', cliente_id=cliente.id) }}
+    </div>
+    {% endif %}
+
+    <!-- Back button -->
+    <div class="mt-6">
+        <a href="{{ url_for('clientes.ver', id=cliente.id) }}" class="text-blue-600 hover:text-blue-800">
+            <i class="fas fa-arrow-left mr-1"></i>
+            {{ _('Volver al cliente') }}
+        </a>
+    </div>
+</div>
+{% endblock %}

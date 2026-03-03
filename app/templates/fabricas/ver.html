@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ fabrica.nombre }} - {{ _('Fábrica') }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="flex justify-between items-start mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">{{ fabrica.nombre }}</h1>
+            <p class="text-gray-600 mt-1">
+                {{ _('Cliente') }}: 
+                <a href="{{ url_for('clientes.ver', id=fabrica.cliente.id) }}" class="text-blue-600 hover:text-blue-800">
+                    {{ fabrica.cliente.nombre }}
+                </a>
+            </p>
+        </div>
+        <div class="flex space-x-2">
+            <a href="{{ url_for('fabricas.editar', id=fabrica.id) }}" 
+               class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                <i class="fas fa-edit mr-1"></i>
+                {{ _('Editar') }}
+            </a>
+        </div>
+    </div>
+
+    <!-- Estado -->
+    <div class="mb-6">
+        {% if fabrica.activo %}
+        <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+            {{ _('Activa') }}
+        </span>
+        {% else %}
+        <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+            {{ _('Inactiva') }}
+        </span>
+        {% endif %}
+    </div>
+
+    <!-- Stats Cards (Placeholders para Phase 3) -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                    <i class="fas fa-flask text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">{{ _('Total Muestras') }}</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ stats.total_muestras }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-green-100 text-green-600">
+                    <i class="fas fa-calendar-alt text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">{{ _('Muestras este año') }}</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ stats.muestras_anio }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-orange-100 text-orange-600">
+                    <i class="fas fa-clock text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">{{ _('Ensayos Pendientes') }}</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ stats.ensayos_pendientes }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información General -->
+    <div class="bg-white rounded-lg shadow mb-6">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">{{ _('Información General') }}</h2>
+        </div>
+        <div class="px-6 py-4">
+            <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <dt class="text-sm font-medium text-gray-600">{{ _('Nombre') }}</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ fabrica.nombre }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-600">{{ _('Cliente') }}</dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        <a href="{{ url_for('clientes.ver', id=fabrica.cliente.id) }}" class="text-blue-600 hover:text-blue-800">
+                            {{ fabrica.cliente.nombre }}
+                        </a>
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-600">{{ _('Provincia') }}</dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        {% if fabrica.provincia %}
+                            {{ fabrica.provincia.nombre }} ({{ fabrica.provincia.sigla }})
+                        {% else %}
+                            -
+                        {% endif %}
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-600">{{ _('Estado') }}</dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        {% if fabrica.activo %}
+                            <span class="text-green-600">{{ _('Activa') }}</span>
+                        {% else %}
+                            <span class="text-red-600">{{ _('Inactiva') }}</span>
+                        {% endif %}
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-600">{{ _('Fecha de Creación') }}</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ fabrica.creado_en.strftime('%d/%m/%Y') if fabrica.creado_en else '-' }}</dd>
+                </div>
+            </dl>
+        </div>
+    </div>
+
+    <!-- Historial de Muestras (Placeholder para Phase 3) -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <h2 class="text-lg font-semibold text-gray-900">{{ _('Historial de Muestras') }}</h2>
+            <span class="text-sm text-gray-500">{{ _('Próximamente en Phase 3') }}</span>
+        </div>
+        <div class="px-6 py-8 text-center text-gray-500">
+            <i class="fas fa-flask text-4xl mb-4 text-gray-300"></i>
+            <p>{{ _('El historial de muestras estará disponible en la siguiente fase.') }}</p>
+        </div>
+    </div>
+
+    <!-- Back button -->
+    <div class="mt-6 flex justify-between">
+        <a href="{{ url_for('fabricas.listar') }}" class="text-blue-600 hover:text-blue-800">
+            <i class="fas fa-arrow-left mr-1"></i>
+            {{ _('Volver al listado') }}
+        </a>
+        <a href="{{ url_for('clientes.ver', id=fabrica.cliente.id) }}" class="text-blue-600 hover:text-blue-800">
+            <i class="fas fa-building mr-1"></i>
+            {{ _('Ver Cliente') }}
+        </a>
+    </div>
+</div>
+{% endblock %}
