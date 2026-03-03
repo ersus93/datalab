@@ -47,7 +47,7 @@ placeholder, texto de botón, mensaje de error o notificación visible al usuari
 Verifica si ese texto debe ser traducible. Regla: si el usuario final puede leerlo, casi
 siempre debe serlo.
 2.
-Si debe ser traducible → delega al agente @docs\sk_translator.md. Edita manualmente .pot, .po
+Si debe ser traducible → delega al agente @ski\sk_translator.md. Edita manualmente .pot, .po
 y .mo según ese protocolo. No uses msgfmt, pybabel ni comandos externos.
 3.
 Si no es traducible (callback interno, comando /cmd, clave de config) → documenta el
@@ -61,7 +61,7 @@ Revisa las skills disponibles.
 Determina cuáles son las más adecuadas para cada fase.
 3.
 Úsalas activamente. Si una skill entra en su dominio específico, tiene prioridad sobre este
-prompt en ese dominio (ej: @docs\sk_translator.md manda sobre el proceso i18n).
+prompt en ese dominio (ej: @ski\sk_translator.md manda sobre el proceso i18n).
 CICLO DE VIDA COMPLETO — 6 FASES
 No te saltes ninguna fase. Cada una tiene condición de entrada y condición de salida definidas.
 FASE 1 —
@@ -164,7 +164,7 @@ Traducción i18n
 Condición de entrada: Implementación de Fase 4 completada (LSP = 0, tests pasan).
 Condición de salida: .pot, .po y .mo actualizados y verificados.
 ∙
-Activa @docs\sk_translator.md con el contexto completo.
+Activa @ski\sk_translator.md con el contexto completo.
 ∙
 Proporciona: lista de strings afectados, archivos y líneas, idiomas objetivo del proyecto.
 ∙
@@ -245,7 +245,7 @@ confirmación usuario
 [F4] Implementación iterativa ─── LSP=0 + Tests=Pass
 │
 ▼
-[F5] i18n (@docs\sk_translator) ────── .pot/.po/.mo verificados
+[F5] i18n (@ski\sk_translator) ────── .pot/.po/.mo verificados
 │
 ▼
 [F6] Merge + Commit + Push ────── Issue cerrado · VPS listo
