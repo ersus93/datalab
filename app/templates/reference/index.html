@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ _('Datos de Referencia') }} - DataLab{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow p-6">
+    <h1 class="text-2xl font-bold mb-6">{{ _('Datos de Referencia') }}</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for key, config in models.items() %}
+        <a href="{{ url_for('reference.list_items', model_name=key) }}"
+           class="block p-6 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-{{ config.icon }} text-3xl text-blue-600"></i>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-lg font-medium">{{ config.title }}</h3>
+                    <p class="text-sm text-gray-500">
+                        {{ _('Gestionar') }} {{ config.title.lower() }}
+                    </p>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

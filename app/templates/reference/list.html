@@ -1,0 +1,81 @@
+{% extends 'crud/base_list.html' %}
+{% from 'macros/tables.html' import action_buttons %}
+
+{% block title %}{{ title }} - DataLab{% endblock %}
+{% block list_title %}{{ title }}{% endblock %}
+
+{% block create_button %}
+<a href="{{ url_for('reference.create_item', model_name=model_name) }}"
+   class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+    <i class="fas fa-plus mr-1"></i>
+    {{ _('Nuevo') }}
+</a>
+{% endblock %}
+
+{% block table_headers %}
+<tr>
+    {% if model_name == 'annos' %}
+    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Año') }}</th>
+    {% else %}
+    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+    {% endif %}
+    {% for field in fields %}
+    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+        {{ field|replace('_', ' ')|title }}
+    </th>
+    {% endfor %}
+    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+        {{ _('Acciones') }}
+    </th>
+</tr>
+{% endblock %}
+
+{% block table_rows %}
+{% for item in items %}
+<tr class="hover:bg-gray-50">
+    {% if model_name == 'annos' %}
+    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ item.anno }}</td>
+    {% else %}
+    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ item.id }}</td>
+    {% endif %}
+    {% for field in fields %}
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+        {% if field == 'activo' %}
+            {% if item.activo %}
+            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                {{ _('Sí') }}
+            </span>
+            {% else %}
+            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                {{ _('No') }}
+            </span>
+            {% endif %}
+        {% else %}
+            {{ item[field] }}
+        {% endif %}
+    </td>
+    {% endfor %}
+    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+        {% if model_name == 'annos' %}
+        {{ action_buttons(
+            url_for('reference.edit_item', model_name=model_name, id=item.anno),
+            url_for('reference.delete_item', model_name=model_name, id=item.anno),
+            _('¿Estás seguro de que deseas eliminar este elemento?')
+        ) }}
+        {% else %}
+        {{ action_buttons(
+            url_for('reference.edit_item', model_name=model_name, id=item.id),
+            url_for('reference.delete_item', model_name=model_name, id=item.id),
+            _('¿Estás seguro de que deseas eliminar este elemento?')
+        ) }}
+        {% endif %}
+    </td>
+</tr>
+{% else %}
+<tr>
+    <td colspan="{{ fields|length + 2 }}" class="px-6 py-4 text-center text-gray-500">
+        {{ _('No hay registros para mostrar') }}
+    </td>
+</tr>
+{% endfor %}
+{% endblock %}

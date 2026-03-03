@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: DataLab 1.0\n"
-"PO-Revision-Date: 2026-03-03 16:30+0000\n"
+"PO-Revision-Date: 2026-03-03 20:00+0000\n"
 "Last-Translator: Translation Agent v1.1\n"
 "Language-Team: Spanish\n"
 "Language: es\n"
@@ -91,3 +91,137 @@ msgstr "Contraseña"
 #: app/templates/auth/login.html:43
 msgid "Recordarme"
 msgstr "Recordarme"
+
+#: app/routes/reference.py:24
+msgid "Áreas de Laboratorio"
+msgstr "Áreas de Laboratorio"
+
+#: app/routes/reference.py:29
+msgid "Organismos"
+msgstr "Organismos"
+
+#: app/routes/reference.py:34
+msgid "Provincias"
+msgstr "Provincias"
+
+#: app/routes/reference.py:39
+msgid "Destinos"
+msgstr "Destinos"
+
+#: app/routes/reference.py:44
+msgid "Ramas"
+msgstr "Ramas"
+
+#: app/routes/reference.py:49
+msgid "Meses"
+msgstr "Meses"
+
+#: app/routes/reference.py:54
+msgid "Años"
+msgstr "Años"
+
+#: app/routes/reference.py:59
+msgid "Tipos ES"
+msgstr "Tipos ES"
+
+#: app/routes/reference.py:64
+msgid "Unidades de Medida"
+msgstr "Unidades de Medida"
+
+#: app/routes/reference.py:79 app/routes/reference.py:131 app/routes/reference.py:187
+msgid "Modelo no encontrado"
+msgstr "Modelo no encontrado"
+
+#: app/routes/reference.py:116
+#, python-format
+msgid "%(title)s creado exitosamente"
+msgstr "%(title)s creado exitosamente"
+
+#: app/routes/reference.py:119
+#, python-format
+msgid "Error al crear: %(error)s"
+msgstr "Error al crear: %(error)s"
+
+#: app/routes/reference.py:125
+msgid "Nuevo %(title)s"
+msgstr "Nuevo %(title)s"
+
+#: app/routes/reference.py:165
+#, python-format
+msgid "%(title)s actualizado exitosamente"
+msgstr "%(title)s actualizado exitosamente"
+
+#: app/routes/reference.py:168
+#, python-format
+msgid "Error al actualizar: %(error)s"
+msgstr "Error al actualizar: %(error)s"
+
+#: app/routes/reference.py:174
+msgid "Editar %(title)s"
+msgstr "Editar %(title)s"
+
+#: app/routes/reference.py:193
+#, python-format
+msgid "%(title)s eliminado exitosamente"
+msgstr "%(title)s eliminado exitosamente"
+
+#: app/routes/reference.py:196
+#, python-format
+msgid "Error al eliminar: %(error)s"
+msgstr "Error al eliminar: %(error)s"
+
+#: app/forms/reference.py:29
+msgid "Activo"
+msgstr "Activo"
+
+#: app/forms/reference.py:30
+msgid "Año"
+msgstr "Año"
+
+#: app/forms/reference.py:35
+msgid "Sigla"
+msgstr "Sigla"
+
+#: app/forms/reference.py:40
+msgid "Código"
+msgstr "Código"
+
+#: app/forms/reference.py:46
+msgid "Nombre"
+msgstr "Nombre"
+
+#: app/templates/reference/index.html:3 app/templates/reference/index.html:6
+msgid "Datos de Referencia"
+msgstr "Datos de Referencia"
+
+#: app/templates/reference/index.html:16
+msgid "Gestionar"
+msgstr "Gestionar"
+
+#: app/templates/reference/list.html:10
+msgid "Nuevo"
+msgstr "Nuevo"
+
+#: app/templates/reference/list.html:13
+msgid "Año"
+msgstr "Año"
+
+#: app/templates/reference/list.html:15 app/templates/reference/list.html:34
+msgid "Acciones"
+msgstr "Acciones"
+
+#: app/templates/reference/list.html:25
+msgid "Sí"
+msgstr "Sí"
+
+#: app/templates/reference/list.html:28
+msgid "No"
+msgstr "No"
+
+#: app/templates/reference/list.html:38 app/templates/reference/list.html:44
+msgid "¿Estás seguro de que deseas eliminar este elemento?"
+msgstr "¿Estás seguro de que deseas eliminar este elemento?"
+
+#: app/templates/reference/list.html:52
+msgid "No hay registros para mostrar"
+msgstr "No hay registros para mostrar"

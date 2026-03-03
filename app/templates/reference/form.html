@@ -1,0 +1,17 @@
+{% extends 'crud/base_form.html' %}
+{% from 'macros/forms.html' import render_field, render_checkbox %}
+
+{% block title %}{{ title }} - DataLab{% endblock %}
+{% block form_title %}{{ title }}{% endblock %}
+
+{% block form_fields %}
+{% for field_name in fields %}
+    {% if field_name == 'activo' %}
+        {{ render_checkbox(form[field_name]) }}
+    {% else %}
+        {{ render_field(form[field_name]) }}
+    {% endif %}
+{% endfor %}
+{% endblock %}
+
+{% block cancel_url %}{{ url_for('reference.list_items', model_name=model_name) }}{% endblock %}
