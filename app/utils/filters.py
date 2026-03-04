@@ -1,6 +1,7 @@
 """Filtros personalizados para Jinja2."""
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import Blueprint
+from flask_babel import _
 
 filters_bp = Blueprint('filters', __name__)
 
@@ -41,3 +42,29 @@ def icon_for_destino(destino_sigla):
         'DE': 'star',
     }
     return icons.get(destino_sigla, 'box')
+
+
+@filters_bp.app_template_filter('status_color')
+def status_color_filter(status):
+    """Retornar color para estado."""
+    colors = {
+        'RECIBIDO': 'gray',
+        'EN_PROCESO': 'blue',
+        'COMPLETADO': 'green',
+        'ENTREGADO': 'cyan',
+        'ANULADO': 'red'
+    }
+    return colors.get(status, 'gray')
+
+
+@filters_bp.app_template_filter('status_label')
+def status_label_filter(status):
+    """Retornar etiqueta traducida para estado."""
+    labels = {
+        'RECIBIDO': 'Recibido',
+        'EN_PROCESO': 'En Proceso',
+        'COMPLETADO': 'Completado',
+        'ENTREGADO': 'Entregado',
+        'ANULADO': 'Anulado'
+    }
+    return labels.get(status, status)

@@ -1,0 +1,263 @@
+{% extends 'base.html' %}
+{% from 'macros/forms.html' import render_field %}
+
+{% block title %}{{ titulo }} - DataLab{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+.select2-container { width: 100% !important; }
+.select2-selection {
+    min-height: 42px;
+    border: 1px solid #d1d5db !important;
+    border-radius: 0.375rem !important;
+}
+.select2-selection__arrow { height: 42px !important; }
+.select2-selection__rendered { line-height: 40px !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">{{ titulo }}</h1>
+        <a href="{{ url_for('entradas.listar') }}" class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 text-gray-700">
+            <i class="fas fa-arrow-left mr-2"></i>{{ _('Volver') }}
+        </a>
+    </div>
+
+    <form id="entrada-form" method="POST" class="space-y-6" novalidate>
+        {{ form.hidden_tag() }}
+
+        <!-- Sección 1: Identificación -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-blue-600 text-white px-4 py-3 font-medium flex items-center">
+                <i class="fas fa-barcode mr-2"></i>{{ _('Identificación') }}
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        {{ render_field(form.codigo, placeholder="AUTO-001") }}
+                    </div>
+                    <div>
+                        {{ render_field(form.lote, placeholder="A-1234") }}
+                        <p class="text-xs text-gray-500 mt-1">{{ _('Formato: X-XXXX') }}</p>
+                    </div>
+                    <div>
+                        {{ render_field(form.nro_parte) }}
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">{{ _('Fecha Entrada') }}</label>
+                        <input type="date" class="w-full px-3 py-2 border rounded bg-gray-100" value="{{ today or '' }}" readonly>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección 2: Cliente y Ubicación -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-green-600 text-white px-4 py-3 font-medium flex items-center">
+                <i class="fas fa-industry mr-2"></i>{{ _('Cliente y Ubicación') }}
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="fabrica-select" class="block text-gray-700 text-sm font-bold mb-2">
+                            {{ _('Fábrica') }} <span class="text-red-500">*</span>
+                        </label>
+                        <select id="fabrica-select" name="fabrica_id" class="form-select select2 w-full" required>
+                            <option value="">{{ _('Buscar fábrica...') }}</option>
+                        </select>
+                        <p class="text-red-500 text-xs mt-1 hidden" id="fabrica-error">{{ _('Debe seleccionar una fábrica') }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">{{ _('Cliente') }}</label>
+                        <input type="text" id="cliente-display" class="w-full px-3 py-2 border rounded bg-gray-100" readonly
+                               placeholder="{{ _('Se autocompletará') }}">
+                        <input type="hidden" id="cliente_id" name="cliente_id">
+                    </div>
+                </div>
+
+                <div class="flex items-center">
+                    <input type="checkbox" id="link-pedido" class="mr-2 w-4 h-4">
+                    <label for="link-pedido" class="text-gray-700 text-sm">{{ _('Vincular a Pedido existente') }}</label>
+                </div>
+
+                <div id="pedido-row" class="hidden">
+                    <div class="md:w-1/2">
+                        <select id="pedido-select" name="pedido_id" class="form-select w-full border rounded px-3 py-2">
+                            <option value="">{{ _('Seleccionar Pedido...') }}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección 3: Producto -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-cyan-600 text-white px-4 py-3 font-medium flex items-center">
+                <i class="fas fa-box mr-2"></i>{{ _('Producto') }}
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="md:col-span-2">
+                        <label for="producto-select" class="block text-gray-700 text-sm font-bold mb-2">
+                            {{ _('Producto') }} <span class="text-red-500">*</span>
+                        </label>
+                        <select id="producto-select" name="producto_id" class="form-select select2 w-full" required>
+                            <option value="">{{ _('Buscar producto...') }}</option>
+                        </select>
+                        <p class="text-red-500 text-xs mt-1 hidden" id="producto-error">{{ _('Debe seleccionar un producto') }}</p>
+                    </div>
+                    <div>
+                        {{ render_field(form.rama_id) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección 4: Cantidades -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-yellow-500 text-gray-800 px-4 py-3 font-medium flex items-center">
+                <i class="fas fa-balance-scale mr-2"></i>{{ _('Cantidades') }}
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                    <div>
+                        {{ render_field(form.cantidad_recib, type="number", step="0.01", min="0", id="cantidad_recib") }}
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">{{ _('Cantidad Entregada') }}</label>
+                        <input type="number" class="w-full px-3 py-2 border rounded bg-gray-100" value="0" readonly>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">{{ _('Saldo') }}</label>
+                        <div class="flex">
+                            <input type="text" id="saldo-display" class="w-full px-3 py-2 border rounded-l font-bold text-blue-600"
+                                   value="{{ entrada.saldo if entrada else '0.00' }}" readonly>
+                            <span class="px-3 py-2 border border-l-0 rounded-r bg-gray-100 text-gray-600" id="unidad-display">-</span>
+                        </div>
+                    </div>
+                    <div>
+                        {{ render_field(form.unidad_medida_id, id="unidad_medida_id") }}
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
+                    <div>
+                        {{ render_field(form.cantidad_muest, type="number", step="0.01", min="0") }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección 5: Fechas -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-gray-600 text-white px-4 py-3 font-medium flex items-center">
+                <i class="fas fa-calendar-alt mr-2"></i>{{ _('Fechas') }}
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        {{ render_field(form.fech_fab, type="date", id="fech_fab") }}
+                    </div>
+                    <div>
+                        {{ render_field(form.fech_venc, type="date", id="fech_venc") }}
+                        <p class="text-red-500 text-xs mt-1 hidden" id="fecha-error">
+                            {{ _('La fecha de vencimiento debe ser posterior a la de fabricación') }}
+                        </p>
+                    </div>
+                    <div>
+                        {{ render_field(form.fech_muestreo, type="date") }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección 6: Observaciones -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-gray-100 text-gray-800 px-4 py-3 font-medium flex items-center">
+                <i class="fas fa-sticky-note mr-2"></i>{{ _('Observaciones') }}
+            </div>
+            <div class="p-6">
+                {{ render_field(form.observaciones, rows="3") }}
+            </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="flex justify-end gap-3">
+            <a href="{{ url_for('entradas.listar') }}" class="px-6 py-3 border border-gray-300 rounded hover:bg-gray-50 text-gray-700">
+                {{ _('Cancelar') }}
+            </a>
+            <button type="submit" class="px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 font-medium">
+                <i class="fas fa-save mr-2"></i>{{ _('Guardar Entrada') }}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="{{ url_for('static', filename='js/entrada-form.js') }}"></script>
+<script>
+$(document).ready(function() {
+    // Select2 para fábricas con búsqueda
+    $('#fabrica-select').select2({
+        ajax: {
+            url: '/api/fabricas/search',
+            dataType: 'json',
+            delay: 250,
+            data: function(params) {
+                return { q: params.term };
+            },
+            processResults: function(data) {
+                return {
+                    results: data.map(function(f) {
+                        return {
+                            id: f.id,
+                            text: f.nombre + ' (' + f.cliente.nombre + ')',
+                            cliente: f.cliente
+                        };
+                    })
+                };
+            }
+        },
+        placeholder: '{{ _('Buscar fábrica...') }}',
+        minimumInputLength: 2
+    }).on('select2:select', function(e) {
+        var data = e.params.data;
+        $('#cliente-display').val(data.cliente.nombre);
+        $('#cliente_id').val(data.cliente.id);
+
+        // Cargar pedidos del cliente
+        cargarPedidos(data.cliente.id);
+    });
+
+    // Select2 para productos
+    $('#producto-select').select2({
+        ajax: {
+            url: '/api/productos/search',
+            dataType: 'json',
+            delay: 250,
+            data: function(params) {
+                return { q: params.term };
+            }
+        },
+        placeholder: '{{ _('Buscar producto...') }}',
+        minimumInputLength: 2
+    });
+});
+
+function cargarPedidos(clienteId) {
+    // Cargar pedidos del cliente vía AJAX
+    $.get('/api/clientes/' + clienteId + '/pedidos', function(data) {
+        var select = $('#pedido-select');
+        select.empty();
+        select.append('<option value="">{{ _('Seleccionar Pedido...') }}</option>');
+        data.pedidos.forEach(function(p) {
+            select.append('<option value="' + p.id + '">' + p.codigo + ' - ' + p.producto + '</option>');
+        });
+    });
+}
+</script>
+{% endblock %}

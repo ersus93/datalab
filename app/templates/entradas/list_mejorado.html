@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ _('Entradas de Muestras') }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">{{ _('Entradas de Muestras') }}</h1>
+        <a href="{{ url_for('entradas.nueva') }}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+            <i class="fas fa-plus mr-2"></i>{{ _('Nueva Entrada') }}
+        </a>
+    </div>
+
+    <!-- Filtros Avanzados -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+        <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+            <span class="font-medium"><i class="fas fa-filter mr-2"></i>{{ _('Filtros') }}</span>
+            <button type="button" onclick="document.getElementById('filtros-collapse').classList.toggle('hidden')" class="text-blue-600 hover:text-blue-800">
+                <i class="fas fa-chevron-down"></i>
+            </button>
+        </div>
+        <div id="filtros-collapse" class="p-4">
+            <form id="filtros-form" method="GET" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-6 gap-3">
+                    <div class="md:col-span-2">
+                        <input type="text" name="q" class="w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500"
+                               placeholder="{{ _('Buscar código, lote...') }}"
+                               value="{{ request.args.get('q', '') }}">
+                    </div>
+                    <div>
+                        <select name="status" class="w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500">
+                            <option value="">{{ _('Todos los estados') }}</option>
+                            <option value="RECIBIDO" {{ 'selected' if request.args.get('status') == 'RECIBIDO' }}>{{ _('Recibido') }}</option>
+                            <option value="EN_PROCESO" {{ 'selected' if request.args.get('status') == 'EN_PROCESO' }}>{{ _('En Proceso') }}</option>
+                            <option value="COMPLETADO" {{ 'selected' if request.args.get('status') == 'COMPLETADO' }}>{{ _('Completado') }}</option>
+                            <option value="ENTREGADO" {{ 'selected' if request.args.get('status') == 'ENTREGADO' }}>{{ _('Entregado') }}</option>
+                        </select>
+                    </div>
+                    <div>
+                        <select name="cliente" class="w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500">
+                            <option value="">{{ _('Todos los clientes') }}</option>
+                            {% for cliente in clientes %}
+                            <option value="{{ cliente.id }}" {{ 'selected' if request.args.get('cliente')|int == cliente.id }}>{{ cliente.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <input type="date" name="desde" class="w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500"
+                               placeholder="{{ _('Desde') }}"
+                               value="{{ request.args.get('desde', '') }}">
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="date" name="hasta" class="w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500"
+                               placeholder="{{ _('Hasta') }}"
+                               value="{{ request.args.get('hasta', '') }}">
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Filtros Rápidos -->
+    <div class="flex gap-2 mb-4">
+        <a href="{{ url_for('entradas.listar', **{'desde': today}) }}" class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 text-sm">{{ _('Hoy') }}</a>
+        <a href="{{ url_for('entradas.listar', **{'desde': week_start, 'hasta': week_end}) }}" class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 text-sm">{{ _('Esta Semana') }}</a>
+        <a href="{{ url_for('entradas.listar', **{'desde': month_start}) }}" class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 text-sm">{{ _('Este Mes') }}</a>
+    </div>
+
+    <!-- Tabla de Entradas -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-800 text-white">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-medium uppercase">{{ _('Código') }}</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium uppercase">{{ _('Cliente') }}</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium uppercase">{{ _('Producto') }}</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium uppercase">{{ _('Lote') }}</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium uppercase">{{ _('Estado') }}</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium uppercase">{{ _('Saldo') }}</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium uppercase">{{ _('Fecha') }}</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium uppercase">{{ _('Acciones') }}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for entrada in entradas.items %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3">
+                            <a href="{{ url_for('entradas.ver', id=entrada.id) }}" class="font-semibold text-blue-600 hover:text-blue-800">
+                                {{ entrada.codigo }}
+                            </a>
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-900">{{ entrada.cliente.nombre[:30] }}{% if entrada.cliente.nombre|length > 30 %}...{% endif %}</td>
+                        <td class="px-4 py-3 text-sm text-gray-900">{{ entrada.producto.nombre[:30] }}{% if entrada.producto.nombre|length > 30 %}...{% endif %}</td>
+                        <td class="px-4 py-3 text-sm"><code class="bg-gray-100 px-2 py-1 rounded">{{ entrada.lote or '-' }}</code></td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-1 rounded-full text-xs font-medium bg-{{ entrada.status|status_color }}-100 text-{{ entrada.status|status_color }}-800">
+                                {{ entrada.status|status_label }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-sm">
+                            <span class="font-semibold {{ 'text-green-600' if entrada.saldo > 0 else 'text-gray-500' }}">
+                                {{ entrada.saldo }}
+                            </span>
+                            {{ entrada.unidad_medida.codigo if entrada.unidad_medida }}
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-900">{{ entrada.fech_entrada.strftime('%d/%m/%Y') if entrada.fech_entrada }}</td>
+                        <td class="px-4 py-3 text-right">
+                            <div class="flex justify-end gap-2">
+                                <a href="{{ url_for('entradas.ver', id=entrada.id) }}"
+                                   class="p-1 text-blue-600 hover:text-blue-800" title="{{ _('Ver') }}">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ url_for('entradas.editar', id=entrada.id) }}"
+                                   class="p-1 text-gray-600 hover:text-gray-800" title="{{ _('Editar') }}">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="px-4 py-12 text-center text-gray-500">
+                            <i class="fas fa-inbox text-4xl mb-3 block"></i>
+                            <p>{{ _('No se encontraron entradas') }}</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Paginación -->
+    {% if entradas.pages > 1 %}
+    <div class="mt-4 flex justify-center">
+        <nav class="flex gap-1">
+            {% if entradas.has_prev %}
+            <a href="{{ url_for('entradas.listar', page=entradas.prev_num, **request.args) }}" class="px-3 py-1 border rounded hover:bg-gray-50">&laquo;</a>
+            {% endif %}
+
+            {% for page in entradas.iter_pages(left_edge=2, left_current=2, right_current=3, right_edge=2) %}
+                {% if page %}
+                    {% if page != entradas.page %}
+                    <a href="{{ url_for('entradas.listar', page=page, **request.args) }}" class="px-3 py-1 border rounded hover:bg-gray-50">{{ page }}</a>
+                    {% else %}
+                    <span class="px-3 py-1 border rounded bg-blue-600 text-white">{{ page }}</span>
+                    {% endif %}
+                {% else %}
+                    <span class="px-3 py-1">...</span>
+                {% endif %}
+            {% endfor %}
+
+            {% if entradas.has_next %}
+            <a href="{{ url_for('entradas.listar', page=entradas.next_num, **request.args) }}" class="px-3 py-1 border rounded hover:bg-gray-50">&raquo;</a>
+            {% endif %}
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
