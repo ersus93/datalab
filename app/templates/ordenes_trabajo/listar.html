@@ -1,0 +1,138 @@
+{% extends 'crud/base_list.html' %}
+{% from 'macros/tables.html' import pagination, empty_state %}
+
+{% block title %}{{ _('Órdenes de Trabajo') }}{% endblock %}
+
+{% block list_title %}{{ _('Gestión de Órdenes de Trabajo') }}{% endblock %}
+
+{% block create_button %}
+{% if current_user.is_admin() or current_user.is_laboratory_manager() %}
+<a href="{{ url_for('ordenes_trabajo.nueva') }}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+    <i class="fas fa-plus mr-1"></i>
+    {{ _('Nueva Orden') }}
+</a>
+{% endif %}
+{% endblock %}
+
+{% block filters %}
+<form method="GET" class="mb-4 flex flex-wrap gap-4">
+    <div class="flex-1 min-w-[200px]">
+        <input type="text" name="q" value="{{ q }}" placeholder="{{ _('Buscar por Nro. Oficial o código...') }}"
+               class="w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500">
+    </div>
+    <div>
+        <select name="cliente" class="px-3 py-2 border rounded focus:outline-none focus:border-blue-500">
+            <option value="">{{ _('Todos los clientes') }}</option>
+            {% for cliente in clientes %}
+            <option value="{{ cliente.id }}" {% if request.args.get('cliente')|int == cliente.id %}selected{% endif %}>
+                {{ cliente.nombre }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div>
+        <select name="status" class="px-3 py-2 border rounded focus:outline-none focus:border-blue-500">
+            <option value="">{{ _('Todos los estados') }}</option>
+            <option value="PENDIENTE" {% if request.args.get('status') == 'PENDIENTE' %}selected{% endif %}>{{ _('Pendiente') }}</option>
+            <option value="EN_PROGRESO" {% if request.args.get('status') == 'EN_PROGRESO' %}selected{% endif %}>{{ _('En Progreso') }}</option>
+            <option value="COMPLETADA" {% if request.args.get('status') == 'COMPLETADA' %}selected{% endif %}>{{ _('Completada') }}</option>
+        </select>
+    </div>
+    <button type="submit" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
+        <i class="fas fa-search mr-1"></i>
+        {{ _('Filtrar') }}
+    </button>
+    {% if q or request.args.get('cliente') or request.args.get('status') %}
+    <a href="{{ url_for('ordenes_trabajo.listar') }}" class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100">
+        <i class="fas fa-times mr-1"></i>
+        {{ _('Limpiar') }}
+    </a>
+    {% endif %}
+</form>
+{% endblock %}
+
+{% block table_headers %}
+<tr>
+    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Nro. Oficial') }}</th>
+    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Código') }}</th>
+    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Cliente') }}</th>
+    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Estado') }}</th>
+    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Progreso') }}</th>
+    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Pedidos') }}</th>
+    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Creada') }}</th>
+    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Acciones') }}</th>
+</tr>
+{% endblock %}
+
+{% block table_rows %}
+{% for orden in ordenes.items %}
+<tr class="hover:bg-gray-50">
+    <td class="px-6 py-4 whitespace-nowrap">
+        <a href="{{ url_for('ordenes_trabajo.ver', id=orden.id) }}" class="text-blue-600 hover:text-blue-800 font-medium">
+            {{ orden.nro_ofic }}
+        </a>
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+        {{ orden.codigo }}
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+        {{ orden.cliente.nombre if orden.cliente else '-' }}
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap">
+        {% if orden.status == 'PENDIENTE' %}
+        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+            {{ _('Pendiente') }}
+        </span>
+        {% elif orden.status == 'EN_PROGRESO' %}
+        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+            {{ _('En Progreso') }}
+        </span>
+        {% else %}
+        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+            {{ _('Completada') }}
+        </span>
+        {% endif %}
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+        {% if orden.pedidos_count > 0 %}
+        <div class="flex items-center">
+            <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                <div class="bg-blue-600 h-2 rounded-full" style="width: {{ orden.progreso }}%"></div>
+            </div>
+            <span class="text-xs text-gray-600">{{ orden.progreso }}%</span>
+        </div>
+        {% else %}
+        <span class="text-gray-400 text-xs">{{ _('Sin pedidos') }}</span>
+        {% endif %}
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+        {{ orden.pedidos_count }}
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+        {{ orden.fech_creacion.strftime('%d/%m/%Y') if orden.fech_creacion else '-' }}
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+        <div class="flex space-x-2">
+            <a href="{{ url_for('ordenes_trabajo.ver', id=orden.id) }}" class="text-blue-600 hover:text-blue-800" title="{{ _('Ver') }}">
+                <i class="fas fa-eye"></i>
+            </a>
+            {% if current_user.is_admin() or current_user.is_laboratory_manager() %}
+            <a href="{{ url_for('ordenes_trabajo.editar', id=orden.id) }}" class="text-green-600 hover:text-green-800" title="{{ _('Editar') }}">
+                <i class="fas fa-edit"></i>
+            </a>
+            {% endif %}
+        </div>
+    </td>
+</tr>
+{% else %}
+<tr>
+    <td colspan="8" class="px-6 py-4">
+        {{ empty_state(_('No hay órdenes de trabajo registradas')) }}
+    </td>
+</tr>
+{% endfor %}
+{% endblock %}
+
+{% block pagination %}
+{{ pagination(ordenes, 'ordenes_trabajo.listar', q=q, cliente=request.args.get('cliente'), status=request.args.get('status')) }}
+{% endblock %}
