@@ -679,8 +679,8 @@ Este proyecto se construye sobre el trabajo de increíbles proyectos de código 
 - 🌐 Web: https://www.minal.gob.cu
 
 **Equipo de Desarrollo DataLab**
-- 📧 Email: laboratorio@oniepr.alinet.cu
-- 🐛 Issues: [GitHub Issues](https://github.com/datalabdev/datalab/issues)
+- 📧 Email: datalabdevs@gmail.com
+- 🐛 Issues: [GitHub Issues](https://github.com/ersus93/datalab/issues)
 
 ---
 
