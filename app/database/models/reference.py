@@ -21,7 +21,7 @@ class Area(db.Model):
     # Timestamps
     creado_en = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     
-    # Relaciones
+    # Relationships
     ensayos = db.relationship('Ensayo', back_populates='area', lazy=True)
     ensayos_es = db.relationship('EnsayoES', back_populates='area', lazy=True)
     
@@ -260,6 +260,9 @@ class UnidadMedida(db.Model):
     
     # Timestamps
     creado_en = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    
+    # Relationships
+    pedidos = db.relationship('Pedido', back_populates='unidad_medida', lazy=True)
     
     def __repr__(self):
         return f'<UnidadMedida {self.codigo}: {self.nombre}>'

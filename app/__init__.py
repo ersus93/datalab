@@ -54,6 +54,10 @@ def create_app(config_name: str = "development") -> Flask:
     # Manejadores de error globales
     _register_error_handlers(app)
 
+    # Registrar comandos CLI personalizados
+    from app.cli import register_cli_commands
+    register_cli_commands(app)
+
     return app
 
 

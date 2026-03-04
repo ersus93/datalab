@@ -46,6 +46,11 @@ class Cliente(db.Model):
         back_populates='cliente',
         lazy=True
     )
+    pedidos = db.relationship(
+        'Pedido',
+        back_populates='cliente',
+        lazy=True
+    )
     
     def __repr__(self):
         return f'<Cliente {self.nombre}>'

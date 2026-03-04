@@ -22,7 +22,7 @@ class Producto(db.Model):
     
     # Relationships
     destino = db.relationship('Destino', back_populates='productos', lazy=True)
-    # pedidos = relationship existente (definido en Pedido)
+    pedidos = db.relationship('Pedido', back_populates='producto', lazy=True)
     # ensayos = many-to-many via EnsayoXProducto (Phase 2)
     
     def __repr__(self):
