@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ entrada.codigo }} - {{ _('Entrada') }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="flex justify-between items-start mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">{{ entrada.codigo }}</h1>
+            <p class="text-gray-600 mt-1">
+                {{ _('Lote') }}: {{ entrada.lote or '-' }}
+            </p>
+        </div>
+        <div class="flex space-x-2">
+            <a href="{{ url_for('entradas.editar', id=entrada.id) }}" 
+               class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                <i class="fas fa-edit mr-1"></i>
+                {{ _('Editar') }}
+            </a>
+        </div>
+    </div>
+
+    <!-- Estado -->
+    <div class="mb-6 flex items-center space-x-4">
+        {% if entrada.status == 'RECIBIDO' %}
+        <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+            {{ _('Recibido') }}
+        </span>
+        {% elif entrada.status == 'EN_PROCESO' %}
+        <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+            {{ _('En Proceso') }}
+        </span>
+        {% elif entrada.status == 'COMPLETADO' %}
+        <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+            {{ _('Completado') }}
+        </span>
+        {% elif entrada.status == 'ENTREGADO' %}
+        <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+            {{ _('Entregado') }}
+        </span>
+        {% elif entrada.status == 'ANULADO' %}
+        <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+            {{ _('Anulado') }}
+        </span>
+        {% endif %}
+        
+        {% if entrada.en_os %}
+        <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+            {{ _('En OS') }}
+        </span>
+        {% endif %}
+        
+        {% if entrada.anulado %}
+        <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+            {{ _('Anulado') }}
+        </span>
+        {% endif %}
+    </div>
+
+    <!-- Stats Cards - Cantidades -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                    <i class="fas fa-box-open text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">{{ _('Cantidad Recibida') }}</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ entrada.cantidad_recib }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-green-100 text-green-600">
+                    <i class="fas fa-check-circle text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">{{ _('Cantidad Entregada') }}</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ entrada.cantidad_entreg }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full {% if entrada.saldo > 0 %}bg-orange-100 text-orange-600{% else %}bg-green-100 text-green-600{% endif %}">
+                    <i class="fas fa-balance-scale text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">{{ _('Saldo') }}</p>
+                    <p class="text-2xl font-bold {% if entrada.saldo > 0 %}text-orange-600{% else %}text-green-600{% endif %}">{{ entrada.saldo }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Información General -->
+        <div class="bg-white rounded-lg shadow mb-6">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">{{ _('Información General') }}</h2>
+            </div>
+            <div class="px-6 py-4">
+                <dl class="grid grid-cols-1 gap-4">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-600">{{ _('Producto') }}</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ entrada.producto.nombre if entrada.producto else '-' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-600">{{ _('Cliente') }}</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ entrada.cliente.nombre if entrada.cliente else '-' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-600">{{ _('Fábrica') }}</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ entrada.fabrica.nombre if entrada.fabrica else '-' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-600">{{ _('Rama / Sector') }}</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ entrada.rama.nombre if entrada.rama else '-' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-600">{{ _('Nro. Parte') }}</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ entrada.nro_parte or '-' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-600">{{ _('Cantidad Muestreada') }}</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ entrada.cantidad_muest or '-' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-600">{{ _('Unidad de Medida') }}</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ entrada.unidad_medida.codigo if entrada.unidad_medida else '-' }}</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+
+        <!-- Fechas -->
+        <div class="bg-white rounded-lg shadow mb-6">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">{{ _('Fechas') }}</h2>
+            </div>
+            <div class="px-6 py-4">
+                <dl class="grid grid-cols-1 gap-4">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-600">{{ _('Fecha de Entrada') }}</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ entrada.fech_entrada.strftime('%d/%m/%Y %H:%M') if entrada.fech_entrada else '-' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-600">{{ _('Fecha de Fabricación') }}</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ entrada.fech_fab.strftime('%d/%m/%Y') if entrada.fech_fab else '-' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-600">{{ _('Fecha de Vencimiento') }}</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ entrada.fech_venc.strftime('%d/%m/%Y') if entrada.fech_venc else '-' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-600">{{ _('Fecha de Muestreo') }}</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ entrada.fech_muestreo.strftime('%d/%m/%Y') if entrada.fech_muestreo else '-' }}</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <!-- Observaciones -->
+    {% if entrada.observaciones %}
+    <div class="bg-white rounded-lg shadow mb-6">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">{{ _('Observaciones') }}</h2>
+        </div>
+        <div class="px-6 py-4">
+            <p class="text-sm text-gray-900 whitespace-pre-wrap">{{ entrada.observaciones }}</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Acciones de Estado -->
+    {% if not entrada.anulado and entrada.status != 'ENTREGADO' %}
+    <div class="bg-white rounded-lg shadow mb-6">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">{{ _('Cambiar Estado') }}</h2>
+        </div>
+        <div class="px-6 py-4">
+            <div class="flex flex-wrap gap-2">
+                {% if entrada.status == 'RECIBIDO' %}
+                <form method="POST" action="{{ url_for('entradas.cambiar_estado', id=entrada.id) }}" class="inline">
+                    <input type="hidden" name="status" value="EN_PROCESO">
+                    <button type="submit" class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">
+                        <i class="fas fa-play mr-1"></i>
+                        {{ _('Iniciar Proceso') }}
+                    </button>
+                </form>
+                <form method="POST" action="{{ url_for('entradas.cambiar_estado', id=entrada.id) }}" class="inline">
+                    <input type="hidden" name="status" value="ANULADO">
+                    <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                            onclick="return confirm('{{ _('¿Estás seguro de anular esta entrada?') }}')">
+                        <i class="fas fa-ban mr-1"></i>
+                        {{ _('Anular') }}
+                    </button>
+                </form>
+                {% elif entrada.status == 'EN_PROCESO' %}
+                <form method="POST" action="{{ url_for('entradas.cambiar_estado', id=entrada.id) }}" class="inline">
+                    <input type="hidden" name="status" value="COMPLETADO">
+                    <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">
+                        <i class="fas fa-check mr-1"></i>
+                        {{ _('Completar') }}
+                    </button>
+                </form>
+                <form method="POST" action="{{ url_for('entradas.cambiar_estado', id=entrada.id) }}" class="inline">
+                    <input type="hidden" name="status" value="ANULADO">
+                    <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                            onclick="return confirm('{{ _('¿Estás seguro de anular esta entrada?') }}')">
+                        <i class="fas fa-ban mr-1"></i>
+                        {{ _('Anular') }}
+                    </button>
+                </form>
+                {% elif entrada.status == 'COMPLETADO' and entrada.saldo > 0 %}
+                <form method="POST" action="{{ url_for('entradas.registrar_entrega', id=entrada.id) }}" class="inline flex items-center space-x-2">
+                    <input type="number" name="cantidad" step="0.01" min="0.01" max="{{ entrada.saldo }}"
+                           placeholder="{{ _('Cantidad') }}" required
+                           class="px-3 py-2 border rounded focus:outline-none focus:border-blue-500 w-32">
+                    <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                        <i class="fas fa-truck mr-1"></i>
+                        {{ _('Registrar Entrega') }}
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Back button -->
+    <div class="mt-6">
+        <a href="{{ url_for('entradas.listar') }}" class="text-blue-600 hover:text-blue-800">
+            <i class="fas fa-arrow-left mr-1"></i>
+            {{ _('Volver al listado') }}
+        </a>
+    </div>
+</div>
+{% endblock %}
