@@ -1,0 +1,36 @@
+{% extends 'crud/base_form.html' %}
+{% from 'macros/forms.html' import render_field %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block form_title %}{{ titulo }}{% endblock %}
+
+{% block cancel_url %}{{ url_for('pedidos.listar') }}{% endblock %}
+
+{% block form_fields %}
+<div class="space-y-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {{ render_field(form.codigo) }}
+        {{ render_field(form.lote) }}
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {{ render_field(form.cliente_id) }}
+        {{ render_field(form.producto_id) }}
+    </div>
+    
+    {{ render_field(form.orden_trabajo_id) }}
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {{ render_field(form.cantidad) }}
+        {{ render_field(form.unidad_medida_id) }}
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {{ render_field(form.fech_fab) }}
+        {{ render_field(form.fech_venc) }}
+    </div>
+    
+    {{ render_field(form.observaciones) }}
+</div>
+{% endblock %}
