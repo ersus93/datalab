@@ -9,6 +9,7 @@ from .fabrica import Fabrica
 from .pedido import Pedido
 from .producto import Producto
 from .orden_trabajo import OrdenTrabajo
+from .entrada import Entrada, EntradaStatus
 from .reference import (
     Area,
     Organismo,
@@ -21,6 +22,9 @@ from .reference import (
     UnidadMedida,
 )
 from .user import User, UserRole
+from .audit import AuditLog
+from .notification import Notification
+from .status_history import StatusHistory
 
 __all__ = [
     'Cliente',
@@ -31,6 +35,8 @@ __all__ = [
     'Pedido',
     'Producto',
     'OrdenTrabajo',
+    'Entrada',
+    'EntradaStatus',
     'Area',
     'Organismo',
     'Provincia',
@@ -42,4 +48,7 @@ __all__ = [
     'UnidadMedida',
     'User',
     'UserRole',
+    'AuditLog',
+    'Notification',
+    'StatusHistory',
 ]
