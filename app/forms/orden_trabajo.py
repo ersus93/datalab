@@ -1,5 +1,6 @@
 """Formularios para órdenes de trabajo."""
 from flask_wtf import FlaskForm
+from flask_babel import _
 from wtforms import StringField, SelectField, TextAreaField
 from wtforms.validators import DataRequired, Length, Optional, ValidationError
 
