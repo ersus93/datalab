@@ -26,6 +26,18 @@ class BaseConfig:
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
 
+    # Flask-Mail configuration
+    MAIL_SERVER = os.environ.get('MAIL_SERVER', 'localhost')
+    MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
+    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'true').lower() in ['true', 'on', '1']
+    MAIL_USE_SSL = os.environ.get('MAIL_USE_SSL', 'false').lower() in ['true', 'on', '1']
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', 'noreply@datalab.local')
+    MAIL_MAX_EMAILS = None
+    MAIL_SUPPRESS_SEND = False
+    MAIL_ASCII_ATTACHMENTS = False
+
 
 class DevelopmentConfig(BaseConfig):
     DEBUG = True

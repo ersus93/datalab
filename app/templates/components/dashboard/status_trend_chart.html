@@ -1,0 +1,66 @@
+{# Widget de Gráfico de Tendencias de Estado - Muestra evolución de estados en el tiempo #}
+{# Uso: {% from 'components/dashboard/status_trend_chart.html' import status_trend_chart %}
+        {{ status_trend_chart(trends) }} #}
+
+{% macro status_trend_chart(trends) %}
+<div class="status-trend-widget card">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+        <div>
+            <h5 class="card-title mb-1">
+                <i class="fas fa-chart-line text-primary me-2"></i>
+                Tendencias de Estados
+            </h5>
+            <small class="text-muted">Evolución de estados en los últimos 30 días</small>
+        </div>
+        <div class="btn-group btn-group-sm" role="group" aria-label="Período">
+            <button type="button" class="btn btn-outline-primary active" data-period="30" onclick="updateTrendPeriod(30)">30d</button>
+            <button type="button" class="btn btn-outline-primary" data-period="7" onclick="updateTrendPeriod(7)">7d</button>
+            <button type="button" class="btn btn-outline-primary" data-period="90" onclick="updateTrendPeriod(90)">90d</button>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="chart-container" style="position: relative; height: 350px;">
+            <canvas id="statusTrendChart"></canvas>
+        </div>
+    </div>
+    <div class="card-footer bg-light">
+        <div class="d-flex flex-wrap gap-3 justify-content-center">
+            <span class="badge rounded-pill bg-secondary">
+                <i class="fas fa-circle me-1" style="font-size: 8px;"></i> Recibido
+            </span>
+            <span class="badge rounded-pill bg-primary">
+                <i class="fas fa-circle me-1" style="font-size: 8px;"></i> En Proceso
+            </span>
+            <span class="badge rounded-pill bg-success">
+                <i class="fas fa-circle me-1" style="font-size: 8px;"></i> Completado
+            </span>
+            <span class="badge rounded-pill bg-info">
+                <i class="fas fa-circle me-1" style="font-size: 8px;"></i> Entregado
+            </span>
+            <span class="badge rounded-pill bg-danger">
+                <i class="fas fa-circle me-1" style="font-size: 8px;"></i> Anulado
+            </span>
+        </div>
+    </div>
+</div>
+
+<style>
+.status-trend-widget {
+    border: 1px solid rgba(0,0,0,0.08);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.status-trend-widget .card-header {
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.status-trend-widget .chart-container {
+    min-height: 300px;
+}
+
+.status-trend-widget .badge {
+    font-weight: 500;
+    padding: 0.5em 1em;
+}
+</style>
+{% endmacro %}

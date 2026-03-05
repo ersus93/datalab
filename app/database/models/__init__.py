@@ -24,6 +24,7 @@ from .reference import (
 from .user import User, UserRole
 from .audit import AuditLog
 from .notification import Notification
+from .notification_preference import NotificationPreference
 from .status_history import StatusHistory
 
 __all__ = [
@@ -50,5 +51,6 @@ __all__ = [
     'UserRole',
     'AuditLog',
     'Notification',
+    'NotificationPreference',
     'StatusHistory',
 ]

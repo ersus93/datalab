@@ -33,7 +33,12 @@
     
     <!-- Footer -->
     {% include 'partials/footer.html' %}
-    
+
+    {# Notifications JS for authenticated users #}
+    {% if current_user.is_authenticated %}
+    <script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
+    {% endif %}
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>

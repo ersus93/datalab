@@ -6,8 +6,12 @@
                 <span>DataLab</span>
             </a>
             
-            {% if current_user.is_authenticated %}
+{% if current_user.is_authenticated %}
             <div class="flex items-center space-x-4">
+                {# Dropdown de Notificaciones #}
+                {% from 'components/notifications/notification_dropdown.html' import notification_dropdown %}
+                {{ notification_dropdown() }}
+
                 <span class="text-sm">
                     <i class="fas fa-user mr-1"></i>
                     {{ current_user.nombre_completo or current_user.username }}

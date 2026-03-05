@@ -37,6 +37,15 @@ class User(UserMixin, db.Model):
     cliente_id = db.Column(db.Integer, db.ForeignKey("clientes.id"), nullable=True)
     cliente = db.relationship("Cliente", backref="usuarios", lazy=True)
 
+    # Relación con preferencias de notificación
+    notification_preferences = db.relationship(
+        "NotificationPreference",
+        back_populates="user",
+        uselist=False,
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
+
     # Timestamps
     ultimo_acceso = db.Column(db.DateTime, nullable=True)
     creado_en = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
@@ -108,3 +117,10 @@ class User(UserMixin, db.Model):
                 self.actualizado_en.isoformat() if self.actualizado_en else None
             ),
         }
+
+    def get_notification_preferences(self):
+        """Obtiene o crea las preferencias de notificación del usuario."""
+        from app.database.models.notification_preference import NotificationPreference
+        if not self.notification_preferences:
+            return NotificationPreference.get_or_create(self.id)
+        return self.notification_preferences

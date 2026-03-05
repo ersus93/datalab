@@ -1,0 +1,24 @@
+DataLab - Cambio de Estado de Muestra
+======================================
+
+Hola {{ user_name }},
+
+Le informamos que el estado de una muestra ha sido actualizado en el sistema.
+
+DETALLES DEL CAMBIO
+-------------------
+Codigo de Muestra: {{ sample_code }}
+Estado Anterior:   {{ old_status }}
+Nuevo Estado:      {{ new_status }}
+Fecha de Cambio:   {{ change_date }}
+
+ACCION REQUERIDA
+----------------
+Para ver los detalles completos de la muestra, visite:
+{{ sample_url }}
+
+---
+Este es un correo automatico del sistema DataLab.
+Por favor no responda a este mensaje.
+
+DataLab - Sistema de Gestion de Laboratorio

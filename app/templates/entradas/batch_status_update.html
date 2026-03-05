@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ _('Actualización Masiva de Estados') }} - DataLab{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/select/1.7.0/css/select.dataTables.min.css">
+<style>
+    .batch-actions-bar {
+        position: sticky;
+        bottom: 0;
+        background: white;
+        border-top: 2px solid #e5e7eb;
+        padding: 1rem;
+        z-index: 50;
+    }
+    .dt-checkbox {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+    .progress-container {
+        display: none;
+    }
+    .progress-container.active {
+        display: block;
+    }
+    .results-container {
+        display: none;
+    }
+    .results-container.active {
+        display: block;
+    }
+    .sample-row.selected {
+        background-color: #dbeafe !important;
+    }
+    .status-badge {
+        display: inline-flex;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    .status-recibido { background-color: #dbeafe; color: #1e40af; }
+    .status-en-proceso { background-color: #fef3c7; color: #92400e; }
+    .status-completado { background-color: #e9d5ff; color: #7c3aed; }
+    .status-entregado { background-color: #d1fae5; color: #047857; }
+    .status-anulado { background-color: #fee2e2; color: #b91c1c; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">{{ _('Actualización Masiva de Estados') }}</h1>
+        <p class="text-gray-600 mt-2">{{ _('Seleccione las muestras y aplique cambios de estado en lote') }}</p>
+    </div>
+
+    <!-- Filters Card -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 class="text-lg font-semibold text-gray-700 mb-4">
+            <i class="fas fa-filter mr-2"></i>{{ _('Filtros') }}
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ _('Estado') }}</label>
+                <select id="filter-status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">{{ _('Todos los estados') }}</option>
+                    <option value="RECIBIDO">{{ _('Recibido') }}</option>
+                    <option value="EN_PROCESO">{{ _('En Proceso') }}</option>
+                    <option value="COMPLETADO">{{ _('Completado') }}</option>
+                    <option value="ENTREGADO">{{ _('Entregado') }}</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ _('Fecha Desde') }}</label>
+                <input type="date" id="filter-desde" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ _('Fecha Hasta') }}</label>
+                <input type="date" id="filter-hasta" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ _('Cliente') }}</label>
+                <select id="filter-cliente" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">{{ _('Todos los clientes') }}</option>
+                    {% for cliente in clientes %}
+                    <option value="{{ cliente.id }}">{{ cliente.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="mt-4 flex gap-2">
+            <button id="btn-aplicar-filtros" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                <i class="fas fa-search mr-2"></i>{{ _('Aplicar Filtros') }}
+            </button>
+            <button id="btn-limpiar-filtros" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                <i class="fas fa-times mr-2"></i>{{ _('Limpiar') }}
+            </button>
+        </div>
+    </div>
+
+    <!-- Selection Info -->
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <input type="checkbox" id="select-all" class="dt-checkbox">
+            <label for="select-all" class="text-sm font-medium text-blue-800 cursor-pointer">
+                {{ _('Seleccionar todas las muestras visibles') }}
+            </label>
+            <span id="selected-count" class="text-sm text-blue-600 font-semibold">
+                (0 {{ _('seleccionadas') }})
+            </span>
+        </div>
+        <div class="text-sm text-gray-600">
+            <span id="total-muestras">0</span> {{ _('muestras encontradas') }}
+        </div>
+    </div>
+
+    <!-- Samples Table -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+        <table id="samples-table" class="w-full display nowrap" style="width:100%">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-4 py-3 text-left">
+                        <input type="checkbox" id="select-all-header" class="dt-checkbox">
+                    </th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ _('Código') }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ _('Lote') }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ _('Producto') }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ _('Cliente') }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ _('Estado') }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ _('Cantidad') }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ _('Fecha Entrada') }}</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- Batch Actions Bar -->
+    <div class="batch-actions-bar rounded-lg shadow-lg">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-4 flex-wrap">
+                <span class="text-sm font-medium text-gray-700">
+                    {{ _('Acción masiva:') }}
+                </span>
+                <select id="batch-action" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">{{ _('Seleccione una acción...') }}</option>
+                    <option value="EN_PROCESO">{{ _('Cambiar a: En Proceso') }}</option>
+                    <option value="COMPLETADO">{{ _('Cambiar a: Completado') }}</option>
+                    <option value="ENTREGADO">{{ _('Cambiar a: Entregado') }}</option>
+                    <option value="ANULADO">{{ _('Cambiar a: Anulado') }}</option>
+                </select>
+                <input type="text" id="batch-reason" placeholder="{{ _('Motivo del cambio (obligatorio)') }}"
+                       class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64">
+            </div>
+            <div class="flex gap-2">
+                <button id="btn-preview" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors" disabled>
+                    <i class="fas fa-eye mr-2"></i>{{ _('Vista Previa') }}
+                </button>
+                <button id="btn-execute" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors" disabled>
+                    <i class="fas fa-check mr-2"></i>{{ _('Ejecutar Cambios') }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Container -->
+    <div id="progress-container" class="progress-container bg-white rounded-lg shadow-md p-6 mb-6">
+        <h3 class="text-lg font-semibold text-gray-700 mb-4">{{ _('Procesando Cambios...') }}</h3>
+        <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
+            <div id="progress-bar" class="bg-blue-600 h-4 rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+        <div class="flex justify-between text-sm text-gray-600">
+            <span id="progress-text">0%</span>
+            <span id="progress-status">{{ _('Iniciando...') }}</span>
+        </div>
+    </div>
+
+    <!-- Results Container -->
+    <div id="results-container" class="results-container bg-white rounded-lg shadow-md p-6 mb-6">
+        <h3 class="text-lg font-semibold text-gray-700 mb-4">{{ _('Resultados de la Operación') }}</h3>
+        <div class="grid grid-cols-3 gap-4 mb-4">
+            <div class="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+                <div id="results-success" class="text-3xl font-bold text-green-600">0</div>
+                <div class="text-sm text-green-700">{{ _('Exitosos') }}</div>
+            </div>
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+                <div id="results-failed" class="text-3xl font-bold text-red-600">0</div>
+                <div class="text-sm text-red-700">{{ _('Fallidos') }}</div>
+            </div>
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+                <div id="results-total" class="text-3xl font-bold text-blue-600">0</div>
+                <div class="text-sm text-blue-700">{{ _('Total') }}</div>
+            </div>
+        </div>
+        <div id="results-errors" class="hidden">
+            <h4 class="font-medium text-red-700 mb-2">{{ _('Errores:') }}</h4>
+            <ul id="errors-list" class="list-disc list-inside text-sm text-red-600 bg-red-50 rounded-lg p-4 max-h-48 overflow-y-auto"></ul>
+        </div>
+        <div class="mt-4 flex gap-2">
+            <button id="btn-new-operation" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                <i class="fas fa-plus mr-2"></i>{{ _('Nueva Operación') }}
+            </button>
+            <a href="{{ url_for('entradas.listar') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors inline-flex items-center">
+                <i class="fas fa-arrow-left mr-2"></i>{{ _('Volver al Listado') }}
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Preview Modal -->
+<div id="preview-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+    <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[80vh] flex flex-col">
+        <div class="p-6 border-b border-gray-200">
+            <div class="flex justify-between items-center">
+                <h3 class="text-xl font-semibold text-gray-800">{{ _('Vista Previa de Cambios') }}</h3>
+                <button id="btn-close-modal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+        </div>
+        <div class="p-6 overflow-y-auto flex-1">
+            <div class="mb-4 p-4 bg-blue-50 rounded-lg">
+                <p class="text-sm text-blue-800">
+                    <strong>{{ _('Acción:') }}</strong> <span id="preview-action"></span><br>
+                    <strong>{{ _('Motivo:') }}</strong> <span id="preview-reason"></span><br>
+                    <strong>{{ _('Muestras afectadas:') }}</strong> <span id="preview-count"></span>
+                </p>
+            </div>
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ _('Código') }}</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ _('Estado Actual') }}</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ _('Nuevo Estado') }}</th>
+                    </tr>
+                </thead>
+                <tbody id="preview-table-body"></tbody>
+            </table>
+        </div>
+        <div class="p-6 border-t border-gray-200 flex justify-end gap-2">
+            <button id="btn-cancel-modal" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                {{ _('Cancelar') }}
+            </button>
+            <button id="btn-confirm-modal" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                <i class="fas fa-check mr-2"></i>{{ _('Confirmar y Ejecutar') }}
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/select/1.7.0/js/dataTables.select.min.js"></script>
+<script src="{{ url_for('static', filename='js/batch_operations.js') }}"></script>
+{% endblock %}

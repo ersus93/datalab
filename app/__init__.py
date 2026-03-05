@@ -7,6 +7,7 @@ from flask import Flask, request
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_babel import Babel
+from flask_mail import Mail
 
 from app.core.infrastructure.database import db
 
@@ -14,6 +15,7 @@ from app.core.infrastructure.database import db
 login_manager = LoginManager()
 migrate = Migrate()
 babel = Babel()
+mail = Mail()
 
 # Exportar db para compatibilidad
 __all__ = ['create_app', 'db', 'login_manager']
@@ -40,6 +42,7 @@ def create_app(config_name: str = "development") -> Flask:
     login_manager.init_app(app)
     migrate.init_app(app, db)
     babel.init_app(app, locale_selector=_get_locale)
+    mail.init_app(app)
 
     # Configurar Flask-Login
     _configure_login_manager(app)

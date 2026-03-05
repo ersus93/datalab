@@ -1,0 +1,73 @@
+{# Macro para el badge de notificaciones #}
+{% macro notification_badge(count=0) %}
+<span id="{{ kwargs.id | default('notification-badge') }}"
+      class="notification-badge absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center {{ 'notification-badge--pulse' if count > 0 else 'hidden' }}"
+      data-count="{{ count }}">
+    {% if count > 99 %}
+        99+
+    {% else %}
+        {{ count }}
+    {% endif %}
+</span>
+
+{# Estilos para animación de pulso #}
+<style>
+@keyframes pulse-badge {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0);
+    }
+}
+
+.notification-badge {
+    transition: all 0.3s ease;
+}
+
+.notification-badge--pulse {
+    animation: pulse-badge 2s ease-in-out infinite;
+}
+
+.notification-badge--new {
+    animation: pulse-badge 0.5s ease-in-out 3;
+}
+
+/* Ocultar cuando el contador es 0 */
+.notification-badge[data-count="0"],
+.notification-badge.hidden {
+    display: none;
+}
+</style>
+{% endmacro %}
+
+{# Variante pequeña para usar en otros lugares #}
+{% macro notification_badge_small(count=0) %}
+<span class="notification-badge-small inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-red-500 rounded-full {{ 'hidden' if count == 0 else '' }}"
+      data-count="{{ count }}">
+    {% if count > 99 %}
+        99+
+    {% else %}
+        {{ count }}
+    {% endif %}
+</span>
+{% endmacro %}
+
+{# Variante con texto opcional #}
+{% macro notification_badge_with_text(count=0, text=None) %}
+<span class="notification-badge-with-text inline-flex items-center space-x-1 {{ 'hidden' if count == 0 else '' }}"
+      data-count="{{ count }}">
+    <span class="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-red-500 rounded-full">
+        {% if count > 99 %}
+            99+
+        {% else %}
+            {{ count }}
+        {% endif %}
+    </span>
+    {% if text %}
+        <span class="text-xs text-gray-600">{{ text }}</span>
+    {% endif %}
+</span>
+{% endmacro %}

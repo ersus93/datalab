@@ -7,6 +7,7 @@ from app import db
 from app.database.models.entrada import Entrada, EntradaStatus
 from app.database.models.status_history import StatusHistory
 from app.database.models.notification import Notification
+from app.services.notification_service import NotificationService
 
 
 class StatusWorkflow:
@@ -101,27 +102,33 @@ class StatusWorkflow:
         # Enviar notificaciones
         cls._send_notifications(entrada, from_status, to_status)
 
+        # Verificar notificación de entrega pendiente si es completado
+        if to_status == EntradaStatus.COMPLETADO:
+            cls.check_delivery_pending(entrada)
+
         return True
 
     @classmethod
     def _send_notifications(cls, entrada: Entrada, from_status: str, to_status: str):
         """Enviar notificaciones según el cambio de estado."""
-        # Notificar al cliente en completado/entregado
-        if to_status in [EntradaStatus.COMPLETADO, EntradaStatus.ENTREGADO]:
-            if entrada.cliente and entrada.cliente.usuarios:
-                # Crear notificación para el primer usuario del cliente
-                notif = Notification(
-                    user_id=entrada.cliente.usuarios[0].id,
-                    type='status_change',
-                    title=_('Muestra %(codigo)s - %(status)s',
-                            codigo=entrada.codigo,
-                            status=cls.STATUS_LABELS[to_status]),
-                    message=_('Su muestra ha cambiado de estado a: %(status)s',
-                              status=cls.STATUS_LABELS[to_status]),
-                    entity_type='entrada',
-                    entity_id=entrada.id
-                )
-                db.session.add(notif)
+        try:
+            NotificationService.notify_status_change(entrada, from_status, to_status)
+        except Exception as e:
+            # Log error but don't fail the status change
+            import logging
+            logging.getLogger(__name__).error(f"Error sending notification: {e}")
+
+    @classmethod
+    def check_delivery_pending(cls, entrada: Entrada):
+        """Check if sample should trigger pending delivery notification."""
+        if (entrada.status == EntradaStatus.COMPLETADO and
+            entrada.saldo > 0 and
+            entrada.saldo <= entrada.cantidad_recib * 0.1):  # Less than 10% remaining
+            try:
+                NotificationService.notify_delivery_pending(entrada)
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).error(f"Error sending pending notification: {e}")
 
     @classmethod
     def batch_transition(cls, entrada_ids: List[int], to_status: str,

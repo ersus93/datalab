@@ -1,0 +1,76 @@
+{# Macro para el dropdown de notificaciones #}
+{% macro notification_dropdown() %}
+<div class="dropdown relative" id="notification-dropdown">
+    {# Botón del campana con badge #}
+    <button class="dropdown__trigger relative p-2 text-white hover:text-gray-200 focus:outline-none"
+            aria-expanded="false"
+            aria-haspopup="true"
+            aria-label="Notificaciones"
+            id="notification-trigger">
+        <i class="fas fa-bell text-xl"></i>
+        {# Badge de contador #}
+        <span id="notification-badge"
+              class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center hidden">
+            0
+        </span>
+    </button>
+
+    {# Menú desplegable #}
+    <div class="dropdown__menu absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50 hidden"
+         role="menu"
+         aria-labelledby="notification-trigger">
+        
+        {# Header #}
+        <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between bg-gray-50 rounded-t-lg">
+            <h3 class="text-sm font-semibold text-gray-700">{{ _('Notificaciones') }}</h3>
+            <button id="mark-all-read" 
+                    class="text-xs text-blue-600 hover:text-blue-800 focus:outline-none"
+                    title="{{ _('Marcar todas como leídas') }}">
+                {{ _('Marcar todo leído') }}
+            </button>
+        </div>
+
+        {# Lista de notificaciones #}
+        <div id="notification-list" class="max-h-80 overflow-y-auto">
+            {# Estado de carga #}
+            <div id="notification-loading" class="p-4 text-center">
+                <i class="fas fa-spinner fa-spin text-gray-400"></i>
+                <span class="text-sm text-gray-500 ml-2">{{ _('Cargando...') }}</span>
+            </div>
+
+            {# Estado vacío #}
+            <div id="notification-empty" class="p-6 text-center hidden">
+                <div class="text-gray-300 mb-2">
+                    <i class="fas fa-bell-slash text-3xl"></i>
+                </div>
+                <p class="text-sm text-gray-500">{{ _('No tienes notificaciones') }}</p>
+            </div>
+
+            {# Contenedor para items dinámicos #}
+            <div id="notification-items" class="hidden">
+                {# Los items se cargarán dinámicamente #}
+            </div>
+        </div>
+
+        {# Footer #}
+        <div class="px-4 py-2 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+            <a href="{{ url_for('notifications.index') }}" 
+               class="text-xs text-blue-600 hover:text-blue-800 flex items-center justify-center">
+                {{ _('Ver todas las notificaciones') }}
+                <i class="fas fa-arrow-right ml-1"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+{# Estilos específicos para animación del badge #}
+<style>
+@keyframes pulse-badge {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+.notification-badge--pulse {
+    animation: pulse-badge 2s ease-in-out infinite;
+}
+</style>
+{% endmacro %}

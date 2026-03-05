@@ -5,6 +5,7 @@ Flask-Migrate==4.0.5
 Flask-Login==0.6.3
 Flask-WTF==1.2.1
 Flask-Babel==4.0.0
+Flask-Mail==0.10.0
 
 # Database
 SQLAlchemy==2.0.35

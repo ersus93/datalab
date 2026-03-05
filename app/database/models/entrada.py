@@ -90,6 +90,14 @@ class Entrada(db.Model):
         self.saldo = self.cantidad_recib - self.cantidad_entreg
         return self.saldo
     
+    def update_en_os_status(self):
+        """Actualizar el estado de en_os basado en el pedido vinculado."""
+        if self.pedido and self.pedido.orden_trabajo_id:
+            self.en_os = True
+        else:
+            self.en_os = False
+        return self.en_os
+    
     @validates('lote')
     def validate_lote(self, key, lote):
         """Validar formato de lote X-XXXX."""
@@ -141,3 +149,47 @@ def calculate_balance(mapper, connection, target):
     # Auto-actualizar status si entregada completamente
     if target.ent_entregada and target.status == EntradaStatus.COMPLETADO:
         target.status = EntradaStatus.ENTREGADO
+
+
+@event.listens_for(Entrada, 'before_update')
+def actualizar_en_os_flag(mapper, connection, target):
+    """Actualizar flag en_os cuando la entrada se vincula a un pedido con OT."""
+    from sqlalchemy import select
+    
+    stmt = select(Entrada.pedido_id, Entrada.en_os).where(Entrada.id == target.id)
+    result = connection.execute(stmt).fetchone()
+    
+    if result:
+        old_pedido_id = result[0]
+        old_en_os = result[1]
+        new_pedido_id = target.pedido_id
+        
+        if old_pedido_id != new_pedido_id:
+            if new_pedido_id is not None:
+                from app.database.models.pedido import Pedido
+                stmt = select(Pedido.orden_trabajo_id).where(Pedido.id == new_pedido_id)
+                ot_result = connection.execute(stmt).fetchone()
+                
+                if ot_result and ot_result[0]:
+                    target.en_os = True
+                else:
+                    target.en_os = False
+            else:
+                target.en_os = False
+        
+        if old_en_os is False and target.en_os is True:
+            from app.services.notification_service import NotificationService
+            from app import db
+            db.session.after_flush.add(lambda *args: _notify_ot_assignment(target.id))
+
+def _notify_ot_assignment(entrada_id):
+    """Callback para enviar notificación de asignación a OT."""
+    from app.services.notification_service import NotificationService
+    from app import db
+    
+    try:
+        entrada = db.session.get(Entrada, entrada_id)
+        if entrada and entrada.en_os:
+            NotificationService.notify_assigned_to_ot(entrada)
+    except Exception:
+        pass

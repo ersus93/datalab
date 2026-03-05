@@ -1,0 +1,87 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Cambio de Estado - {{ sample_code }}{% endblock %}
+
+{% block content %}
+<table role="presentation" style="width: 100%; border-collapse: collapse;">
+    <tr>
+        <td>
+            <h2 style="margin: 0 0 20px 0; font-size: 22px; font-weight: 600; color: #1e293b;">Cambio de Estado de Muestra</h2>
+
+            <p style="margin: 0 0 20px 0; font-size: 16px; color: #334155; line-height: 1.6;">
+                Hola <strong style="color: #1e293b;">{{ user_name }}</strong>,
+            </p>
+
+            <p style="margin: 0 0 25px 0; font-size: 15px; color: #475569; line-height: 1.6;">
+                Le informamos que el estado de una muestra ha sido actualizado en el sistema.
+            </p>
+
+            <!-- Status Change Box -->
+            <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 25px 0; background-color: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <tr>
+                    <td style="padding: 25px;">
+                        <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                            <!-- Sample Code -->
+                            <tr>
+                                <td style="padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
+                                    <span style="font-size: 13px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Codigo de Muestra</span>
+                                </td>
+                                <td style="padding: 8px 0; border-bottom: 1px solid #e2e8f0; text-align: right;">
+                                    <span style="font-size: 16px; font-weight: 600; color: #1e293b; font-family: 'Courier New', monospace;">{{ sample_code }}</span>
+                                </td>
+                            </tr>
+                            <!-- Old Status -->
+                            <tr>
+                                <td style="padding: 12px 0 8px 0;">
+                                    <span style="font-size: 13px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Estado Anterior</span>
+                                </td>
+                                <td style="padding: 12px 0 8px 0; text-align: right;">
+                                    <span style="display: inline-block; padding: 6px 14px; background-color: #e2e8f0; color: #475569; font-size: 14px; font-weight: 500; border-radius: 20px;">{{ old_status }}</span>
+                                </td>
+                            </tr>
+                            <!-- Arrow -->
+                            <tr>
+                                <td colspan="2" style="padding: 5px 0; text-align: center;">
+                                    <span style="font-size: 20px; color: #94a3b8;">&#8595;</span>
+                                </td>
+                            </tr>
+                            <!-- New Status -->
+                            <tr>
+                                <td style="padding: 8px 0 12px 0;">
+                                    <span style="font-size: 13px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Nuevo Estado</span>
+                                </td>
+                                <td style="padding: 8px 0 12px 0; text-align: right;">
+                                    <span style="display: inline-block; padding: 6px 14px; background-color: #dbeafe; color: #1d4ed8; font-size: 14px; font-weight: 600; border-radius: 20px;">{{ new_status }}</span>
+                                </td>
+                            </tr>
+                            <!-- Change Date -->
+                            <tr>
+                                <td style="padding: 12px 0 0 0; border-top: 1px solid #e2e8f0;">
+                                    <span style="font-size: 13px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Fecha de Cambio</span>
+                                </td>
+                                <td style="padding: 12px 0 0 0; border-top: 1px solid #e2e8f0; text-align: right;">
+                                    <span style="font-size: 14px; color: #334155;">{{ change_date }}</span>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Action Button -->
+            <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 30px 0;">
+                <tr>
+                    <td style="text-align: center;">
+                        <a href="{{ sample_url }}" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 600; border-radius: 6px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3);">Ver Detalles de la Muestra</a>
+                    </td>
+                </tr>
+            </table>
+
+            <p style="margin: 20px 0 0 0; font-size: 13px; color: #94a3b8; text-align: center;">
+                Si el boton no funciona, copie y pegue este enlace:<br>
+                <a href="{{ sample_url }}" style="color: #2563eb; text-decoration: underline; word-break: break-all;">{{ sample_url }}</a>
+            </p>
+        </td>
+    </tr>
+</table>
+{% endblock %}

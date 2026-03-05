@@ -216,3 +216,13 @@ def registrar_entrega(id):
     
     flash(_('Entrega registrada exitosamente.'), 'success')
     return redirect(url_for('entradas.ver', id=id))
+
+
+@entradas_bp.route('/batch-status', methods=['GET'])
+@login_required
+@technician_required
+def batch_status():
+    """Vista para actualización masiva de estados."""
+    # Obtener clientes para el filtro
+    clientes = Cliente.query.filter_by(activo=True).order_by(Cliente.nombre).all()
+    return render_template('entradas/batch_status_update.html', clientes=clientes)
