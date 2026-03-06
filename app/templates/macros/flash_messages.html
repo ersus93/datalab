@@ -1,0 +1,59 @@
+{# Macros de mensajes flash para DataLab #}
+
+{% macro render_flash_messages() %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="flash-messages mb-4">
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        <div class="d-flex align-items-center">
+            {% if category == 'success' %}
+                <i class="fas fa-check-circle me-2"></i>
+            {% elif category == 'error' or category == 'danger' %}
+                <i class="fas fa-exclamation-circle me-2"></i>
+            {% elif category == 'warning' %}
+                <i class="fas fa-exclamation-triangle me-2"></i>
+            {% else %}
+                <i class="fas fa-info-circle me-2"></i>
+            {% endif %}
+            <span>{{ message }}</span>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+{% endmacro %}
+
+{% macro flash_success(message) %}
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="fas fa-check-circle me-2"></i>
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endmacro %}
+
+{% macro flash_error(message) %}
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="fas fa-exclamation-circle me-2"></i>
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endmacro %}
+
+{% macro flash_warning(message) %}
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endmacro %}
+
+{% macro flash_info(message) %}
+<div class="alert alert-info alert-dismissible fade show" role="alert">
+    <i class="fas fa-info-circle me-2"></i>
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endmacro %}

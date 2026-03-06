@@ -1,0 +1,82 @@
+{# Macros de filtros para DataLab #}
+
+{% macro search_input(name='q', value='', placeholder='Buscar...', id='') %}
+<div class="input-group input-group-sm" style="max-width: 300px;">
+    <span class="input-group-text"><i class="fas fa-search"></i></span>
+    <input type="text" 
+           name="{{ name }}" 
+           id="{{ id or name }}"
+           class="form-control" 
+           placeholder="{{ placeholder }}" 
+           value="{{ value }}">
+</div>
+{% endmacro %}
+
+{% macro filter_dropdown(name, options, selected='', label='Filtrar', id='') %}
+<select name="{{ name }}" 
+        id="{{ id or name }}"
+        class="form-select form-select-sm"
+        style="min-width: 150px;">
+    <option value="">{{ label }}</option>
+    {% for value, text in options %}
+    <option value="{{ value }}" {% if value == selected|string %}selected{% endif %}>{{ text }}</option>
+    {% endfor %}
+</select>
+{% endmacro %}
+
+{% macro filter_boolean(name, selected='', label='Estado', id='') %}
+<select name="{{ name }}" 
+        id="{{ id or name }}"
+        class="form-select form-select-sm"
+        style="min-width: 120px;">
+    <option value="">{{ label }}</option>
+    <option value="true" {% if selected == 'true' %}selected{% endif %}>Activo</option>
+    <option value="false" {% if selected == 'false' %}selected{% endif %}>Inactivo</option>
+</select>
+{% endmacro %}
+
+{% macro date_filter(name_from, name_to, value_from='', value_to='', label_from='Desde', label_to='Hasta') %}
+<div class="d-flex align-items-center gap-2">
+    <div class="input-group input-group-sm">
+        <span class="input-group-text">{{ label_from }}</span>
+        <input type="date" name="{{ name_from }}" class="form-control" value="{{ value_from }}">
+    </div>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text">{{ label_to }}</span>
+        <input type="date" name="{{ name_to }}" class="form-control" value="{{ value_to }}">
+    </div>
+</div>
+{% endmacro %}
+
+{% macro apply_filters_btn(text='Aplicar') %}
+<button type="submit" class="btn btn-primary btn-sm">
+    <i class="fas fa-filter"></i> {{ text }}
+</button>
+{% endmacro %}
+
+{% macro clear_filters_btn(url) %}
+<a href="{{ url }}" class="btn btn-outline-secondary btn-sm">
+    <i class="fas fa-times"></i> Limpiar
+</a>
+{% endmacro %}
+
+{% macro render_filter_form(action='', method='GET', fields=[]) %}
+<form action="{{ action }}" method="{{ method }}" class="row g-3 align-items-end">
+    {% for field in fields %}
+    <div class="col-auto">
+        {% if field.type == 'search' %}
+            {{ search_input(field.name, field.value, field.placeholder, field.id) }}
+        {% elif field.type == 'select' %}
+            {{ filter_dropdown(field.name, field.options, field.selected, field.label, field.id) }}
+        {% elif field.type == 'boolean' %}
+            {{ filter_boolean(field.name, field.selected, field.label, field.id) }}
+        {% elif field.type == 'date' %}
+            {{ date_filter(field.name_from, field.name_to, field.value_from, field.value_to, field.label_from, field.label_to) }}
+        {% endif %}
+    </div>
+    {% endfor %}
+    <div class="col-auto">
+        {{ apply_filters_btn() }}
+    </div>
+</form>
+{% endmacro %}
