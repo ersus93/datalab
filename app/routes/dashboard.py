@@ -7,6 +7,7 @@ from flask_login import login_required
 from app import db
 from app.database.models import Cliente, Fabrica, Producto, Provincia, Rama
 from app.database.models.entrada import Entrada, EntradaStatus
+from app.services.dashboard_service import DashboardService
 
 dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 
@@ -82,7 +83,21 @@ def index():
         .all()
     )
 
-    return render_template('dashboard/index.html',
+    # Obtener datos del DashboardService para widgets de Phase 3
+    try:
+        dashboard_data = DashboardService.get_full_dashboard_data()
+    except Exception as e:
+        # Fallback si el servicio falla
+        import logging
+        logging.getLogger(__name__).error(f"Error loading dashboard data: {e}")
+        dashboard_data = {
+            'status_counts': {},
+            'status_trends': [],
+            'recent_activity': [],
+            'pending_deliveries': []
+        }
+
+    return render_template('pages/dashboard/dashboard.html',
                            stats=stats,
                            provincia_data=provincia_data,
                            top_clientes=top_clientes,
@@ -91,4 +106,9 @@ def index():
                            latest_fabricas=latest_fabricas,
                            latest_productos=latest_productos,
                            entrada_stats=entrada_stats,
-                           entradas_recientes=recientes)
+                           entradas_recientes=recientes,
+                           # Datos del DashboardService para widgets
+                           status_counts=dashboard_data['status_counts'],
+                           trends=dashboard_data['status_trends'],
+                           recent_activity=dashboard_data['recent_activity'],
+                           pending_deliveries=dashboard_data['pending_deliveries'])
