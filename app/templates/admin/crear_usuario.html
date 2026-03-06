@@ -74,3 +74,8 @@
 {% endblock %}
 
 {% block cancel_url %}{{ url_for('admin.listar_usuarios') }}{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/password-strength.js') }}"></script>
+{{ super() }}
+{% endblock %}

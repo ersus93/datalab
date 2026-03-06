@@ -150,6 +150,63 @@
         </div>
     </div>
 
+    <!-- Historial de Auditoría -->
+    <div class="bg-white rounded-lg shadow mt-6">
+        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <h2 class="text-lg font-semibold text-gray-900">{{ _('Historial de Auditoria') }}</h2>
+            <a href="{{ url_for('clientes.exportar_audit', id=cliente.id) }}" class="px-3 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 text-sm">
+                <i class="fas fa-download mr-1"></i>
+                {{ _('Exportar CSV') }}
+            </a>
+        </div>
+        <div class="px-6 py-4">
+            {% if audit_entries %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ _('Fecha') }}</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ _('Usuario') }}</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ _('Accion') }}</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ _('IP') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        {% for entry in audit_entries %}
+                        <tr>
+                            <td class="px-4 py-2 text-sm text-gray-900">{{ entry.created_at.strftime('%d/%m/%Y %H:%M') if entry.created_at else '-' }}</td>
+                            <td class="px-4 py-2 text-sm text-gray-900">{{ entry.user.username if entry.user else '-' }}</td>
+                            <td class="px-4 py-2">
+                                {% if entry.action == 'CREATE' %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    {{ _('Creado') }}
+                                </span>
+                                {% elif entry.action == 'UPDATE' %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                    {{ _('Actualizado') }}
+                                </span>
+                                {% elif entry.action == 'DELETE' %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                    {{ _('Eliminado') }}
+                                </span>
+                                {% else %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                    {{ entry.action }}
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-2 text-sm text-gray-500">{{ entry.ip_address or '-' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-gray-500 text-center py-4">{{ _('No hay registros de auditoria') }}</p>
+            {% endif %}
+        </div>
+    </div>
+
     <!-- Back button -->
     <div class="mt-6">
         <a href="{{ url_for('clientes.listar') }}" class="text-blue-600 hover:text-blue-800">

@@ -1,10 +1,14 @@
 """Rutas CRUD para gestión de fábricas."""
+from datetime import datetime
+
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required
 from flask_babel import _
+from sqlalchemy.orm import joinedload
 
 from app import db
 from app.database.models import Fabrica, Cliente, Provincia
+from app.database.models.entrada import Entrada
 from app.forms.fabrica import FabricaForm
 from app.decorators import admin_required, laboratory_manager_required
 
@@ -55,11 +59,28 @@ def ver(id):
     """Ver detalle de fábrica."""
     fabrica = Fabrica.query.get_or_404(id)
     
+    # Obtener últimas 10 entradas de esta fábrica con eager loading
+    ultimas_entradas = (
+        Entrada.query
+        .options(joinedload(Entrada.producto))
+        .filter_by(fabrica_id=id)
+        .filter_by(anulado=False)
+        .order_by(Entrada.fech_entrada.desc())
+        .limit(10)
+        .all()
+    )
+    
     # Estadísticas
+    current_year = datetime.now().year
     stats = {
-        'total_muestras': 0,  # Phase 3
-        'muestras_anio': 0,
-        'ensayos_pendientes': 0
+        'total_muestras': Entrada.query.filter_by(fabrica_id=id, anulado=False).count(),
+        'muestras_anio': Entrada.query.filter(
+            Entrada.fabrica_id == id,
+            Entrada.anulado == False,
+            db.func.extract('year', Entrada.fech_entrada) == current_year
+        ).count(),
+        'ensayos_pendientes': 0,  # Phase 3+
+        'ultimas_entradas': ultimas_entradas
     }
     
     return render_template('fabricas/ver.html',

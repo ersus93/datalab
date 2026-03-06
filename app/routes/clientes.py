@@ -207,3 +207,48 @@ def activar(id):
 
     flash(_('Cliente reactivado exitosamente.'), 'success')
     return redirect(url_for('clientes.ver', id=id))
+
+
+@clientes_bp.route('/<int:id>/export-audit', methods=['GET'])
+@login_required
+def exportar_audit(id):
+    """Exportar historial de auditoría a CSV."""
+    cliente = Cliente.query.get_or_404(id)
+    
+    # Obtener todas las entradas de auditoría para este cliente
+    audit_entries = (
+        AuditLog.query
+        .filter_by(table_name='clientes', record_id=id)
+        .order_by(AuditLog.created_at.desc())
+        .all()
+    )
+    
+    # Generar CSV
+    import csv
+    import io
+    from flask import make_response
+    
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Header
+    writer.writerow(['Fecha', 'Usuario', 'Accion', 'Valores Anteriores', 'Valores Nuevos', 'IP'])
+    
+    # Data
+    for entry in audit_entries:
+        writer.writerow([
+            entry.created_at.strftime('%Y-%m-%d %H:%M:%S') if entry.created_at else '',
+            entry.user.username if entry.user else '',
+            entry.action,
+            str(entry.old_values) if entry.old_values else '',
+            str(entry.new_values) if entry.new_values else '',
+            entry.ip_address or ''
+        ])
+    
+    # Response
+    output.seek(0)
+    response = make_response(output.getvalue())
+    response.headers['Content-Type'] = 'text/csv; charset=utf-8'
+    response.headers['Content-Disposition'] = f'attachment; filename=auditoria_cliente_{id}.csv'
+    
+    return response
