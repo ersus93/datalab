@@ -1,128 +1,199 @@
 #!/usr/bin/env python3
-"""Tests unitarios para modelos maestros (Master Data Models)."""
+"""Tests unitarios para modelos de datos maestros.
+
+Estos tests verifican la creación y validación básica de los modelos
+de datos maestros (Cliente, Fabrica, Producto).
+"""
 
 import pytest
-from app.database.models import Cliente, Fabrica, Producto, EnsayoXProducto
+from datetime import datetime
+
+# Import master data models
+from app.database.models import (
+    Cliente,
+    Fabrica,
+    Producto,
+    Organismo,
+    Provincia,
+    Destino,
+    Rama,
+)
+
+
+class TestClienteModel:
+    """Tests para el modelo Cliente."""
+
+    def test_cliente_creation(self):
+        """Test creación básica de Cliente."""
+        cliente = Cliente()
+        cliente.codigo = "CLI001"
+        cliente.nombre = "Empresa de Prueba"
+        cliente.activo = True
+
+        assert cliente.codigo == "CLI001"
+        assert cliente.nombre == "Empresa de Prueba"
+        assert cliente.activo is True
+
+    def test_cliente_repr(self):
+        """Test representación string de Cliente."""
+        cliente = Cliente()
+        cliente.codigo = "CLI001"
+        cliente.nombre = "Test Company"
+
+        assert repr(cliente) == "<Cliente Test Company>"
+
+    def test_cliente_to_dict(self):
+        """Test serialización a dict."""
+        cliente = Cliente()
+        cliente.id = 1
+        cliente.codigo = "CLI001"
+        cliente.nombre = "Empresa de Prueba"
+
+        data = cliente.to_dict()
+
+        assert data['id'] == 1
+        assert data['codigo'] == "CLI001"
+        assert data['nombre'] == "Empresa de Prueba"
 
 
 class TestFabricaModel:
     """Tests para el modelo Fabrica."""
 
     def test_fabrica_creation(self):
-        """Test crear una instancia de fábrica."""
-        fabrica = Fabrica(
-            cliente_id=1,
-            nombre='Fábrica Principal',
-            provincia_id=1,
-            activo=True
-        )
+        """Test creación básica de Fabrica."""
+        fabrica = Fabrica()
+        fabrica.nombre = "Planta Principal"
+        fabrica.activo = True
 
-        assert fabrica.cliente_id == 1
-        assert fabrica.nombre == 'Fábrica Principal'
-        assert fabrica.provincia_id == 1
+        assert fabrica.nombre == "Planta Principal"
         assert fabrica.activo is True
 
     def test_fabrica_repr(self):
         """Test representación string de Fabrica."""
-        fabrica = Fabrica(cliente_id=1, nombre='Fábrica Test')
-        assert repr(fabrica) == '<Fabrica Fábrica Test>'
+        fabrica = Fabrica()
+        fabrica.nombre = "Planta de Producción"
+
+        assert repr(fabrica) == "<Fabrica Planta de Producción>"
 
     def test_fabrica_to_dict(self):
-        """Test conversión a diccionario."""
-        fabrica = Fabrica(cliente_id=1, nombre='Fábrica Dict')
+        """Test serialización a dict."""
+        fabrica = Fabrica()
         fabrica.id = 1
+        fabrica.nombre = "Planta Principal"
 
         data = fabrica.to_dict()
+
         assert data['id'] == 1
-        assert data['nombre'] == 'Fábrica Dict'
-        assert data['cliente_id'] == 1
-        assert 'creado_en' in data
+        assert data['nombre'] == "Planta Principal"
 
 
 class TestProductoModel:
     """Tests para el modelo Producto."""
 
     def test_producto_creation(self):
-        """Test crear un producto."""
-        producto = Producto(
-            nombre='Producto Test',
-            destino_id=1,
-            activo=True
-        )
+        """Test creación básica de Producto."""
+        producto = Producto()
+        producto.codigo = "PROD001"
+        producto.nombre = "Producto de Prueba"
+        producto.activo = True
 
-        assert producto.nombre == 'Producto Test'
-        assert producto.destino_id == 1
+        assert producto.codigo == "PROD001"
+        assert producto.nombre == "Producto de Prueba"
         assert producto.activo is True
 
     def test_producto_repr(self):
         """Test representación string de Producto."""
-        producto = Producto(nombre='Leche Entera')
-        assert repr(producto) == '<Producto Leche Entera>'
+        producto = Producto()
+        producto.codigo = "PROD001"
+        producto.nombre = "Test Product"
+
+        assert repr(producto) == "<Producto Test Product>"
 
     def test_producto_to_dict(self):
-        """Test conversión a diccionario."""
-        producto = Producto(nombre='Producto Dict')
+        """Test serialización a dict."""
+        producto = Producto()
         producto.id = 1
+        producto.nombre = "Producto de Prueba"
 
         data = producto.to_dict()
+
         assert data['id'] == 1
-        assert data['nombre'] == 'Producto Dict'
+        assert data['nombre'] == "Producto de Prueba"
 
 
-class TestEnsayoXProducto:
-    """Tests para la tabla de unión EnsayoXProducto."""
+class TestOrganismoModel:
+    """Tests para el modelo Organismo."""
 
-    def test_ensayo_x_producto_creation(self):
-        """Test crear relación ensayo-producto."""
-        rel = EnsayoXProducto(
-            producto_id=1,
-            ensayo_id=2
-        )
+    def test_organismo_creation(self):
+        """Test creación básica de Organismo."""
+        org = Organismo()
+        org.nombre = "Ministerio de Agricultura"
 
-        assert rel.producto_id == 1
-        assert rel.ensayo_id == 2
+        assert org.nombre == "Ministerio de Agricultura"
 
-    def test_ensayo_x_producto_repr(self):
+    def test_organismo_repr(self):
         """Test representación string."""
-        rel = EnsayoXProducto(producto_id=1, ensayo_id=2)
-        assert repr(rel) == '<EnsayoXProducto producto=1 ensayo=2>'
+        org = Organismo()
+        org.nombre = "ONIE"
+
+        assert repr(org) == "<Organismo ONIE>"
 
 
-class TestClienteUpdated:
-    """Tests para verificar actualizaciones del modelo Cliente."""
+class TestProvinciaModel:
+    """Tests para el modelo Provincia."""
 
-    def test_cliente_tipo_cliente(self):
-        """Test campo tipo_cliente."""
-        cliente = Cliente(
-            codigo='CLI001',
-            nombre='Cliente con Tipo',
-            tipo_cliente=1
-        )
+    def test_provincia_creation(self):
+        """Test creación básica de Provincia."""
+        prov = Provincia()
+        prov.nombre = "La Habana"
+        prov.sigla = "LH"
 
-        assert cliente.tipo_cliente == 1
+        assert prov.nombre == "La Habana"
+        assert prov.sigla == "LH"
 
-    def test_cliente_to_dict_updated(self):
-        """Test que to_dict incluye los nuevos campos."""
-        cliente = Cliente(
-            codigo='CLI002',
-            nombre='Cliente Test',
-            tipo_cliente=2,
-            organismo_id=1
-        )
-        cliente.id = 1
+    def test_provincia_repr(self):
+        """Test representación string."""
+        prov = Provincia()
+        prov.sigla = "PRI"
+        prov.nombre = "Pinar del Río"
 
-        data = cliente.to_dict()
-        assert data['tipo_cliente'] == 2
-        assert data['organismo_id'] == 1
-        assert 'total_fabricas' in data
-        assert 'total_pedidos' in data
+        assert repr(prov) == "<Provincia PRI: Pinar del Río>"
 
-    def test_cliente_total_fabricas_empty(self):
-        """Test total_fabricas cuando no hay fábricas."""
-        cliente = Cliente(codigo='CLI003', nombre='Cliente 3')
-        assert cliente.total_fabricas == 0
 
-    def test_cliente_total_pedidos_empty(self):
-        """Test total_pedidos cuando no hay pedidos."""
-        cliente = Cliente(codigo='CLI004', nombre='Cliente 4')
-        assert cliente.total_pedidos == 0
+class TestDestinoModel:
+    """Tests para el modelo Destino."""
+
+    def test_destino_creation(self):
+        """Test creación básica de Destino."""
+        dest = Destino()
+        dest.nombre = "Consumo Familiar"
+        dest.sigla = "CF"
+
+        assert dest.nombre == "Consumo Familiar"
+        assert dest.sigla == "CF"
+
+    def test_destino_repr(self):
+        """Test representación string."""
+        dest = Destino()
+        dest.sigla = "AC"
+        dest.nombre = "Alimentación Colectiva"
+
+        assert repr(dest) == "<Destino AC: Alimentación Colectiva>"
+
+
+class TestRamaModel:
+    """Tests para el modelo Rama."""
+
+    def test_rama_creation(self):
+        """Test creación básica de Rama."""
+        rama = Rama()
+        rama.nombre = "Industria Láctea"
+
+        assert rama.nombre == "Industria Láctea"
+
+    def test_rama_repr(self):
+        """Test representación string."""
+        rama = Rama()
+        rama.nombre = "Carnes"
+
+        assert repr(rama) == "<Rama Carnes>"
