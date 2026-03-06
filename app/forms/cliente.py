@@ -10,6 +10,11 @@ from app.database.models import Cliente, Organismo
 class ClienteForm(FlaskForm):
     """Formulario para crear/editar clientes."""
     
+    codigo = StringField(_('Código'), validators=[
+        DataRequired(message=_('El código es obligatorio')),
+        Length(max=20, message=_('Máximo 20 caracteres'))
+    ])
+    
     nombre = StringField(_('Nombre'), validators=[
         DataRequired(message=_('El nombre es obligatorio')),
         Length(max=300, message=_('Máximo 300 caracteres'))
@@ -38,6 +43,14 @@ class ClienteForm(FlaskForm):
             (o.id, o.nombre) for o in Organismo.query.order_by(Organismo.nombre).all()
         ]
     
+    def validate_codigo(self, field):
+        """Validar que no exista un cliente con el mismo código."""
+        cliente = Cliente.query.filter_by(codigo=field.data).first()
+        if cliente:
+            if hasattr(self, 'id') and self.id.data == cliente.id:
+                return
+            raise ValidationError(_('Ya existe un cliente con este código'))
+
     def validate_nombre(self, field):
         """Validar que no exista un cliente con el mismo nombre."""
         cliente = Cliente.query.filter_by(nombre=field.data).first()

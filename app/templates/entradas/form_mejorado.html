@@ -173,12 +173,26 @@
             </div>
         </div>
 
-        <!-- Sección 6: Observaciones -->
+        <!-- Sección 6: Estado y Observaciones -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div class="bg-gray-100 text-gray-800 px-4 py-3 font-medium flex items-center">
-                <i class="fas fa-sticky-note mr-2"></i>{{ _('Observaciones') }}
+                <i class="fas fa-sticky-note mr-2"></i>{{ _('Estado y Observaciones') }}
             </div>
-            <div class="p-6">
+            <div class="p-6 space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% if entrada %}
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">{{ form.status.label }}</label>
+                        {{ form.status(class="w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500") }}
+                    </div>
+                    {% endif %}
+                    <div class="flex items-center mt-6">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            {{ form.en_os(class="w-4 h-4 accent-blue-600") }}
+                            <span class="text-gray-700 text-sm">{{ form.en_os.label.text }}</span>
+                        </label>
+                    </div>
+                </div>
                 {{ render_field(form.observaciones, rows="3") }}
             </div>
         </div>
@@ -223,7 +237,7 @@ $(document).ready(function() {
             }
         },
         placeholder: '{{ _('Buscar fábrica...') }}',
-        minimumInputLength: 2
+        minimumInputLength: 1
     }).on('select2:select', function(e) {
         var data = e.params.data;
         $('#cliente-display').val(data.cliente.nombre);
@@ -233,6 +247,18 @@ $(document).ready(function() {
         cargarPedidos(data.cliente.id);
     });
 
+    // Precargar fábrica en modo edición
+    {% if entrada and entrada.fabrica_id %}
+    $.get('/api/fabricas/{{ entrada.fabrica_id }}', function(f) {
+        var option = new Option(f.text, f.id, true, true);
+        $('#fabrica-select').append(option).trigger('change');
+        if (f.cliente) {
+            $('#cliente-display').val(f.cliente.nombre);
+            $('#cliente_id').val(f.cliente.id);
+        }
+    });
+    {% endif %}
+
     // Select2 para productos
     $('#producto-select').select2({
         ajax: {
@@ -241,11 +267,26 @@ $(document).ready(function() {
             delay: 250,
             data: function(params) {
                 return { q: params.term };
+            },
+            processResults: function(data) {
+                return {
+                    results: data.map(function(p) {
+                        return { id: p.id, text: p.nombre };
+                    })
+                };
             }
         },
         placeholder: '{{ _('Buscar producto...') }}',
-        minimumInputLength: 2
+        minimumInputLength: 1
     });
+
+    // Precargar producto en modo edición
+    {% if entrada and entrada.producto_id %}
+    $.get('/api/productos/{{ entrada.producto_id }}', function(p) {
+        var option = new Option(p.text, p.id, true, true);
+        $('#producto-select').append(option).trigger('change');
+    });
+    {% endif %}
 });
 
 function cargarPedidos(clienteId) {

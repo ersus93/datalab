@@ -147,6 +147,9 @@ class Rama(db.Model):
     
     # Timestamps
     creado_en = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    # Relationships (Phase 2 Issue #3)
+    productos = db.relationship('Producto', back_populates='rama', lazy=True)
     
     def __repr__(self):
         return f'<Rama {self.nombre}>'

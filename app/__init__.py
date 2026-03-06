@@ -29,6 +29,34 @@ def _register_template_context_processors(app):
     def inject_globals():
         return {"flash_message_component": flash_message_component}
 
+    # ------------------------------------------------------------------
+    # Template filters para status de Entradas
+    # ------------------------------------------------------------------
+    _STATUS_COLORS = {
+        'RECIBIDO':   'blue',
+        'EN_PROCESO': 'yellow',
+        'COMPLETADO': 'purple',
+        'ENTREGADO':  'green',
+        'ANULADO':    'red',
+    }
+    _STATUS_LABELS = {
+        'RECIBIDO':   'Recibido',
+        'EN_PROCESO': 'En Proceso',
+        'COMPLETADO': 'Completado',
+        'ENTREGADO':  'Entregado',
+        'ANULADO':    'Anulado',
+    }
+
+    @app.template_filter('status_color')
+    def status_color_filter(status):
+        """Devuelve el color Tailwind correspondiente al status."""
+        return _STATUS_COLORS.get(str(status), 'gray')
+
+    @app.template_filter('status_label')
+    def status_label_filter(status):
+        """Devuelve la etiqueta legible correspondiente al status."""
+        return _STATUS_LABELS.get(str(status), str(status))
+
 
 def create_app(config_name: str = "development") -> Flask:
     """Factory de la aplicación Flask."""
@@ -91,22 +119,55 @@ def _configure_app(app: Flask, config_name: str):
 
 
 def _get_locale():
-    """Determina el idioma preferido del usuario."""
-    return request.accept_languages.best_match(['es', 'en']) or 'es'
+    """Determina el idioma preferido del usuario.
+    
+    Prioridad:
+    1. Parámetro ?lang= en la URL (permite cambio manual)
+    2. Accept-Languages del navegador
+    3. Español como fallback
+    """
+    supported = ['es', 'en']
+    lang = request.args.get('lang')
+    if lang and lang in supported:
+        return lang
+    return request.accept_languages.best_match(supported) or 'es'
 
 
 def _register_error_handlers(app: Flask):
-    from flask import jsonify
+    from flask import jsonify, render_template
     from app.core.domain.base import NotFoundError, ValidationError, DomainException
+
+    def _wants_json():
+        """Determina si el cliente prefiere respuesta JSON."""
+        return request.path.startswith('/api/') or \
+               request.accept_mimetypes.best == 'application/json'
 
     @app.errorhandler(NotFoundError)
     def handle_not_found(e):
-        return jsonify({"error": str(e)}), 404
+        if _wants_json():
+            return jsonify({"error": str(e)}), 404
+        return render_template('errors/404.html', message=str(e)), 404
 
     @app.errorhandler(ValidationError)
     def handle_validation(e):
-        return jsonify({"error": str(e)}), 400
+        if _wants_json():
+            return jsonify({"error": str(e)}), 400
+        return render_template('errors/400.html', message=str(e)), 400
 
     @app.errorhandler(DomainException)
     def handle_domain(e):
-        return jsonify({"error": str(e)}), 422
+        if _wants_json():
+            return jsonify({"error": str(e)}), 422
+        return render_template('errors/422.html', message=str(e)), 422
+
+    @app.errorhandler(403)
+    def handle_403(e):
+        if _wants_json():
+            return jsonify({"error": "Acceso prohibido"}), 403
+        return render_template('errors/403.html'), 403
+
+    @app.errorhandler(404)
+    def handle_404(e):
+        if _wants_json():
+            return jsonify({"error": "Recurso no encontrado"}), 404
+        return render_template('errors/404.html'), 404

@@ -36,6 +36,14 @@ class Ensayo(db.Model):
     # detalles = relationship('DetalleEnsayo', back_populates='ensayo') - Phase 2
     # utilizados = relationship('Utilizado', back_populates='ensayo') - Phase 2
 
+    # Many-to-many con Producto (Phase 1 Issue #3)
+    productos = db.relationship(
+        'Producto',
+        secondary='ensayos_x_productos',
+        back_populates='ensayos',
+        lazy='dynamic',
+    )
+
     def __repr__(self):
         return f'<Ensayo {self.id}: {self.nombre_corto}>'
 

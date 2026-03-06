@@ -1,11 +1,12 @@
 """Rutas para dashboard principal."""
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 from flask import Blueprint, render_template
 from flask_login import login_required
 
 from app import db
 from app.database.models import Cliente, Fabrica, Producto, Provincia, Rama
+from app.database.models.entrada import Entrada, EntradaStatus
 
 dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 
@@ -58,6 +59,29 @@ def index():
         Producto.creado_en.desc()
     ).limit(5).all()
 
+    # --- Widgets de Entradas (Phase 3) ---
+    today = date.today()
+    entrada_stats = {
+        'hoy': Entrada.query.filter(
+            db.func.date(Entrada.fech_entrada) == today,
+            Entrada.anulado == False,
+        ).count(),
+        'en_proceso': Entrada.query.filter_by(
+            status=EntradaStatus.EN_PROCESO, anulado=False
+        ).count(),
+        'pendiente_entrega': Entrada.query.filter_by(
+            status=EntradaStatus.COMPLETADO, anulado=False
+        ).count(),
+        'anuladas': Entrada.query.filter_by(anulado=True).count(),
+    }
+    recientes = (
+        Entrada.query
+        .filter_by(anulado=False)
+        .order_by(Entrada.fech_entrada.desc())
+        .limit(5)
+        .all()
+    )
+
     return render_template('dashboard/index.html',
                            stats=stats,
                            provincia_data=provincia_data,
@@ -65,4 +89,6 @@ def index():
                            sector_data=sector_data,
                            latest_clientes=latest_clientes,
                            latest_fabricas=latest_fabricas,
-                           latest_productos=latest_productos)
+                           latest_productos=latest_productos,
+                           entrada_stats=entrada_stats,
+                           entradas_recientes=recientes)

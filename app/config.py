@@ -56,6 +56,8 @@ class TestingConfig(BaseConfig):
 class ProductionConfig(BaseConfig):
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
+    # Cookies seguras solo en producción (requiere HTTPS)
+    SESSION_COOKIE_SECURE = True
     # PostgreSQL connection pooling
     SQLALCHEMY_ENGINE_OPTIONS = {
         "pool_size": 10,

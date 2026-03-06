@@ -32,8 +32,16 @@ class EnsayoES(db.Model):
     creado_en = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relaciones
-    area = db.relationship('Area', back_populates='ensayos_es')
-    tipo_es = db.relationship('TipoES', back_populates='ensayos_es')
+    area     = db.relationship('Area',   back_populates='ensayos_es')
+    tipo_es  = db.relationship('TipoES', back_populates='ensayos_es')
+
+    # Many-to-many con Producto (Phase 1 Issue #3 + Phase 2 Issue #3)
+    productos = db.relationship(
+        'Producto',
+        secondary='ensayos_es_x_productos',
+        back_populates='ensayos_es',
+        lazy='dynamic',
+    )
 
     def __repr__(self):
         return f'<EnsayoES {self.id}: {self.nombre_corto}>'

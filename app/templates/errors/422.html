@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}422 — Error de dominio{% endblock %}
+{% block content %}
+<div class="container mt-5 text-center">
+  <h1 class="display-1 text-secondary">422</h1>
+  <h2>Error de Procesamiento</h2>
+  <p class="text-muted">{{ message or 'No se pudo procesar la operación.' }}</p>
+  <a href="{{ request.referrer or url_for('dashboard.index') }}" class="btn btn-secondary mt-3">Volver</a>
+</div>
+{% endblock %}

@@ -20,9 +20,13 @@ def register_routes(app):
     from .dashboard import dashboard_bp
     from .dashboard_api import dashboard_api_bp
     from .entradas import entradas_bp
+    from .fabricas import fabricas_bp
+    from .fabricas_api import fabricas_api_bp
     from .ordenes_trabajo import ordenes_trabajo_bp
     from .ordenes_trabajo_api import ordenes_trabajo_api_bp, clientes_ordenes_api_bp
     from .pedidos import pedidos_bp
+    from .productos import productos_bp
+    from .productos_api import productos_api_bp
     from .reference import reference_bp
     from .status_api import status_api_bp
     from .entradas_api import entradas_api_bp
@@ -33,6 +37,10 @@ def register_routes(app):
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(reference_bp)
+    app.register_blueprint(fabricas_bp)
+    app.register_blueprint(fabricas_api_bp)
+    app.register_blueprint(productos_bp)
+    app.register_blueprint(productos_api_bp)
     app.register_blueprint(entradas_bp)
     app.register_blueprint(ordenes_trabajo_bp)
     app.register_blueprint(ordenes_trabajo_api_bp)

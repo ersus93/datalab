@@ -5,6 +5,7 @@ from .cliente import Cliente
 from .ensayo import Ensayo
 from .ensayo_es import EnsayoES
 from .ensayo_x_producto import EnsayoXProducto
+from .ensayo_es_x_producto import EnsayoESXProducto
 from .fabrica import Fabrica
 from .pedido import Pedido
 from .producto import Producto
@@ -32,6 +33,7 @@ __all__ = [
     'Ensayo',
     'EnsayoES',
     'EnsayoXProducto',
+    'EnsayoESXProducto',
     'Fabrica',
     'Pedido',
     'Producto',

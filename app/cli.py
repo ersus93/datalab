@@ -280,3 +280,11 @@ def seed_reference_command():
 def register_cli_commands(app):
     """Register custom CLI commands."""
     app.cli.add_command(seed_reference_command)
+
+    # Phase 1/2 import commands
+    from app.commands.import_cli import import_cli
+    app.cli.add_command(import_cli)
+
+    # Phase 3 transactional import commands
+    from app.commands.import_phase3 import import_phase3_cli
+    app.cli.add_command(import_phase3_cli)
