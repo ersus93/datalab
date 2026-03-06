@@ -193,7 +193,7 @@ def eliminar_detalle(entrada_id, detalle_id):
 
         DetalleEnsayoService.eliminar_detalle(
             detalle_id=detalle_id,
-            entrada_id=entrada_id
+            usuario_id=current_user.id
         )
 
         return jsonify({
@@ -262,7 +262,7 @@ def asignar_tecnico(entrada_id, detalle_id):
         detalle = DetalleEnsayoService.asignar_tecnico(
             detalle_id=detalle_id,
             tecnico_id=tecnico_id,
-            entrada_id=entrada_id
+            usuario_id=current_user.id
         )
 
         return jsonify({
@@ -310,7 +310,7 @@ def iniciar_ensayo(entrada_id, detalle_id):
 
         detalle = DetalleEnsayoService.iniciar_ensayo(
             detalle_id=detalle_id,
-            entrada_id=entrada_id
+            usuario_id=current_user.id
         )
 
         return jsonify({
@@ -364,8 +364,8 @@ def completar_ensayo(entrada_id, detalle_id):
 
         detalle = DetalleEnsayoService.completar_ensayo(
             detalle_id=detalle_id,
-            entrada_id=entrada_id,
-            observaciones=observaciones
+            observaciones=observaciones,
+            usuario_id=current_user.id
         )
 
         return jsonify({
@@ -413,7 +413,7 @@ def reportar_ensayo(entrada_id, detalle_id):
 
         detalle = DetalleEnsayoService.reportar_ensayo(
             detalle_id=detalle_id,
-            entrada_id=entrada_id
+            usuario_id=current_user.id
         )
 
         return jsonify({
