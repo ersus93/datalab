@@ -1,0 +1,113 @@
+{#
+  Partial: _detalle_row.html
+  Uso: Fila de un DetalleEnsayo en el panel de ensayos asignados.
+
+  Variables esperadas:
+    - detalle: objeto DetalleEnsayo con atributos:
+        id, ensayo (nombre_corto), estado, tecnico (User|None), cantidad
+#}
+
+{# Mapeo de estados a clases Tailwind #}
+{% set estado_cfg = {
+    'PENDIENTE':  {'bg': 'bg-gray-100',   'text': 'text-gray-700',   'icon': 'fa-clock',         'label': _('Pendiente')},
+    'ASIGNADO':   {'bg': 'bg-blue-100',   'text': 'text-blue-700',   'icon': 'fa-user-check',    'label': _('Asignado')},
+    'EN_PROCESO': {'bg': 'bg-amber-100',  'text': 'text-amber-700',  'icon': 'fa-spinner',       'label': _('En Proceso')},
+    'COMPLETADO': {'bg': 'bg-green-100',  'text': 'text-green-700',  'icon': 'fa-check-circle',  'label': _('Completado')},
+    'REPORTADO':  {'bg': 'bg-purple-100', 'text': 'text-purple-700', 'icon': 'fa-file-alt',      'label': _('Reportado')},
+} %}
+{% set cfg = estado_cfg.get(detalle.estado, {'bg': 'bg-gray-100', 'text': 'text-gray-700', 'icon': 'fa-question-circle', 'label': detalle.estado}) %}
+
+<tr id="detalle-row-{{ detalle.id }}"
+    class="border-b border-gray-100 hover:bg-gray-50 transition-colors duration-150">
+
+    {# Nombre del ensayo #}
+    <td class="px-4 py-3 text-sm font-medium text-gray-900">
+        {{ detalle.ensayo.nombre_corto if detalle.ensayo else '-' }}
+    </td>
+
+    {# Badge de estado #}
+    <td class="px-4 py-3">
+        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold {{ cfg.bg }} {{ cfg.text }}">
+            <i class="fas {{ cfg.icon }} {% if detalle.estado == 'EN_PROCESO' %}animate-spin{% endif %}"></i>
+            {{ cfg.label }}
+        </span>
+    </td>
+
+    {# Técnico asignado #}
+    <td class="px-4 py-3 text-sm text-gray-600">
+        {% if detalle.tecnico %}
+            <span class="inline-flex items-center gap-1">
+                <i class="fas fa-user text-gray-400 text-xs"></i>
+                {{ detalle.tecnico.nombre_completo if detalle.tecnico.nombre_completo else detalle.tecnico.username }}
+            </span>
+        {% else %}
+            <span class="text-gray-400 italic text-xs">{{ _('Sin asignar') }}</span>
+        {% endif %}
+    </td>
+
+    {# Cantidad #}
+    <td class="px-4 py-3 text-sm text-gray-700 text-center">
+        {{ detalle.cantidad if detalle.cantidad is not none else '-' }}
+    </td>
+
+    {# Acciones #}
+    <td class="px-4 py-3">
+        <div class="flex items-center gap-1 flex-wrap">
+
+            {# Asignar técnico: disponible en PENDIENTE y ASIGNADO #}
+            {% if detalle.estado in ('PENDIENTE', 'ASIGNADO') %}
+            <button type="button"
+                    onclick="abrirModalTecnico({{ detalle.id }}, '{{ detalle.tecnico.id if detalle.tecnico else '' }}')"
+                    class="inline-flex items-center gap-1 px-2 py-1 text-xs bg-blue-50 text-blue-700 border border-blue-200 rounded hover:bg-blue-100 transition-colors"
+                    title="{{ _('Asignar Técnico') }}">
+                <i class="fas fa-user-plus"></i>
+                <span class="hidden sm:inline">{{ _('Técnico') }}</span>
+            </button>
+            {% endif %}
+
+            {# Iniciar: de ASIGNADO → EN_PROCESO #}
+            {% if detalle.estado == 'ASIGNADO' %}
+            <button type="button"
+                    onclick="transicionEstado({{ detalle.id }}, 'iniciar')"
+                    class="inline-flex items-center gap-1 px-2 py-1 text-xs bg-amber-50 text-amber-700 border border-amber-200 rounded hover:bg-amber-100 transition-colors"
+                    title="{{ _('Iniciar ensayo') }}">
+                <i class="fas fa-play"></i>
+                <span class="hidden sm:inline">{{ _('Iniciar') }}</span>
+            </button>
+            {% endif %}
+
+            {# Completar: de EN_PROCESO → COMPLETADO #}
+            {% if detalle.estado == 'EN_PROCESO' %}
+            <button type="button"
+                    onclick="abrirModalCompletar({{ detalle.id }})"
+                    class="inline-flex items-center gap-1 px-2 py-1 text-xs bg-green-50 text-green-700 border border-green-200 rounded hover:bg-green-100 transition-colors"
+                    title="{{ _('Completar ensayo') }}">
+                <i class="fas fa-check"></i>
+                <span class="hidden sm:inline">{{ _('Completar') }}</span>
+            </button>
+            {% endif %}
+
+            {# Reportar: de COMPLETADO → REPORTADO #}
+            {% if detalle.estado == 'COMPLETADO' %}
+            <button type="button"
+                    onclick="transicionEstado({{ detalle.id }}, 'reportar')"
+                    class="inline-flex items-center gap-1 px-2 py-1 text-xs bg-purple-50 text-purple-700 border border-purple-200 rounded hover:bg-purple-100 transition-colors"
+                    title="{{ _('Marcar como reportado') }}">
+                <i class="fas fa-file-alt"></i>
+                <span class="hidden sm:inline">{{ _('Reportar') }}</span>
+            </button>
+            {% endif %}
+
+            {# Eliminar: solo si está en PENDIENTE #}
+            {% if detalle.estado == 'PENDIENTE' %}
+            <button type="button"
+                    onclick="eliminarDetalle({{ detalle.id }})"
+                    class="inline-flex items-center gap-1 px-2 py-1 text-xs bg-red-50 text-red-700 border border-red-200 rounded hover:bg-red-100 transition-colors"
+                    title="{{ _('Eliminar') }}">
+                <i class="fas fa-trash"></i>
+            </button>
+            {% endif %}
+
+        </div>
+    </td>
+</tr>

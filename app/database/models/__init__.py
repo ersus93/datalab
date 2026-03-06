@@ -27,6 +27,7 @@ from .audit import AuditLog
 from .notification import Notification
 from .notification_preference import NotificationPreference
 from .status_history import StatusHistory
+from .detalle_ensayo import DetalleEnsayo, DetalleEnsayoStatus
 
 __all__ = [
     'Cliente',
@@ -55,4 +56,6 @@ __all__ = [
     'Notification',
     'NotificationPreference',
     'StatusHistory',
+    'DetalleEnsayo',
+    'DetalleEnsayoStatus',
 ]
