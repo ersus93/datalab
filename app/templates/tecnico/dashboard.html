@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Panel del Técnico') }} - DataLab{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="h3 mb-4">
+        <i class="fas fa-user-hard-hat"></i> {{ _('Panel del Técnico') }}
+    </h1>
+
+    {# Stats Cards #}
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">{{ _('Asignados') }}</h5>
+                    <h2 class="mb-0">{{ stats.asignado }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <h5 class="card-title">{{ _('En Proceso') }}</h5>
+                    <h2 class="mb-0">{{ stats.en_proceso }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">{{ _('Completados Hoy') }}</h5>
+                    <h2 class="mb-0">{{ stats.completado }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">{{ _('Reportados') }}</h5>
+                    <h2 class="mb-0">{{ stats.reportado }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Area Filter #}
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <div class="btn-group" role="group">
+                <a href="{{ url_for('tecnico.dashboard') }}" class="btn btn-outline-primary {{ 'active' if not request.args.get('area') }}">
+                    {{ _('Todas las Áreas') }}
+                </a>
+                <a href="{{ url_for('tecnico.dashboard', area='FQ') }}" class="btn btn-outline-primary {{ 'active' if request.args.get('area') == 'FQ' }}">FQ</a>
+                <a href="{{ url_for('tecnico.dashboard', area='MB') }}" class="btn btn-outline-primary {{ 'active' if request.args.get('area') == 'MB' }}">MB</a>
+                <a href="{{ url_for('tecnico.dashboard', area='ES') }}" class="btn btn-outline-primary {{ 'active' if request.args.get('area') == 'ES' }}">ES</a>
+                <a href="{{ url_for('tecnico.dashboard', area='OS') }}" class="btn btn-outline-primary {{ 'active' if request.args.get('area') == 'OS' }}">OS</a>
+            </div>
+        </div>
+    </div>
+
+    {# Pending Tests by Area #}
+    {% for area, detalles in ensayos_por_area.items() %}
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">
+                <i class="fas fa-flask"></i> {{ _('Área') }}: {{ area }}
+                <span class="badge bg-secondary">{{ detalles|length }}</span>
+            </h5>
+        </div>
+        <div class="card-body">
+            {% if detalles %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="select-all-{{ area }}" onclick="toggleAll('{{ area }}')"></th>
+                            <th>{{ _('Ensayo') }}</th>
+                            <th>{{ _('Producto') }}</th>
+                            <th>{{ _('Estado') }}</th>
+                            <th>{{ _('Acciones') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in detalles %}
+                        <tr>
+                            <td><input type="checkbox" name="detalle_ids" value="{{ d.id }}" class="detalle-checkbox"></td>
+                            <td>{{ d.ensayo.nombre_corto if d.ensayo else _('Sin ensayo') }}</td>
+                            <td>{{ d.entrada.producto.nombre if d.entrada and d.entrada.producto else _('Sin producto') }}</td>
+                            <td>
+                                <span class="badge 
+                                    {{ 'bg-secondary' if d.estado == 'PENDIENTE' else
+                                       'bg-primary' if d.estado == 'ASIGNADO' else
+                                       'bg-warning' if d.estado == 'EN_PROCESO' else
+                                       'bg-success' if d.estado == 'COMPLETADO' else
+                                       'bg-info' }}">
+                                    {{ d.estado }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if d.estado == 'ASIGNADO' %}
+                                <button class="btn btn-sm btn-primary" onclick="iniciarEnsayo({{ d.id }})">
+                                    <i class="fas fa-play"></i> {{ _('Iniciar') }}
+                                </button>
+                                {% elif d.estado == 'EN_PROCESO' %}
+                                <a href="{{ url_for('tecnico.ejecutar', detalle_id=d.id) }}" class="btn btn-sm btn-success">
+                                    <i class="fas fa-check"></i> {{ _('Ejecutar') }}
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-2">
+                <button class="btn btn-primary btn-sm" onclick="batchIniciar('{{ area }}')">
+                    <i class="fas fa-play"></i> {{ _('Iniciar Selección') }}
+                </button>
+            </div>
+            {% else %}
+            <p class="text-muted mb-0">{{ _('No hay ensayos pendientes en esta área.') }}</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleAll(area) {
+    const checkboxes = document.querySelectorAll('#select-all-' + area);
+    const isChecked = checkboxes.checked;
+    document.querySelectorAll('.detalle-checkbox').forEach(cb => cb.checked = isChecked);
+}
+
+function iniciarEnsayo(detalleId) {
+    fetch(`/tecnico/api/ejecutar/${detalleId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.message || 'Error al iniciar ensayo');
+        }
+    });
+}
+
+function batchIniciar(area) {
+    const ids = Array.from(document.querySelectorAll('.detalle-checkbox:checked')).map(cb => cb.value);
+    if (ids.length === 0) {
+        alert('Selecciona al menos un ensayo');
+        return;
+    }
+    fetch('/tecnico/api/batch/iniciar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ detalle_ids: ids })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.message || 'Error al iniciar ensayos');
+        }
+    });
+}
+</script>
+{% endblock %}

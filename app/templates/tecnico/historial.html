@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Historial de Ensayos') }} - DataLab{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('tecnico.dashboard') }}">{{ _('Panel del Técnico') }}</a></li>
+            <li class="breadcrumb-item active">{{ _('Historial') }}</li>
+        </ol>
+    </nav>
+
+    <h1 class="h3 mb-4">
+        <i class="fas fa-history"></i> {{ _('Historial de Ensayos') }}
+    </h1>
+
+    {# Filters #}
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">{{ _('Área') }}</label>
+                    <select name="area" class="form-select">
+                        <option value="">{{ _('Todas') }}</option>
+                        <option value="FQ" {{ 'selected' if request.args.get('area') == 'FQ' }}>FQ</option>
+                        <option value="MB" {{ 'selected' if request.args.get('area') == 'MB' }}>MB</option>
+                        <option value="ES" {{ 'selected' if request.args.get('area') == 'ES' }}>ES</option>
+                        <option value="OS" {{ 'selected' if request.args.get('area') == 'OS' }}>OS</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ _('Estado') }}</label>
+                    <select name="estado" class="form-select">
+                        <option value="">{{ _('Todos') }}</option>
+                        <option value="COMPLETADO" {{ 'selected' if request.args.get('estado') == 'COMPLETADO' }}>{{ _('Completado') }}</option>
+                        <option value="REPORTADO" {{ 'selected' if request.args.get('estado') == 'REPORTADO' }}>{{ _('Reportado') }}</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">{{ _('Búsqueda') }}</label>
+                    <input type="text" name="q" class="form-control" placeholder="{{ _('Nombre del ensayo...') }}" value="{{ request.args.get('q', '') }}">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i> {{ _('Buscar') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# Results Table #}
+    <div class="card">
+        <div class="card-body">
+            {% if ensayos %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>{{ _('Ensayo') }}</th>
+                            <th>{{ _('Producto') }}</th>
+                            <th>{{ _('Área') }}</th>
+                            <th>{{ _('Estado') }}</th>
+                            <th>{{ _('Resultado') }}</th>
+                            <th>{{ _('Fecha Inicio') }}</th>
+                            <th>{{ _('Fecha Fin') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in ensayos %}
+                        <tr>
+                            <td>{{ d.ensayo.nombre_corto if d.ensayo else '-' }}</td>
+                            <td>{{ d.entrada.producto.nombre if d.entrada and d.entrada.producto else '-' }}</td>
+                            <td>{{ d.ensayo.area.siglas if d.ensayo and d.ensayo.area else '-' }}</td>
+                            <td>
+                                <span class="badge {{ 'bg-success' if d.estado == 'COMPLETADO' else 'bg-info' if d.estado == 'REPORTADO' else 'bg-secondary' }}">
+                                    {{ d.estado }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if d.valor_numerico %}{{ d.valor_numerico }}{% endif %}
+                                {% if d.valor_texto %}{{ d.valor_texto }}{% endif %}
+                                {% if d.valor_booleano %}{{ _('Sí') if d.valor_booleano else _('No') }}{% endif %}
+                                {% if d.parametros_json %}<small class="text-muted">JSON</small>{% endif %}
+                            </td>
+                            <td>{{ d.fecha_inicio.strftime('%d/%m/%Y %H:%M') if d.fecha_inicio else '-' }}</td>
+                            <td>{{ d.fecha_fin.strftime('%d/%m/%Y %H:%M') if d.fecha_fin else '-' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted text-center">{{ _('No se encontraron ensayos en el historial.') }}</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

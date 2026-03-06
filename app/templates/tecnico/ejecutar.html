@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Ejecutar Ensayo') }} - DataLab{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('tecnico.dashboard') }}">{{ _('Panel del Técnico') }}</a></li>
+            <li class="breadcrumb-item active">{{ _('Ejecutar Ensayo') }}</li>
+        </ol>
+    </nav>
+
+    <h1 class="h3 mb-4">
+        <i class="fas fa-play-circle"></i> {{ _('Ejecutar Ensayo') }}
+    </h1>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ detalle.ensayo.nombre_corto if detalle.ensayo else _('Ensayo') }}</h5>
+                </div>
+                <div class="card-body">
+                    <form id="resultadoForm">
+                        <input type="hidden" name="detalle_id" value="{{ detalle.id }}">
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">{{ _('Fecha Inicio') }}</label>
+                                <input type="datetime-local" class="form-control" name="fecha_inicio" id="fechaInicio" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{{ _('Fecha Fin') }}</label>
+                                <input type="datetime-local" class="form-control" name="fecha_fin" id="fechaFin" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">{{ _('Tipo de Resultado') }}</label>
+                            <select class="form-select" name="tipo_resultado" id="tipoResultado" onchange="mostrarCampos()">
+                                <option value="numerico">{{ _('Numérico') }}</option>
+                                <option value="texto">{{ _('Texto') }}</option>
+                                <option value="booleano">{{ _('Booleano (Sí/No)') }}</option>
+                                <option value="json">{{ _('JSON (Múltiples parámetros)') }}</option>
+                            </select>
+                        </div>
+
+                        {# Campo numérico #}
+                        <div id="campoNumerico" class="mb-3">
+                            <label class="form-label">{{ _('Valor Numérico') }}</label>
+                            <input type="number" step="0.01" class="form-control" name="valor_numerico" placeholder="0.00">
+                        </div>
+
+                        {# Campo texto #}
+                        <div id="campoTexto" class="mb-3" style="display:none">
+                            <label class="form-label">{{ _('Valor Texto') }}</label>
+                            <textarea class="form-control" name="valor_texto" rows="3"></textarea>
+                        </div>
+
+                        {# Campo booleano #}
+                        <div id="campoBooleano" class="mb-3" style="display:none">
+                            <label class="form-label">{{ _('Resultado') }}</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="valor_booleano" id="valorTrue" value="true">
+                                <label class="form-check-label" for="valorTrue">{{ _('Positivo / Cumple') }}</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="valor_booleano" id="valorFalse" value="false">
+                                <label class="form-check-label" for="valorFalse">{{ _('Negativo / No Cumple') }}</label>
+                            </div>
+                        </div>
+
+                        {# Campo JSON #}
+                        <div id="campoJson" class="mb-3" style="display:none">
+                            <label class="form-label">{{ _('Parámetros (JSON)') }}</label>
+                            <textarea class="form-control" name="parametros_json" id="parametrosJson" rows="5" placeholder='{"param1": 1.5, "param2": "ok"}'></textarea>
+                            <small class="text-muted" id="jsonError" style="color: red; display: none;">{{ _('JSON inválido') }}</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">{{ _('Observaciones') }}</label>
+                            <textarea class="form-control" name="observaciones" rows="3" placeholder="{{ _('Observaciones opcionales del ensayo') }}"></textarea>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-check"></i> {{ _('Completar Ensayo') }}
+                            </button>
+                            <a href="{{ url_for('tecnico.dashboard') }}" class="btn btn-secondary">
+                                {{ _('Cancelar') }}
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">{{ _('Información del Ensayo') }}</h6>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">{{ _('Producto') }}</dt>
+                        <dd class="col-sm-8">{{ detalle.entrada.producto.nombre if detalle.entrada and detalle.entrada.producto else '-' }}</dd>
+                        
+                        <dt class="col-sm-4">{{ _('Lote') }}</dt>
+                        <dd class="col-sm-8">{{ detalle.entrada.lote if detalle.entrada else '-' }}</dd>
+                        
+                        <dt class="col-sm-4">{{ _('Estado') }}</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge bg-warning">{{ detalle.estado }}</span>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Inicializar fechas con hora actual
+const now = new Date();
+now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+const datetimeNow = now.toISOString().slice(0, 16);
+document.getElementById('fechaInicio').value = datetimeNow;
+document.getElementById('fechaFin').value = datetimeNow;
+
+function mostrarCampos() {
+    const tipo = document.getElementById('tipoResultado').value;
+    document.getElementById('campoNumerico').style.display = tipo === 'numerico' ? 'block' : 'none';
+    document.getElementById('campoTexto').style.display = tipo === 'texto' ? 'block' : 'none';
+    document.getElementById('campoBooleano').style.display = tipo === 'booleano' ? 'block' : 'none';
+    document.getElementById('campoJson').style.display = tipo === 'json' ? 'block' : 'none';
+}
+
+function validateJson(str) {
+    try {
+        JSON.parse(str);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+document.getElementById('resultadoForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const tipo = document.getElementById('tipoResultado').value;
+    if (tipo === 'json') {
+        const jsonField = document.getElementById('parametrosJson');
+        if (jsonField.value && !validateJson(jsonField.value)) {
+            document.getElementById('jsonError').style.display = 'block';
+            jsonField.focus();
+            return;
+        }
+    }
+    
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData.entries());
+    
+    fetch(`/tecnico/api/resultado/${data.detalle_id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'applic
