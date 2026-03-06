@@ -81,6 +81,7 @@ class Entrada(db.Model):
     rama = db.relationship('Rama', backref='entradas', lazy=True)
     unidad_medida = db.relationship('UnidadMedida', backref='entradas', lazy=True)
     status_history = db.relationship('StatusHistory', back_populates='entrada', lazy=True)
+    utilizados = db.relationship("Utilizado", back_populates="entrada", lazy="dynamic")
     
     def __repr__(self):
         return f'<Entrada {self.codigo}>'

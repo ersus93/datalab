@@ -35,6 +35,7 @@ def register_routes(app):
     from .detalle_ensayo_api import detalle_ensayo_api_bp, ensayos_catalog_bp
     from .detalle_ensayo import detalle_ensayo_bp
     from .lab import lab_bp
+    from .billing_api import billing_bp
     from .tecnico import tecnico_bp
     from .admin import admin_bp
 
@@ -60,6 +61,7 @@ def register_routes(app):
     app.register_blueprint(detalle_ensayo_bp)
     app.register_blueprint(lab_bp)
     app.register_blueprint(tecnico_bp)
+    app.register_blueprint(billing_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(notifications_api_bp, url_prefix='/api/notifications')
     app.register_blueprint(dashboard_api_bp, url_prefix='/api/dashboard')

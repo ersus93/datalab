@@ -34,7 +34,7 @@ class Ensayo(db.Model):
     # Relaciones
     area = db.relationship('Area', back_populates='ensayos')
     # detalles = relationship('DetalleEnsayo', back_populates='ensayo') - Phase 2
-    # utilizados = relationship('Utilizado', back_populates='ensayo') - Phase 2
+        utilizados = relationship('Utilizado', back_populates='ensayo') - Phase 2
 
     # Many-to-many con Producto (Phase 1 Issue #3)
     productos = db.relationship(

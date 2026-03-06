@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Facturación y Uso') }} - DataLab{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="h3 mb-4">
+        <i class="fas fa-file-invoice-dollar"></i> {{ _('Facturación y Uso') }}
+    </h1>
+
+    {# Tabs #}
+    <ul class="nav nav-tabs mb-4" id="billingTabs" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#pendientes">
+                {{ _('Pendientes de Facturación') }}
+                <span class="badge bg-warning">{{ pendientes_count }}</span>
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#facturas">
+                {{ _('Facturas') }}
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#resumen">
+                {{ _('Resumen por Ensayo') }}
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        {# Pendientes #}
+        <div class="tab-pane fade show active" id="pendientes">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ _('Registros Pendientes') }}</h5>
+                    <button class="btn btn-primary btn-sm" onclick="generarFactura()">
+                        <i class="fas fa-file-invoice"></i> {{ _('Generar Factura') }}
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="tablaPendientes">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" id="selectAll"></th>
+                                    <th>{{ _('Fecha') }}</th>
+                                    <th>{{ _('Entrada') }}</th>
+                                    <th>{{ _('Ensayo') }}</th>
+                                    <th>{{ _('Cantidad') }}</th>
+                                    <th>{{ _('Precio Unit.') }}</th>
+                                    <th>{{ _('Importe') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for u in pendientes %}
+                                <tr>
+                                    <td><input type="checkbox" class="sel-item" value="{{ u.id }}"></td>
+                                    <td>{{ u.fecha_uso.strftime('%d/%m/%Y') if u.fecha_uso else '-' }}</td>
+                                    <td>{{ u.entrada.lote if u.entrada else '-' }}</td>
+                                    <td>{{ u.ensayo.nombre_corto if u.ensayo else '-' }}</td>
+                                    <td>{{ u.cantidad }}</td>
+                                    <td>${{ "%.2f"|format(u.precio_unitario) }}</td>
+                                    <td>${{ "%.2f"|format(u.importe) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-success">
+                                    <td colspan="6" class="text-end"><strong>{{ _('Total') }}:</strong></td>
+                                    <td><strong>${{ "%.2f"|format(total_pendiente) }}</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Facturas #}
+        <div class="tab-pane fade" id="facturas">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ _('Facturas Emitidas') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>{{ _('Número') }}</th>
+                                    <th>{{ _('Fecha') }}</th>
+                                    <th>{{ _('Cliente') }}</th>
+                                    <th>{{ _('Total') }}</th>
+                                    <th>{{ _('Estado') }}</th>
+                                    <th>{{ _('Acciones') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for f in facturas %}
+                                <tr>
+                                    <td>{{ f.numero_factura }}</td>
+                                    <td>{{ f.fecha_emision.strftime('%d/%m/%Y') if f.fecha_emision else '-' }}</td>
+                                    <td>{{ f.cliente.razon_social if f.cliente else '-' }}</td>
+                                    <td>${{ "%.2f"|format(f.total) }}</td>
+                                    <td>
+                                        <span class="badge {{ 'bg-secondary' if f.estado == 'BORRADOR' else 'bg-primary' if f.estado == 'EMITIDA' else 'bg-success' if f.estado == 'PAGADA' else 'bg-danger' }}">
+                                            {{ f.estado }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-info" onclick="verFactura({{ f.id }})">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Resumen #}
+        <div class="tab-pane fade" id="resumen">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ _('Resumen por Tipo de Ensayo') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>{{ _('Ensayo') }}</th>
+                                    <th>{{ _('Cantidad') }}</th>
+                                    <th>{{ _('Importe Total') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for r in resumen %}
+                                <tr>
+                                    <td>{{ r.ensayo }}</td>
+                                    <td>{{ r.cantidad }}</td>
+                                    <td>${{ "%.2f"|format(r.total) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('selectAll').addEventListener('change', function() {
+    document.querySelectorAll('.sel-item').forEach(cb => cb.checked = this.checked);
+});
+
+function generarFactura() {
+    const ids = Array.from(document.querySelectorAll('.sel-item:checked')).map(cb => cb.value);
+    if (ids.length === 0) {
+        alert('Selecciona al menos un registro');
+        return;
+    }
+    const numero = prompt('Número de factura:');
+    if (!numero) return;
+    
+    fetch('/api/billing/facturas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            cliente_id: {{ current_user.id 
