@@ -11,6 +11,9 @@ from .pedido import Pedido
 from .producto import Producto
 from .orden_trabajo import OrdenTrabajo
 from .entrada import Entrada, EntradaStatus
+from .informe import Informe, InformeStatus, TipoInforme, MedioEntrega, InformeEnsayo
+from .plantilla_informe import PlantillaInforme
+from .informe_history import InformeHistory
 from .reference import (
     Area,
     Organismo,
@@ -42,6 +45,13 @@ __all__ = [
     'OrdenTrabajo',
     'Entrada',
     'EntradaStatus',
+    'Informe',
+    'InformeStatus',
+    'TipoInforme',
+    'MedioEntrega',
+    'InformeEnsayo',
+    'PlantillaInforme',
+    'InformeHistory',
     'Area',
     'Organismo',
     'Provincia',
