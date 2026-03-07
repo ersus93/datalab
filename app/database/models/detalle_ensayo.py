@@ -15,11 +15,13 @@ class DetalleEnsayoStatus(Enum):
 
     Flujo de trabajo:
         PENDIENTE → ASIGNADO → EN_PROCESO → COMPLETADO → REPORTADO
+        El estado PAUSADO permite interrumpir temporalmente EN_PROCESO.
     """
 
     PENDIENTE = "PENDIENTE"
     ASIGNADO = "ASIGNADO"
     EN_PROCESO = "EN_PROCESO"
+    PAUSADO = "PAUSADO"
     COMPLETADO = "COMPLETADO"
     REPORTADO = "REPORTADO"
 
@@ -87,6 +89,7 @@ class DetalleEnsayo(db.Model):
             DetalleEnsayoStatus.PENDIENTE.value,
             DetalleEnsayoStatus.ASIGNADO.value,
             DetalleEnsayoStatus.EN_PROCESO.value,
+            DetalleEnsayoStatus.PAUSADO.value,
             DetalleEnsayoStatus.COMPLETADO.value,
             DetalleEnsayoStatus.REPORTADO.value,
             name="detalle_ensayo_status",
@@ -95,6 +98,13 @@ class DetalleEnsayo(db.Model):
         nullable=False,
     )
     observaciones = db.Column(db.Text, nullable=True)
+
+    # Campos para resultados de ensayo
+    valor_numerico = db.Column(db.Numeric(12, 4), nullable=True)
+    valor_texto = db.Column(db.Text, nullable=True)
+    valor_booleano = db.Column(db.Boolean, nullable=True)
+    parametros_json = db.Column(db.Text, nullable=True)
+    resultado_cumple = db.Column(db.Boolean, nullable=True)
 
     # Fechas de seguimiento del flujo de trabajo
     fecha_asignacion = db.Column(db.DateTime, nullable=True)
@@ -119,7 +129,11 @@ class DetalleEnsayo(db.Model):
     VALID_TRANSITIONS: ClassVar[dict[str, list[str]]] = {
         DetalleEnsayoStatus.PENDIENTE.value: [DetalleEnsayoStatus.ASIGNADO.value],
         DetalleEnsayoStatus.ASIGNADO.value: [DetalleEnsayoStatus.EN_PROCESO.value],
-        DetalleEnsayoStatus.EN_PROCESO.value: [DetalleEnsayoStatus.COMPLETADO.value],
+        DetalleEnsayoStatus.EN_PROCESO.value: [
+            DetalleEnsayoStatus.COMPLETADO.value,
+            DetalleEnsayoStatus.PAUSADO.value,
+        ],
+        DetalleEnsayoStatus.PAUSADO.value: [DetalleEnsayoStatus.EN_PROCESO.value],
         DetalleEnsayoStatus.COMPLETADO.value: [DetalleEnsayoStatus.REPORTADO.value],
         DetalleEnsayoStatus.REPORTADO.value: [],
     }
@@ -166,6 +180,11 @@ class DetalleEnsayo(db.Model):
                 else None
             ),
             "observaciones": self.observaciones,
+            "valor_numerico": float(self.valor_numerico) if self.valor_numerico else None,
+            "valor_texto": self.valor_texto,
+            "valor_booleano": self.valor_booleano,
+            "parametros_json": self.parametros_json,
+            "resultado_cumple": self.resultado_cumple,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }

@@ -30,11 +30,15 @@ class Ensayo(db.Model):
     activo = db.Column(db.Boolean, default=True, nullable=False)
     es_ensayo = db.Column(db.Boolean, default=True, nullable=False)
     creado_en = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Especificaciones para validación de resultados
+    especificacion_min = db.Column(db.Numeric(10, 4), nullable=True)
+    especificacion_max = db.Column(db.Numeric(10, 4), nullable=True)
+    especificacion_unidad = db.Column(db.String(20), nullable=True)
 
     # Relaciones
     area = db.relationship('Area', back_populates='ensayos')
-    # detalles = relationship('DetalleEnsayo', back_populates='ensayo') - Phase 2
-        utilizados = relationship('Utilizado', back_populates='ensayo') - Phase 2
+    detalles = db.relationship('DetalleEnsayo', back_populates='ensayo')
 
     # Many-to-many con Producto (Phase 1 Issue #3)
     productos = db.relationship(
@@ -69,4 +73,7 @@ class Ensayo(db.Model):
             'unidad_medida': self.unidad_medida,
             'activo': self.activo,
             'es_ensayo': self.es_ensayo,
+            'especificacion_min': str(self.especificacion_min) if self.especificacion_min else None,
+            'especificacion_max': str(self.especificacion_max) if self.especificacion_max else None,
+            'especificacion_unidad': self.especificacion_unidad,
         }

@@ -10,7 +10,7 @@
 
     {# Stats Cards #}
     <div class="row mb-4">
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div class="card bg-primary text-white">
                 <div class="card-body">
                     <h5 class="card-title">{{ _('Asignados') }}</h5>
@@ -18,7 +18,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div class="card bg-warning text-dark">
                 <div class="card-body">
                     <h5 class="card-title">{{ _('En Proceso') }}</h5>
@@ -26,15 +26,23 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-success text-white">
+        <div class="col-md-2">
+            <div class="card bg-secondary text-white">
                 <div class="card-body">
-                    <h5 class="card-title">{{ _('Completados Hoy') }}</h5>
-                    <h2 class="mb-0">{{ stats.completado }}</h2>
+                    <h5 class="card-title">{{ _('Pausados') }}</h5>
+                    <h2 class="mb-0">{{ stats.pausado }}</h2>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">{{ _('Completados Hoy') }}</h5>
+                    <h2 class="mb-0">{{ stats.completado_hoy }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
             <div class="card bg-info text-white">
                 <div class="card-body">
                     <h5 class="card-title">{{ _('Reportados') }}</h5>
@@ -42,88 +50,172 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    {# Area Filter #}
-    <div class="row mb-3">
-        <div class="col-md-12">
-            <div class="btn-group" role="group">
-                <a href="{{ url_for('tecnico.dashboard') }}" class="btn btn-outline-primary {{ 'active' if not request.args.get('area') }}">
-                    {{ _('Todas las Áreas') }}
-                </a>
-                <a href="{{ url_for('tecnico.dashboard', area='FQ') }}" class="btn btn-outline-primary {{ 'active' if request.args.get('area') == 'FQ' }}">FQ</a>
-                <a href="{{ url_for('tecnico.dashboard', area='MB') }}" class="btn btn-outline-primary {{ 'active' if request.args.get('area') == 'MB' }}">MB</a>
-                <a href="{{ url_for('tecnico.dashboard', area='ES') }}" class="btn btn-outline-primary {{ 'active' if request.args.get('area') == 'ES' }}">ES</a>
-                <a href="{{ url_for('tecnico.dashboard', area='OS') }}" class="btn btn-outline-primary {{ 'active' if request.args.get('area') == 'OS' }}">OS</a>
+        <div class="col-md-2">
+            <div class="card bg-dark text-white">
+                <div class="card-body">
+                    <h5 class="card-title">{{ _('Métricas') }}</h5>
+                    <a href="{{ url_for('tecnico.metricas') }}" class="btn btn-light btn-sm">
+                        <i class="fas fa-chart-bar"></i> {{ _('Ver') }}
+                    </a>
+                </div>
             </div>
         </div>
     </div>
 
-    {# Pending Tests by Area #}
-    {% for area, detalles in ensayos_por_area.items() %}
-    <div class="card mb-4">
-        <div class="card-header bg-light">
-            <h5 class="mb-0">
-                <i class="fas fa-flask"></i> {{ _('Área') }}: {{ area }}
-                <span class="badge bg-secondary">{{ detalles|length }}</span>
-            </h5>
+    {# Alerts Section #}
+    {% if alertas_vencimiento %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <h5 class="alert-heading">
+            <i class="fas fa-exclamation-triangle"></i> {{ _('Alertas de Vencimiento') }}
+        </h5>
+        <p class="mb-2">{{ _('Los siguientes ensayos llevan más de 3 días sin completarse:') }}</p>
+        <ul class="mb-0">
+            {% for alerta in alertas_vencimiento[:5] %}
+            <li>
+                <strong>{{ alerta.ensayo.nombre_corto if alerta.ensayo else _('Sin nombre') }}</strong>
+                - {{ alerta.entrada.producto.nombre if alerta.entrada and alerta.entrada.producto else _('Sin producto') }}
+                ({{ _('Asignado') }}: {{ alerta.fecha_asignacion.strftime('%d/%m/%Y') if alerta.fecha_asignacion else '-' }})
+            </li>
+            {% endfor %}
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
+    <div class="row mb-4">
+        {# Área de Pendientes #}
+        <div class="col-md-8">
+            {# Area Filter #}
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <div class="btn-group" role="group">
+                        <a href="{{ url_for('tecnico.dashboard') }}" class="btn btn-outline-primary {{ 'active' if not request.args.get('area') }}">
+                            {{ _('Todas las Áreas') }}
+                        </a>
+                        <a href="{{ url_for('tecnico.dashboard', area='FQ') }}" class="btn btn-outline-primary {{ 'active' if request.args.get('area') == 'FQ' }}">FQ</a>
+                        <a href="{{ url_for('tecnico.dashboard', area='MB') }}" class="btn btn-outline-primary {{ 'active' if request.args.get('area') == 'MB' }}">MB</a>
+                        <a href="{{ url_for('tecnico.dashboard', area='ES') }}" class="btn btn-outline-primary {{ 'active' if request.args.get('area') == 'ES' }}">ES</a>
+                        <a href="{{ url_for('tecnico.dashboard', area='OS') }}" class="btn btn-outline-primary {{ 'active' if request.args.get('area') == 'OS' }}">OS</a>
+                    </div>
+                </div>
+            </div>
+
+            {# Pending Tests by Area #}
+            {% for area, detalles in pendientes_por_area.items() %}
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-flask"></i> {{ _('Área') }}: {{ area }}
+                        <span class="badge bg-secondary">{{ detalles|length }}</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if detalles %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" id="select-all-{{ area }}" onclick="toggleAll('{{ area }}')"></th>
+                                    <th>{{ _('Ensayo') }}</th>
+                                    <th>{{ _('Producto') }}</th>
+                                    <th>{{ _('Estado') }}</th>
+                                    <th>{{ _('Acciones') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for d in detalles %}
+                                <tr class="{{ 'table-warning' if d.estado == 'PAUSADO' else '' }}">
+                                    <td><input type="checkbox" name="detalle_ids" value="{{ d.id }}" class="detalle-checkbox"></td>
+                                    <td>{{ d.ensayo.nombre_corto if d.ensayo else _('Sin ensayo') }}</td>
+                                    <td>{{ d.entrada.producto.nombre if d.entrada and d.entrada.producto else _('Sin producto') }}</td>
+                                    <td>
+                                        <span class="badge 
+                                            {{ 'bg-secondary' if d.estado == 'PENDIENTE' else
+                                               'bg-primary' if d.estado == 'ASIGNADO' else
+                                               'bg-warning' if d.estado == 'EN_PROCESO' else
+                                               'bg-info' if d.estado == 'PAUSADO' else
+                                               'bg-success' if d.estado == 'COMPLETADO' else
+                                               'bg-dark' }}">
+                                            {{ d.estado }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if d.estado == 'ASIGNADO' %}
+                                        <button class="btn btn-sm btn-primary" onclick="iniciarEnsayo({{ d.id }})">
+                                            <i class="fas fa-play"></i> {{ _('Iniciar') }}
+                                        </button>
+                                        {% elif d.estado == 'EN_PROCESO' %}
+                                        <a href="{{ url_for('tecnico.ejecutar', detalle_id=d.id) }}" class="btn btn-sm btn-success">
+                                            <i class="fas fa-check"></i> {{ _('Ejecutar') }}
+                                        </a>
+                                        <button class="btn btn-sm btn-outline-warning" onclick="pausarEnsayo({{ d.id }})">
+                                            <i class="fas fa-pause"></i> {{ _('Pausar') }}
+                                        </button>
+                                        {% elif d.estado == 'PAUSADO' %}
+                                        <button class="btn btn-sm btn-outline-success" onclick="reanudarEnsayo({{ d.id }})">
+                                            <i class="fas fa-play"></i> {{ _('Reanudar') }}
+                                        </button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-2">
+                        <button class="btn btn-primary btn-sm" onclick="batchIniciar('{{ area }}')">
+                            <i class="fas fa-play"></i> {{ _('Iniciar Selección') }}
+                        </button>
+                    </div>
+                    {% else %}
+                    <p class="text-muted mb-0">{{ _('No hay ensayos pendientes en esta área.') }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
         </div>
-        <div class="card-body">
-            {% if detalles %}
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th><input type="checkbox" id="select-all-{{ area }}" onclick="toggleAll('{{ area }}')"></th>
-                            <th>{{ _('Ensayo') }}</th>
-                            <th>{{ _('Producto') }}</th>
-                            <th>{{ _('Estado') }}</th>
-                            <th>{{ _('Acciones') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for d in detalles %}
-                        <tr>
-                            <td><input type="checkbox" name="detalle_ids" value="{{ d.id }}" class="detalle-checkbox"></td>
-                            <td>{{ d.ensayo.nombre_corto if d.ensayo else _('Sin ensayo') }}</td>
-                            <td>{{ d.entrada.producto.nombre if d.entrada and d.entrada.producto else _('Sin producto') }}</td>
-                            <td>
-                                <span class="badge 
-                                    {{ 'bg-secondary' if d.estado == 'PENDIENTE' else
-                                       'bg-primary' if d.estado == 'ASIGNADO' else
-                                       'bg-warning' if d.estado == 'EN_PROCESO' else
-                                       'bg-success' if d.estado == 'COMPLETADO' else
-                                       'bg-info' }}">
-                                    {{ d.estado }}
-                                </span>
-                            </td>
-                            <td>
-                                {% if d.estado == 'ASIGNADO' %}
-                                <button class="btn btn-sm btn-primary" onclick="iniciarEnsayo({{ d.id }})">
-                                    <i class="fas fa-play"></i> {{ _('Iniciar') }}
-                                </button>
-                                {% elif d.estado == 'EN_PROCESO' %}
-                                <a href="{{ url_for('tecnico.ejecutar', detalle_id=d.id) }}" class="btn btn-sm btn-success">
-                                    <i class="fas fa-check"></i> {{ _('Ejecutar') }}
-                                </a>
-                                {% endif %}
-                            </td>
-                        </tr>
+
+        {# Actividad Reciente #}
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history"></i> {{ _('Actividad Reciente') }}
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if actividad_reciente %}
+                    <div class="list-group list-group-flush">
+                        {% for item in actividad_reciente %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ item.ensayo.nombre_corto if item.ensayo else _('Sin nombre') }}</strong>
+                                    <br>
+                                    <small class="text-muted">
+                                        {{ item.entrada.producto.nombre if item.entrada and item.entrada.producto else _('Sin producto') }}
+                                    </small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge {{ 'bg-success' if item.estado == 'COMPLETADO' else 'bg-info' if item.estado == 'REPORTADO' else 'bg-secondary' }}">
+                                        {{ item.estado }}
+                                    </span>
+                                    <br>
+                                    <small class="text-muted">
+                                        {{ item.fecha_completado.strftime('%d/%m %H:%M') if item.fecha_completado else '-' }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
                         {% endfor %}
-                    </tbody>
-                </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center p-3 mb-0">{{ _('Sin actividad reciente.') }}</p>
+                    {% endif %}
+                </div>
             </div>
-            <div class="mt-2">
-                <button class="btn btn-primary btn-sm" onclick="batchIniciar('{{ area }}')">
-                    <i class="fas fa-play"></i> {{ _('Iniciar Selección') }}
-                </button>
-            </div>
-            {% else %}
-            <p class="text-muted mb-0">{{ _('No hay ensayos pendientes en esta área.') }}</p>
-            {% endif %}
         </div>
     </div>
-    {% endfor %}
 </div>
 {% endblock %}
 
@@ -146,6 +238,36 @@ function iniciarEnsayo(detalleId) {
             location.reload();
         } else {
             alert(data.message || 'Error al iniciar ensayo');
+        }
+    });
+}
+
+function pausarEnsayo(detalleId) {
+    fetch(`/tecnico/api/pausar/${detalleId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.message || 'Error al pausar ensayo');
+        }
+    });
+}
+
+function reanudarEnsayo(detalleId) {
+    fetch(`/tecnico/api/reanudar/${detalleId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.message || 'Error al reanudar ensayo');
         }
     });
 }

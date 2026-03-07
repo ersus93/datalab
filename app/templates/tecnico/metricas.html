@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Métricas del Técnico') }} - DataLab{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('tecnico.dashboard') }}">{{ _('Panel del Técnico') }}</a></li>
+            <li class="breadcrumb-item active">{{ _('Métricas') }}</li>
+        </ol>
+    </nav>
+
+    <h1 class="h3 mb-4">
+        <i class="fas fa-chart-bar"></i> {{ _('Métricas del Técnico') }}
+    </h1>
+
+    {# Stats Cards #}
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-primary">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">{{ _('Completados Hoy') }}</h5>
+                    <h2 class="mb-0">{{ stats.completados_hoy }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-success">
+                <div class="card-body">
+                    <h5 class="card-title text-success">{{ _('Esta Semana') }}</h5>
+                    <h2 class="mb-0">{{ stats.completados_semana }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-info">
+                <div class="card-body">
+                    <h5 class="card-title text-info">{{ _('Este Mes') }}</h5>
+                    <h2 class="mb-0">{{ stats.completados_mes }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <h5 class="card-title text-warning">{{ _('Eficiencia') }}</h5>
+                    <h2 class="mb-0">{{ stats.eficiencia }}%</h2>
+                    <small class="text-muted">{{ _('En menos de 48h') }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        {# Tests por Tipo - Gráfico de Barras #}
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie"></i> {{ _('Tests Completados por Tipo') }}</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartTipo"></canvas>
+                </div>
+            </div>
+        </div>
+
+        {# Tendencia Semanal #}
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-line"></i> {{ _('Tendencia Semanal') }}</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartTendencia"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Indicadores de Estado #}
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-tasks"></i> {{ _('Estado Actual') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <div class="p-3 bg-primary text-white rounded">
+                                <h3>{{ stats.en_proceso }}</h3>
+                                <small>{{ _('En Proceso') }}</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 bg-warning text-dark rounded">
+                                <h3>{{ stats.pausados }}</h3>
+                                <small>{{ _('Pausados') }}</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 bg-success text-white rounded">
+                                <h3>{{ stats.total_completados }}</h3>
+                                <small>{{ _('Total Completados') }}</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 bg-info text-white rounded">
+                                <h3>{{ stats.completados_mes }}</h3>
+                                <small>{{ _('Este Mes') }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Chart de Tests por Tipo
+    const ctxTipo = document.getElementById('chartTipo');
+    if (ctxTipo) {
+        new Chart(ctxTipo, {
+            type: 'bar',
+            data: {
+                labels: {{ stats.tests_por_tipo.keys()|list|tojson }},
+                datasets: [{
+                    label: {{ _('Tests Completados')|tojson }},
+                    data: {{ stats.tests_por_tipo.values()|list|tojson }},
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(153, 102, 255, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                }
+            }
+        });
+    }
+
+    // Chart de Tendencia Semanal
+    const ctxTendencia = document.getElementById('chartTendencia');
+    if (ctxTendencia) {
+        new Chart(ctxTendencia, {
+            type: 'line',
+            data: {
+                labels: {{ stats.tendencia_semanal|map(attribute='dia')|list|tojson }},
+                datasets: [{
+                    label: {{ _('Tests Completados')|tojson }},
+                    data: {{ stats.tendencia_semanal|map(attribute='count')|list|tojson }},
+                    fill: true,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

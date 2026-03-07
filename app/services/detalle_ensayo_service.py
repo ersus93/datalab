@@ -328,6 +328,99 @@ class DetalleEnsayoService:
         return detalle
 
     @classmethod
+    def pausar_ensayo(cls, detalle_id: int, usuario_id: int):
+        """
+        Pausar un ensayo en proceso.
+
+        Realiza la transición EN_PROCESO → PAUSADO. El ensayo puede ser
+        reanudado posteriormente.
+
+        Args:
+            detalle_id: ID del DetalleEnsayo a pausar.
+            usuario_id: ID del usuario que pausa el ensayo.
+
+        Returns:
+            DetalleEnsayo: Instancia actualizada.
+
+        Raises:
+            ValueError: Si el detalle no existe o la transición no es válida.
+        """
+        from app.database.models.audit import AuditLog
+        from app.database.models.detalle_ensayo import DetalleEnsayo, DetalleEnsayoStatus
+
+        detalle = DetalleEnsayo.query.get(detalle_id)
+        if not detalle:
+            raise ValueError(f'DetalleEnsayo con id={detalle_id} no encontrado')
+
+        if not detalle.can_transition(DetalleEnsayoStatus.PAUSADO):
+            raise ValueError(
+                f'Transición no válida: {detalle.estado} → {DetalleEnsayoStatus.PAUSADO}'
+            )
+
+        valores_anteriores = {'estado': detalle.estado}
+
+        detalle.estado = DetalleEnsayoStatus.PAUSADO
+        detalle.updated_at = datetime.utcnow()
+
+        AuditLog.log_change(
+            user_id=usuario_id,
+            action='UPDATE',
+            table_name='detalle_ensayos',
+            record_id=detalle.id,
+            old_values=valores_anteriores,
+            new_values={'estado': detalle.estado},
+        )
+
+        db.session.commit()
+        return detalle
+
+    @classmethod
+    def reanudar_ensayo(cls, detalle_id: int, usuario_id: int):
+        """
+        Reanudar un ensayo pausado.
+
+        Realiza la transición PAUSADO → EN_PROCESO.
+
+        Args:
+            detalle_id: ID del DetalleEnsayo a reanudar.
+            usuario_id: ID del usuario que reanuda el ensayo.
+
+        Returns:
+            DetalleEnsayo: Instancia actualizada.
+
+        Raises:
+            ValueError: Si el detalle no existe o la transición no es válida.
+        """
+        from app.database.models.audit import AuditLog
+        from app.database.models.detalle_ensayo import DetalleEnsayo, DetalleEnsayoStatus
+
+        detalle = DetalleEnsayo.query.get(detalle_id)
+        if not detalle:
+            raise ValueError(f'DetalleEnsayo con id={detalle_id} no encontrado')
+
+        if not detalle.can_transition(DetalleEnsayoStatus.EN_PROCESO):
+            raise ValueError(
+                f'Transición no válida: {detalle.estado} → {DetalleEnsayoStatus.EN_PROCESO}'
+            )
+
+        valores_anteriores = {'estado': detalle.estado}
+
+        detalle.estado = DetalleEnsayoStatus.EN_PROCESO
+        detalle.updated_at = datetime.utcnow()
+
+        AuditLog.log_change(
+            user_id=usuario_id,
+            action='UPDATE',
+            table_name='detalle_ensayos',
+            record_id=detalle.id,
+            old_values=valores_anteriores,
+            new_values={'estado': detalle.estado},
+        )
+
+        db.session.commit()
+        return detalle
+
+    @classmethod
     def reportar_ensayo(cls, detalle_id: int, usuario_id: int):
         """
         Marcar un ensayo como reportado.

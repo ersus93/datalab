@@ -114,6 +114,27 @@ def sample_detalle_en_proceso(db_session, sample_entrada, sample_ensayo, admin_u
     return detalle
 
 
+@pytest.fixture
+def sample_detalle_pausado(db_session, sample_entrada, sample_ensayo, admin_user):
+    """DetalleEnsayo en estado PAUSADO."""
+    from app.database.models.detalle_ensayo import DetalleEnsayo, DetalleEnsayoStatus
+    ahora = datetime.utcnow()
+    detalle = DetalleEnsayo(
+        entrada_id=sample_entrada.id,
+        ensayo_id=sample_ensayo.id,
+        cantidad=1,
+        estado=DetalleEnsayoStatus.PAUSADO.value,
+        tecnico_asignado_id=admin_user.id,
+        fecha_asignacion=ahora,
+        fecha_inicio=ahora,
+        created_at=ahora,
+        updated_at=ahora,
+    )
+    db_session.add(detalle)
+    db_session.flush()
+    return detalle
+
+
 # ---------------------------------------------------------------------------
 # TestAsignarEnsayos
 # ---------------------------------------------------------------------------
@@ -358,6 +379,65 @@ class TestEliminar:
         """ValueError si el detalle no existe."""
         with pytest.raises(ValueError, match='no encontrado'):
             DetalleEnsayoService.eliminar_detalle(
+                detalle_id=999999,
+                usuario_id=admin_user.id,
+            )
+
+
+# ---------------------------------------------------------------------------
+# TestPausarReanudar
+# ---------------------------------------------------------------------------
+
+class TestPausarReanudar:
+    """Tests para los métodos pausar_ensayo y reanudar_ensayo."""
+
+    def test_pausar_ensayo(self, db_session, sample_detalle_en_proceso, admin_user):
+        """EN_PROCESO → PAUSADO: cambia el estado del detalle."""
+        from app.database.models.detalle_ensayo import DetalleEnsayo, DetalleEnsayoStatus
+
+        with patch.object(DetalleEnsayo, 'can_transition', return_value=True):
+            resultado = DetalleEnsayoService.pausar_ensayo(
+                detalle_id=sample_detalle_en_proceso.id,
+                usuario_id=admin_user.id,
+            )
+
+        assert resultado.estado == DetalleEnsayoStatus.PAUSADO.value
+
+    def test_pausar_ensayo_detalle_inexistente(self, db_session, admin_user):
+        """ValueError si el detalle no existe."""
+        with pytest.raises(ValueError, match='no encontrado'):
+            DetalleEnsayoService.pausar_ensayo(
+                detalle_id=999999,
+                usuario_id=admin_user.id,
+            )
+
+    def test_pausar_ensayo_transicion_invalida(self, db_session, sample_detalle_pendiente, admin_user):
+        """ValueError si la transición no es válida."""
+        from app.database.models.detalle_ensayo import DetalleEnsayo
+
+        with patch.object(DetalleEnsayo, 'can_transition', return_value=False):
+            with pytest.raises(ValueError, match='Transición no válida'):
+                DetalleEnsayoService.pausar_ensayo(
+                    detalle_id=sample_detalle_pendiente.id,
+                    usuario_id=admin_user.id,
+                )
+
+    def test_reanudar_ensayo(self, db_session, sample_detalle_pausado, admin_user):
+        """PAUSADO → EN_PROCESO: cambia el estado del detalle."""
+        from app.database.models.detalle_ensayo import DetalleEnsayo, DetalleEnsayoStatus
+
+        with patch.object(DetalleEnsayo, 'can_transition', return_value=True):
+            resultado = DetalleEnsayoService.reanudar_ensayo(
+                detalle_id=sample_detalle_pausado.id,
+                usuario_id=admin_user.id,
+            )
+
+        assert resultado.estado == DetalleEnsayoStatus.EN_PROCESO.value
+
+    def test_reanudar_ensayo_detalle_inexistente(self, db_session, admin_user):
+        """ValueError si el detalle no existe."""
+        with pytest.raises(ValueError, match='no encontrado'):
+            DetalleEnsayoService.reanudar_ensayo(
                 detalle_id=999999,
                 usuario_id=admin_user.id,
             )
