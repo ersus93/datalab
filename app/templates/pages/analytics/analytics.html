@@ -1,0 +1,258 @@
+{% extends "base/base.html" %}
+
+{% block title %}Analytics Dashboard - DataLab{% endblock %}
+{% block description %}Panel de análisis con métricas del laboratorio{% endblock %}
+
+{% block extra_css %}
+<!-- Plotly.js -->
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+<style>
+    .analytics-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .analytics-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    .kpi-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+    .chart-container {
+        min-height: 350px;
+    }
+    .loading-spinner {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 300px;
+    }
+    .status-pending { color: #f59e0b; }
+    .status-completed { color: #10b981; }
+    .status-processing { color: #3b82f6; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <h1 class="h3 mb-1">
+                        <i class="fas fa-chart-line text-primary me-2"></i>
+                        Analytics Dashboard
+                    </h1>
+                    <p class="text-muted mb-0">Panel de análisis del laboratorio</p>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-secondary" id="cache-status">
+                        <i class="fas fa-database me-1"></i>
+                        <span id="cache-info">Cargando...</span>
+                    </span>
+                    <button class="btn btn-outline-primary btn-sm" onclick="AnalyticsDashboard.refresh()">
+                        <i class="fas fa-sync-alt me-1"></i> Actualizar
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm" onclick="AnalyticsDashboard.clearCache()">
+                        <i class="fas fa-trash me-1"></i> Limpiar caché
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPIs Row -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card analytics-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Ensayos Pendientes</p>
+                            <div class="kpi-value status-pending" id="kpi-pending">--</div>
+                        </div>
+                        <div class="p-2 bg-warning bg-opacity-10 rounded">
+                            <i class="fas fa-clock text-warning fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card analytics-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Ensayos Completados</p>
+                            <div class="kpi-value status-completed" id="kpi-completed">--</div>
+                        </div>
+                        <div class="p-2 bg-success bg-opacity-10 rounded">
+                            <i class="fas fa-check-circle text-success fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card analytics-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Este Mes</p>
+                            <div class="kpi-value status-processing" id="kpi-month">--</div>
+                        </div>
+                        <div class="p-2 bg-primary bg-opacity-10 rounded">
+                            <i class="fas fa-calendar-check text-primary fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card analytics-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Entradas Pendientes</p>
+                            <div class="kpi-value" id="kpi-entries">--</div>
+                        </div>
+                        <div class="p-2 bg-info bg-opacity-10 rounded">
+                            <i class="fas fa-inbox text-info fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 1 -->
+    <div class="row g-4 mb-4">
+        <!-- Timeline de completados -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-area text-primary me-2"></i>
+                        Determinaciones Completadas (Timeline)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" id="chart-timeline"></div>
+                </div>
+            </div>
+        </div>
+        <!-- Muestreos por tipo cliente -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-pie text-info me-2"></i>
+                        Muestreos por Tipo Cliente
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" id="chart-muestreos"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 2 -->
+    <div class="row g-4 mb-4">
+        <!-- ES Pendientes -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-flask text-warning me-2"></i>
+                        Análisis Sensorial Pendiente
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" id="chart-es-pending"></div>
+                </div>
+            </div>
+        </div>
+        <!-- FQ Pendientes -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-vial text-info me-2"></i>
+                        Análisis FQ Pendiente
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" id="chart-fq-pending"></div>
+                </div>
+            </div>
+        </div>
+        <!-- MB Pendientes por técnico -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-user-md text-success me-2"></i>
+                        Microbiología Pendiente (por Técnico)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" id="chart-mb-pending"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lotes por tipo -->
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-boxes text-purple me-2"></i>
+                        Lotes Analizados por Tipo de Muestra y Cliente
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="table-lotes">
+                            <thead>
+                                <tr>
+                                    <th>Tipo de Muestra</th>
+                                    <th>Cliente</th>
+                                    <th class="text-end">Cantidad</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td colspan="3" class="text-center text-muted">Cargando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer info -->
+    <div class="row">
+        <div class="col-12">
+            <div class="text-center text-muted small">
+                <i class="fas fa-info-circle me-1"></i>
+                Los datos se actualizan automáticamente cada 5 minutos | 
+                Última actualización: <span id="last-update">--</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        AnalyticsDashboard.init();
+    });
+</script>
+{% endblock %}

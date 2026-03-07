@@ -72,6 +72,10 @@ def create_app(config_name: str = "development") -> Flask:
     babel.init_app(app, locale_selector=_get_locale)
     mail.init_app(app)
 
+    # Inicializar caché Redis
+    from app.utils.cache import cache
+    cache.init_app(app)
+
     # Configurar Flask-Login
     _configure_login_manager(app)
 
