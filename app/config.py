@@ -45,6 +45,7 @@ class DevelopmentConfig(BaseConfig):
         "DATABASE_URL", "sqlite:///datalab_dev.db"
     )
     SQLALCHEMY_ECHO = True
+    REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
 
 
 class TestingConfig(BaseConfig):
@@ -66,3 +67,5 @@ class ProductionConfig(BaseConfig):
         "max_overflow": 20,
     }
     SQLALCHEMY_ECHO = False
+    # Redis para caché
+    REDIS_URL = os.environ.get("REDIS_URL")

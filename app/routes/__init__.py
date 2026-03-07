@@ -2,6 +2,9 @@ from flask import Blueprint, render_template
 
 
 def register_routes(app):
+    # Importar analytics
+    from app.routes.analytics_api import analytics_api_bp
+    from app.routes.analytics import analytics_bp
     # Importar features PRIMERO (registran sus propios modelos ORM)
     from app.features.clientes.infrastructure.web.routes import clientes_bp
     from app.features.ensayos.infrastructure.web.routes import ensayos_bp
@@ -67,6 +70,8 @@ def register_routes(app):
     app.register_blueprint(admin_bp)
     app.register_blueprint(notifications_api_bp, url_prefix='/api/notifications')
     app.register_blueprint(dashboard_api_bp, url_prefix='/api/dashboard')
+    app.register_blueprint(analytics_api_bp, url_prefix='/api/analytics')
+    app.register_blueprint(analytics_bp)
 
     @app.route("/")
     def index():
