@@ -102,10 +102,29 @@ def _configure_login_manager(app: Flask):
         "LOGIN_MESSAGE_CATEGORY", "warning"
     )
 
+    # Skip login in development mode
+    if app.config.get('ENV') == 'development' or app.config.get('FLASK_ENV') == 'development':
+        @login_manager.unauthorized_callback
+        def unauthorized_callback():
+            from app.database.models.user import User
+            from flask_login import login_user
+            from flask import redirect, url_for
+            # Auto-login as admin
+            admin = User.query.filter_by(username='admin').first()
+            if admin:
+                login_user(admin)
+                return redirect(url_for('dashboard.index'))
+            return redirect(url_for('auth.login'))
+
     @login_manager.user_loader
     def load_user(user_id: str):
         """Carga el usuario por su ID."""
         from app.database.models.user import User
+        # En desarrollo, autologear como admin
+        if app.config.get('ENV') == 'development' or app.config.get('FLASK_ENV') == 'development':
+            admin = User.query.filter_by(username='admin').first()
+            if admin:
+                return admin
         return User.query.get(int(user_id))
 
 
