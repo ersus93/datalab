@@ -69,6 +69,7 @@ Thumbs.db
 
 # Migrations (optional - uncomment if you want to exclude)
 # migrations/
+data/migrations/
 
 # Testing
 .coverage

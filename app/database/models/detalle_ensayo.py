@@ -124,6 +124,7 @@ class DetalleEnsayo(db.Model):
     entrada = db.relationship("Entrada", backref="detalles_ensayo", lazy=True)
     ensayo = db.relationship("Ensayo", backref="detalles_ensayo", lazy=True)
     tecnico_asignado = db.relationship("User", backref="ensayos_asignados", lazy=True)
+    utilizados = db.relationship("Utilizado", back_populates="detalle_ensayo", lazy=True)
 
     # Mapa de transiciones válidas del estado del ensayo
     VALID_TRANSITIONS: ClassVar[dict[str, list[str]]] = {

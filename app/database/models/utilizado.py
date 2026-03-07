@@ -31,7 +31,7 @@ class Utilizado(db.Model):
     
     # Foreign Keys
     entrada_id = db.Column(db.Integer, ForeignKey('entradas.id'), nullable=False, index=True)
-    detalle_ensayo_id = db.Column(db.Integer, ForeignKey('detalle_ensayos.id'), nullable=True, index=True)
+    detalle_ensayo_id = db.Column(db.Integer, ForeignKey('detalles_ensayo.id'), nullable=True, index=True)
     ensayo_id = db.Column(db.Integer, ForeignKey('ensayos.id'), nullable=False, index=True)
     factura_id = db.Column(db.Integer, ForeignKey('facturas.id'), nullable=True, index=True)
     
@@ -52,8 +52,7 @@ class Utilizado(db.Model):
     # Relationships
     entrada = relationship('Entrada', back_populates='utilizados')
     detalle_ensayo = relationship('DetalleEnsayo', back_populates='utilizados')
-    ensayo = relationship('Ensayo', back_populates='utilizados')
-    factura = relationship('Factura', back_populates='utilizados')
+    ensayo = relationship('Ensayo', backref='utilizados')
     
     def __repr__(self):
         return f'<Utilizado {self.id} - Ensayo {self.ensayo_id}>'
@@ -99,18 +98,21 @@ class Factura(db.Model):
     actualizado_en = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships
-    cliente = relationship('Cliente', back_populates='facturas')
-    utilizados = relationship('Utilizado', back_populates='factura')
+    cliente = relationship('Cliente', backref='facturas')
     
     def __repr__(self):
         return f'<Factura {self.numero_factura}>'
     
     def calcular_total(self):
         """Calcula el total de la factura sumando los importados."""
-        self.total = sum(u.importe for u in self.utilizados if u.estado != 'ANULADO')
+        from app import db
+        utilizados = Utilizado.query.filter_by(factura_id=self.id).all()
+        self.total = sum(u.importe for u in utilizados if u.estado != 'ANULADO')
         return self.total
     
     def to_dict(self):
+        from app import db
+        utilizados = Utilizado.query.filter_by(factura_id=self.id).all()
         return {
             'id': self.id,
             'cliente_id': self.cliente_id,
@@ -118,7 +120,7 @@ class Factura(db.Model):
             'fecha_emision': self.fecha_emision.isoformat() if self.fecha_emision else None,
             'total': float(self.total) if self.total else 0,
             'estado': self.estado,
-            'utilizados_count': len(self.utilizados)
+            'utilizados_count': len(utilizados)
         }
 
 

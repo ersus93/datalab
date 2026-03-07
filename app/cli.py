@@ -288,3 +288,7 @@ def register_cli_commands(app):
     # Phase 3 transactional import commands
     from app.commands.import_phase3 import import_phase3_cli
     app.cli.add_command(import_phase3_cli)
+
+    # Phase 4 import commands (Detalles de Ensayos y Utilizado)
+    from app.commands.import_phase4 import import_phase4_cli
+    app.cli.add_command(import_phase4_cli)
