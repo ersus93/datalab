@@ -18,8 +18,9 @@
     <div class="row">
         <div class="col-md-8">
             <div class="card">
-                <div class="card-header">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">{{ detalle.ensayo.nombre_corto if detalle.ensayo else _('Ensayo') }}</h5>
+                    <span class="badge bg-warning">{{ detalle.estado }}</span>
                 </div>
                 <div class="card-body">
                     <form id="resultadoForm">
@@ -46,10 +47,23 @@
                             </select>
                         </div>
 
-                        {# Campo numérico #}
+                        {# Campo numérico con validación de rango #}
                         <div id="campoNumerico" class="mb-3">
                             <label class="form-label">{{ _('Valor Numérico') }}</label>
-                            <input type="number" step="0.01" class="form-control" name="valor_numerico" placeholder="0.00">
+                            <div class="input-group">
+                                <input type="number" step="0.01" class="form-control" name="valor_numerico" 
+                                       id="valorNumerico" placeholder="0.00"
+                                       onchange="validarRango()">
+                                <span class="input-group-text" id="indicadorRango">
+                                    <i class="fas fa-question-circle text-muted"></i>
+                                </span>
+                            </div>
+                            <div class="form-text" id="rangoEspecificacion">
+                                {{ _('Rango de especificación:') }} <span id="rangoMin">-</span> - <span id="rangoMax">-</span>
+                            </div>
+                            <div class="invalid-feedback" id="rangoError" style="display: none;">
+                                {{ _('El valor está fuera del rango de especificación') }}
+                            </div>
                         </div>
 
                         {# Campo texto #}
@@ -80,12 +94,15 @@
 
                         <div class="mb-3">
                             <label class="form-label">{{ _('Observaciones') }}</label>
-                            <textarea class="form-control" name="observaciones" rows="3" placeholder="{{ _('Observaciones opcionales del ensayo') }}"></textarea>
+                            <textarea class="form-control" name="observaciones" id="observaciones" rows="3" placeholder="{{ _('Observaciones opcionales del ensayo') }}"></textarea>
                         </div>
 
                         <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-success">
+                            <button type="submit" class="btn btn-success" id="btnCompletar">
                                 <i class="fas fa-check"></i> {{ _('Completar Ensayo') }}
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="btnBorrador" onclick="guardarBorrador()">
+                                <i class="fas fa-save"></i> {{ _('Guardar Borrador') }}
                             </button>
                             <a href="{{ url_for('tecnico.dashboard') }}" class="btn btn-secondary">
                                 {{ _('Cancelar') }}
@@ -97,7 +114,7 @@
         </div>
 
         <div class="col-md-4">
-            <div class="card">
+            <div class="card mb-3">
                 <div class="card-header">
                     <h6 class="mb-0">{{ _('Información del Ensayo') }}</h6>
                 </div>
@@ -113,7 +130,28 @@
                         <dd class="col-sm-8">
                             <span class="badge bg-warning">{{ detalle.estado }}</span>
                         </dd>
+
+                        {% if detalle.ensayo and detalle.ensayo.especificacion_min is not none %}
+                        <dt class="col-sm-4">{{ _('Spec Min') }}</dt>
+                        <dd class="col-sm-8">{{ detalle.ensayo.especificacion_min }}</dd>
+                        {% endif %}
+
+                        {% if detalle.ensayo and detalle.ensayo.especificacion_max is not none %}
+                        <dt class="col-sm-4">{{ _('Spec Max') }}</dt>
+                        <dd class="col-sm-8">{{ detalle.ensayo.especificacion_max }}</dd>
+                        {% endif %}
                     </dl>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">{{ _('Estado del Borrador') }}</h6>
+                </div>
+                <div class="card-body">
+                    <div id="estadoBorrador">
+                        <span class="text-muted">{{ _('Sin borrador guardado') }}</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -129,6 +167,17 @@ now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
 const datetimeNow = now.toISOString().slice(0, 16);
 document.getElementById('fechaInicio').value = datetimeNow;
 document.getElementById('fechaFin').value = datetimeNow;
+
+// Cargar especificaciones del ensayo si existen
+const specMin = {{ detalle.ensayo.especificacion_min if detalle.ensayo and detalle.ensayo.especificacion_min is not none else 'null' }};
+const specMax = {{ detalle.ensayo.especificacion_max if detalle.ensayo and detalle.ensayo.especificacion_max is not none else 'null' }};
+
+if (specMin !== null) {
+    document.getElementById('rangoMin').textContent = specMin;
+}
+if (specMax !== null) {
+    document.getElementById('rangoMax').textContent = specMax;
+}
 
 function mostrarCampos() {
     const tipo = document.getElementById('tipoResultado').value;
@@ -147,6 +196,107 @@ function validateJson(str) {
     }
 }
 
+function validarRango() {
+    const valor = parseFloat(document.getElementById('valorNumerico').value);
+    const indicador = document.getElementById('indicadorRango');
+    const errorDiv = document.getElementById('rangoError');
+    const input = document.getElementById('valorNumerico');
+    
+    if (isNaN(valor)) {
+        indicador.innerHTML = '<i class="fas fa-question-circle text-muted"></i>';
+        input.classList.remove('is-valid', 'is-invalid');
+        errorDiv.style.display = 'none';
+        return true;
+    }
+
+    let enRango = true;
+    if (specMin !== null && valor < specMin) {
+        enRango = false;
+    }
+    if (specMax !== null && valor > specMax) {
+        enRango = false;
+    }
+
+    if (enRango) {
+        indicador.innerHTML = '<i class="fas fa-check-circle text-success"></i>';
+        input.classList.remove('is-invalid');
+        input.classList.add('is-valid');
+        errorDiv.style.display = 'none';
+    } else {
+        indicador.innerHTML = '<i class="fas fa-exclamation-circle text-danger"></i>';
+        input.classList.remove('is-valid');
+        input.classList.add('is-invalid');
+        errorDiv.style.display = 'block';
+    }
+    
+    return enRango;
+}
+
+function guardarBorrador() {
+    const formData = new FormData(document.getElementById('resultadoForm'));
+    const data = Object.fromEntries(formData.entries());
+    
+    // Guardar en localStorage
+    const borrador = {
+        detalle_id: data.detalle_id,
+        fecha_inicio: data.fecha_inicio,
+        fecha_fin: data.fecha_fin,
+        tipo_resultado: data.tipo_resultado,
+        valor_numerico: data.valor_numerico,
+        valor_texto: data.valor_texto,
+        valor_booleano: data.valor_booleano,
+        parametros_json: data.parametros_json,
+        observaciones: data.observaciones,
+        guardado_en: new Date().toISOString()
+    };
+    
+    localStorage.setItem('borrador_ensayo_' + data.detalle_id, JSON.stringify(borrador));
+    
+    const estadoDiv = document.getElementById('estadoBorrador');
+    estadoDiv.innerHTML = '<span class="text-success"><i class="fas fa-check"></i> {{ _("Borrador guardado") }} - ' + 
+        new Date().toLocaleTimeString() + '</span>';
+    
+    // Mostrar toast
+    alert('{{ _("Borrador guardado correctamente") }}');
+}
+
+function cargarBorrador() {
+    const detalleId = {{ detalle.id }};
+    const borradorStr = localStorage.getItem('borrador_ensayo_' + detalleId);
+    
+    if (borradorStr) {
+        try {
+            const borrador = JSON.parse(borradorStr);
+            
+            document.getElementById('fechaInicio').value = borrador.fecha_inicio || '';
+            document.getElementById('fechaFin').value = borrador.fecha_fin || '';
+            document.getElementById('tipoResultado').value = borrador.tipo_resultado || 'numerico';
+            document.getElementById('valorNumerico').value = borrador.valor_numerico || '';
+            document.getElementById('parametrosJson').value = borrador.parametros_json || '';
+            document.getElementById('observaciones').value = borrador.observaciones || '';
+            
+            if (borrador.valor_booleano) {
+                const radio = document.querySelector(`input[name="valor_booleano"][value="${borrador.valor_booleano}"]`);
+                if (radio) radio.checked = true;
+            }
+            
+            const estadoDiv = document.getElementById('estadoBorrador');
+            const fecha = new Date(borrador.guardado_en);
+            estadoDiv.innerHTML = '<span class="text-info"><i class="fas fa-file-alt"></i> {{ _("Borrador cargado") }} - ' + 
+                fecha.toLocaleString() + '</span>';
+            
+            mostrarCampos();
+            if (borrador.valor_numerico) validarRango();
+            
+        } catch (e) {
+            console.error('Error al cargar borrador:', e);
+        }
+    }
+}
+
+// Cargar borrador al iniciar
+document.addEventListener('DOMContentLoaded', cargarBorrador);
+
 document.getElementById('resultadoForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
@@ -160,9 +310,38 @@ document.getElementById('resultadoForm').addEventListener('submit', function(e) 
         }
     }
     
+    // Validar rango si es numérico
+    if (tipo === 'numerico') {
+        const valor = parseFloat(document.getElementById('valorNumerico').value);
+        if (!isNaN(valor) && !validarRango()) {
+            if (!confirm('{{ _("El valor está fuera del rango de especificación. ¿Desea continuar de todas formas?") }}')) {
+                return;
+            }
+        }
+    }
+    
     const formData = new FormData(this);
     const data = Object.fromEntries(formData.entries());
     
     fetch(`/tecnico/api/resultado/${data.detalle_id}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'applic
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            // Limpiar borrador guardado
+            localStorage.removeItem('borrador_ensayo_' + data.data.id);
+            window.location.href = '{{ url_for("tecnico.dashboard") }}';
+        } else {
+            alert(data.error || '{{ _("Error al registrar resultado") }}');
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('{{ _("Error de conexión") }}');
+    });
+});
+</script>
+{% endblock %}

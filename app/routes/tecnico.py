@@ -20,6 +20,8 @@ tecnico_bp = Blueprint('tecnico', __name__, url_prefix='/tecnico')
 @login_required
 def dashboard():
     """Dashboard del técnico con estadísticas y ensayos pendientes."""
+    from datetime import timedelta
+
     # Obtener todos los detalles en estado ASIGNADO o EN_PROCESO para el técnico actual
     detalles_asignados = DetalleEnsayo.query.filter(
         DetalleEnsayo.tecnico_asignado_id == current_user.id
@@ -31,6 +33,7 @@ def dashboard():
         'en_proceso': 0,
         'completado_hoy': 0,
         'reportado': 0,
+        'pausado': 0,
     }
 
     hoy = datetime.utcnow().date()
@@ -39,13 +42,15 @@ def dashboard():
             stats['asignado'] += 1
         elif d.estado == DetalleEnsayoStatus.EN_PROCESO.value:
             stats['en_proceso'] += 1
+        elif d.estado == DetalleEnsayoStatus.PAUSADO.value:
+            stats['pausado'] += 1
         elif d.estado == DetalleEnsayoStatus.COMPLETADO.value:
             if d.fecha_completado and d.fecha_completado.date() == hoy:
                 stats['completado_hoy'] += 1
         elif d.estado == DetalleEnsayoStatus.REPORTADO.value:
             stats['reportado'] += 1
 
-    # Obtener ensayos pendientes de ejecución (ASIGNADO o EN_PROCESO)
+    # Obtener ensayos pendientes de ejecución (ASIGNADO, EN_PROCESO o PAUSADO)
     detalles_pendientes = (
         DetalleEnsayo.query
         .join(Ensayo)
@@ -54,7 +59,8 @@ def dashboard():
             DetalleEnsayo.tecnico_asignado_id == current_user.id,
             DetalleEnsayo.estado.in_([
                 DetalleEnsayoStatus.ASIGNADO.value,
-                DetalleEnsayoStatus.EN_PROCESO.value
+                DetalleEnsayoStatus.EN_PROCESO.value,
+                DetalleEnsayoStatus.PAUSADO.value
             ])
         )
         .order_by(Area.nombre, Ensayo.nombre_corto)
@@ -72,12 +78,46 @@ def dashboard():
     # Obtener áreas para filtro
     areas = Area.query.order_by(Area.sigla).all()
 
+    # Obtener actividad reciente (últimos 10 completados)
+    actividad_reciente = (
+        DetalleEnsayo.query
+        .filter(
+            DetalleEnsayo.tecnico_asignado_id == current_user.id,
+            DetalleEnsayo.estado.in_([
+                DetalleEnsayoStatus.COMPLETADO.value,
+                DetalleEnsayoStatus.REPORTADO.value
+            ])
+        )
+        .order_by(DetalleEnsayo.fecha_completado.desc())
+        .limit(10)
+        .all()
+    )
+
+    # Obtener alertas de vencimiento (ASIGNADOS o EN_PROCESO con más de 3 días)
+    fecha_limite = datetime.utcnow() - timedelta(days=3)
+    alertas_vencimiento = (
+        DetalleEnsayo.query
+        .join(Ensayo)
+        .filter(
+            DetalleEnsayo.tecnico_asignado_id == current_user.id,
+            DetalleEnsayo.estado.in_([
+                DetalleEnsayoStatus.ASIGNADO.value,
+                DetalleEnsayoStatus.EN_PROCESO.value
+            ]),
+            DetalleEnsayo.fecha_asignacion < fecha_limite
+        )
+        .order_by(DetalleEnsayo.fecha_asignacion)
+        .all()
+    )
+
     return render_template(
         'tecnico/dashboard.html',
         stats=stats,
         pendientes_por_area=pendientes_por_area,
         areas=areas,
         detalles_pendientes=detalles_pendientes,
+        actividad_reciente=actividad_reciente,
+        alertas_vencimiento=alertas_vencimiento,
     )
 
 
@@ -114,8 +154,12 @@ def ejecutar_form(detalle_id):
     if detalle.tecnico_asignado_id != current_user.id:
         abort(403)
 
-    # Solo permitir iniciar si está en estado ASIGNADO
-    if detalle.estado != DetalleEnsayoStatus.ASIGNADO.value:
+    # Solo permitir ejecutar si está en estado ASIGNADO, EN_PROCESO o PAUSADO
+    if detalle.estado not in [
+        DetalleEnsayoStatus.ASIGNADO.value,
+        DetalleEnsayoStatus.EN_PROCESO.value,
+        DetalleEnsayoStatus.PAUSADO.value
+    ]:
         abort(400)
 
     return render_template(
@@ -146,6 +190,50 @@ def api_ejecutar(detalle_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
+@tecnico_bp.route('/api/pausar/<int:detalle_id>', methods=['POST'])
+@login_required
+def api_pausar(detalle_id):
+    """API para pausar un ensayo en proceso."""
+    from app.services.detalle_ensayo_service import DetalleEnsayoService
+
+    try:
+        detalle = DetalleEnsayoService.pausar_ensayo(
+            detalle_id=detalle_id,
+            usuario_id=current_user.id
+        )
+        return jsonify({
+            'success': True,
+            'data': detalle.to_dict(),
+            'message': 'Ensayo pausado correctamente'
+        })
+    except ValueError as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@tecnico_bp.route('/api/reanudar/<int:detalle_id>', methods=['POST'])
+@login_required
+def api_reanudar(detalle_id):
+    """API para reanudar un ensayo pausado."""
+    from app.services.detalle_ensayo_service import DetalleEnsayoService
+
+    try:
+        detalle = DetalleEnsayoService.reanudar_ensayo(
+            detalle_id=detalle_id,
+            usuario_id=current_user.id
+        )
+        return jsonify({
+            'success': True,
+            'data': detalle.to_dict(),
+            'message': 'Ensayo reanudado correctamente'
+        })
+    except ValueError as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 @tecnico_bp.route('/api/resultado/<int:detalle_id>', methods=['POST'])
 @login_required
 def api_registrar_resultado(detalle_id):
@@ -153,25 +241,56 @@ def api_registrar_resultado(detalle_id):
     from app.services.detalle_ensayo_service import DetalleEnsayoService
 
     data = request.get_json() or {}
-    resultado = data.get('resultado')
+    tipo_resultado = data.get('tipo_resultado', 'numerico')
+    valor_numerico = data.get('valor_numerico')
+    valor_texto = data.get('valor_texto')
+    valor_booleano = data.get('valor_booleano')
+    parametros_json = data.get('parametros_json')
     observaciones = data.get('observaciones')
-
-    if not resultado:
-        return jsonify({
-            'success': False,
-            'error': 'El resultado es obligatorio'
-        }), 400
+    fecha_inicio = data.get('fecha_inicio')
+    fecha_fin = data.get('fecha_fin')
 
     try:
-        # Completar el ensayo con el resultado
+        # Completar el ensayo
         detalle = DetalleEnsayoService.completar_ensayo(
             detalle_id=detalle_id,
             observaciones=observaciones,
             usuario_id=current_user.id
         )
 
-        # Guardar el resultado en el campo observaciones (o crear campo dedicado si existe)
-        detalle.resultado = resultado
+        # Guardar los valores del resultado
+        if valor_numerico:
+            try:
+                detalle.valor_numerico = float(valor_numerico)
+            except (ValueError, TypeError):
+                pass
+
+        if valor_texto:
+            detalle.valor_texto = valor_texto
+
+        if valor_booleano is not None:
+            if valor_booleano == 'true' or valor_booleano is True:
+                detalle.valor_booleano = True
+            elif valor_booleano == 'false' or valor_booleano is False:
+                detalle.valor_booleano = False
+
+        if parametros_json:
+            detalle.parametros_json = parametros_json
+
+        # Validar si cumple especificaciones
+        if detalle.ensayo and detalle.valor_numerico is not None:
+            espec_min = detalle.ensayo.especificacion_min
+            espec_max = detalle.ensayo.especificacion_max
+            if espec_min is not None and espec_max is not None:
+                try:
+                    detalle.resultado_cumple = float(valor_numerico) >= float(espec_min) and float(valor_numerico) <= float(espec_max)
+                except (ValueError, TypeError):
+                    detalle.resultado_cumple = None
+            elif espec_min is not None:
+                detalle.resultado_cumple = float(valor_numerico) >= float(espec_min) if valor_numerico else None
+            elif espec_max is not None:
+                detalle.resultado_cumple = float(valor_numerico) <= float(espec_max) if valor_numerico else None
+
         db.session.commit()
 
         return jsonify({
@@ -309,4 +428,180 @@ def api_batch_completar():
             'errores': errores
         },
         'message': f'{len(resultados)} ensayos completados'
+    })
+
+
+# ----------------------------------------------------------------------
+# Métricas del Técnico
+# ----------------------------------------------------------------------
+
+@tecnico_bp.route('/metricas')
+@login_required
+def metricas():
+    """Dashboard de métricas del técnico."""
+    from datetime import timedelta
+
+    ahora = datetime.utcnow()
+    hoy = ahora.date()
+    inicio_semana = hoy - timedelta(days=hoy.weekday())
+    inicio_mes = hoy.replace(day=1)
+
+    # Tests completados hoy
+    completados_hoy = DetalleEnsayo.query.filter(
+        DetalleEnsayo.tecnico_asignado_id == current_user.id,
+        DetalleEnsayo.estado == DetalleEnsayoStatus.COMPLETADO.value,
+        func.date(DetalleEnsayo.fecha_completado) == hoy
+    ).count()
+
+    # Tests completados esta semana
+    completados_semana = DetalleEnsayo.query.filter(
+        DetalleEnsayo.tecnico_asignado_id == current_user.id,
+        DetalleEnsayo.estado == DetalleEnsayoStatus.COMPLETADO.value,
+        func.date(DetalleEnsayo.fecha_completado) >= inicio_semana
+    ).count()
+
+    # Tests completados este mes
+    completados_mes = DetalleEnsayo.query.filter(
+        DetalleEnsayo.tecnico_asignado_id == current_user.id,
+        DetalleEnsayo.estado == DetalleEnsayoStatus.COMPLETADO.value,
+        func.date(DetalleEnsayo.fecha_completado) >= inicio_mes
+    ).count()
+
+    # Tests por tipo (FQ, MB, ES)
+    tests_por_tipo = {}
+    for area_sigla in ['FQ', 'MB', 'ES']:
+        area = Area.query.filter_by(sigla=area_sigla).first()
+        if area:
+            count = DetalleEnsayo.query.join(Ensayo).filter(
+                DetalleEnsayo.tecnico_asignado_id == current_user.id,
+                DetalleEnsayo.estado == DetalleEnsayoStatus.COMPLETADO.value,
+                Ensayo.area_id == area.id
+            ).count()
+            tests_por_tipo[area_sigla] = count
+
+    # Eficiencia: completados a tiempo / total completados
+    # Consideramos "a tiempo" si se completaron en menos de 48 horas desde asignación
+    eficiencia = 0
+    total_completados = DetalleEnsayo.query.filter(
+        DetalleEnsayo.tecnico_asignado_id == current_user.id,
+        DetalleEnsayo.estado == DetalleEnsayoStatus.COMPLETADO.value,
+        DetalleEnsayo.fecha_completado.isnot(None),
+        DetalleEnsayo.fecha_asignacion.isnot(None)
+    ).all()
+
+    if total_completados:
+        a_tiempo = sum(
+            1 for d in total_completados
+            if d.fecha_completado and d.fecha_asignacion
+            and (d.fecha_completado - d.fecha_asignacion).total_seconds() < 48 * 3600
+        )
+        eficiencia = round((a_tiempo / len(total_completados)) * 100, 1)
+
+    # Tendencia semanal (últimos 7 días)
+    tendencia_semanal = []
+    for i in range(6, -1, -1):
+        dia = hoy - timedelta(days=i)
+        count = DetalleEnsayo.query.filter(
+            DetalleEnsayo.tecnico_asignado_id == current_user.id,
+            DetalleEnsayo.estado == DetalleEnsayoStatus.COMPLETADO.value,
+            func.date(DetalleEnsayo.fecha_completado) == dia
+        ).count()
+        tendencia_semanal.append({
+            'dia': dia.strftime('%a'),
+            'fecha': dia.isoformat(),
+            'count': count
+        })
+
+    # Tests en curso
+    en_proceso = DetalleEnsayo.query.filter(
+        DetalleEnsayo.tecnico_asignado_id == current_user.id,
+        DetalleEnsayo.estado == DetalleEnsayoStatus.EN_PROCESO.value
+    ).count()
+
+    pausados = DetalleEnsayo.query.filter(
+        DetalleEnsayo.tecnico_asignado_id == current_user.id,
+        DetalleEnsayo.estado == DetalleEnsayoStatus.PAUSADO.value
+    ).count()
+
+    stats = {
+        'completados_hoy': completados_hoy,
+        'completados_semana': completados_semana,
+        'completados_mes': completados_mes,
+        'tests_por_tipo': tests_por_tipo,
+        'eficiencia': eficiencia,
+        'tendencia_semanal': tendencia_semanal,
+        'en_proceso': en_proceso,
+        'pausados': pausados,
+        'total_completados': len(total_completados),
+    }
+
+    return render_template('tecnico/metricas.html', stats=stats)
+
+
+@tecnico_bp.route('/api/metricas')
+@login_required
+def api_metricas():
+    """API de métricas en JSON."""
+    from datetime import timedelta
+
+    ahora = datetime.utcnow()
+    hoy = ahora.date()
+    inicio_semana = hoy - timedelta(days=hoy.weekday())
+    inicio_mes = hoy.replace(day=1)
+
+    # Completados por período
+    completados_hoy = DetalleEnsayo.query.filter(
+        DetalleEnsayo.tecnico_asignado_id == current_user.id,
+        DetalleEnsayo.estado == DetalleEnsayoStatus.COMPLETADO.value,
+        func.date(DetalleEnsayo.fecha_completado) == hoy
+    ).count()
+
+    completados_semana = DetalleEnsayo.query.filter(
+        DetalleEnsayo.tecnico_asignado_id == current_user.id,
+        DetalleEnsayo.estado == DetalleEnsayoStatus.COMPLETADO.value,
+        func.date(DetalleEnsayo.fecha_completado) >= inicio_semana
+    ).count()
+
+    completados_mes = DetalleEnsayo.query.filter(
+        DetalleEnsayo.tecnico_asignado_id == current_user.id,
+        DetalleEnsayo.estado == DetalleEnsayoStatus.COMPLETADO.value,
+        func.date(DetalleEnsayo.fecha_completado) >= inicio_mes
+    ).count()
+
+    # Tests por área
+    tests_por_tipo = {}
+    for area_sigla in ['FQ', 'MB', 'ES']:
+        area = Area.query.filter_by(sigla=area_sigla).first()
+        if area:
+            count = DetalleEnsayo.query.join(Ensayo).filter(
+                DetalleEnsayo.tecnico_asignado_id == current_user.id,
+                DetalleEnsayo.estado == DetalleEnsayoStatus.COMPLETADO.value,
+                Ensayo.area_id == area.id
+            ).count()
+            tests_por_tipo[area_sigla] = count
+
+    # Tendencia semanal
+    tendencia_semanal = []
+    for i in range(6, -1, -1):
+        dia = hoy - timedelta(days=i)
+        count = DetalleEnsayo.query.filter(
+            DetalleEnsayo.tecnico_asignado_id == current_user.id,
+            DetalleEnsayo.estado == DetalleEnsayoStatus.COMPLETADO.value,
+            func.date(DetalleEnsayo.fecha_completado) == dia
+        ).count()
+        tendencia_semanal.append({
+            'dia': dia.strftime('%a'),
+            'fecha': dia.isoformat(),
+            'count': count
+        })
+
+    return jsonify({
+        'success': True,
+        'data': {
+            'completados_hoy': completados_hoy,
+            'completados_semana': completados_semana,
+            'completados_mes': completados_mes,
+            'tests_por_tipo': tests_por_tipo,
+            'tendencia_semanal': tendencia_semanal,
+        }
     })

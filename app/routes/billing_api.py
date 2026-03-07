@@ -1,13 +1,19 @@
 """
 Billing API - Rutas para tracking de uso y facturación
 """
-# Web route
+from flask import Blueprint, jsonify, request, render_template
+from flask_login import login_required
+from app.services.billing_service import BillingService
+from app.database.models.utilizado import Utilizado, Factura, UtilizadoStatus
+from app.database.models.cliente import Cliente
+from app import db
+
+billing_bp = Blueprint('billing', __name__, url_prefix='/api/billing')
+
+
 @billing_bp.route("/web", methods=["GET"])
 @login_required
 def billing_index():
-    from app.services.billing_service import BillingService
-    from app.database.models.utilizado import Utilizado, Factura, UtilizadoStatus
-    
     pendientes = BillingService.get_utilizados_pendientes_facturacion()
     facturas = Factura.query.order_by(Factura.fecha_emision.desc()).limit(50).all()
     resumen = BillingService.get_resumen_por_tipo_ensayo()
@@ -18,16 +24,6 @@ def billing_index():
         total_pendiente=sum(float(u.importe) for u in pendientes),
         facturas=facturas,
         resumen=resumen.get("items", []))
-
-
-from flask import Blueprint, jsonify, request
-from flask_login import login_required
-from app.services.billing_service import BillingService
-from app.database.models.utilizado import Utilizado, Factura, UtilizadoStatus
-from app.database.models.cliente import Cliente
-from app import db
-
-billing_bp = Blueprint('billing', __name__, url_prefix='/api/billing')
 
 
 @billing_bp.route('/utilizados', methods=['GET'])
