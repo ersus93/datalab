@@ -91,3 +91,4 @@ worktrees/
 
 # Access database files and sensitive data
 utiles/
+.opencode/
