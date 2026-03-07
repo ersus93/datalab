@@ -85,6 +85,7 @@ Lista de archivos involucrados.
 Condiciones para cerrar este Issue.
 ## Notas de seguridad
 Consideraciones relevantes (sin datos reales).
+y labels relacionados 
 PAUSA OBLIGATORIA — FIN DE FASE 2:
 Presenta el plan y los Issues. Pregunta:
 “El plan está listo y los Issues han sido creados. ¿Procedo con la implementación tal como está
