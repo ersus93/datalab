@@ -162,3 +162,53 @@ tests/
 - Model tests: `test_{model}_{behavior}`
 - Use pytest-flask for app fixtures
 - Prefer `assert` statements over unittest methods
+
+## Custom Agents (OpenCode)
+
+DataLab tiene agentes especializados configurados en `.opencode/agents/`. Todos son **subagentes** que puedes invocar con `@nombre`.
+
+### Available Agents
+
+| Agent | Description | Usage |
+|-------|-------------|-------|
+| `@code-reviewer` | Revisa código siguiendo convenciones de DataLab | `@code-reviewer revisa este archivo` |
+| `@test-generator` | Genera tests unitarios/integración | `@test-generator crea tests para este modelo` |
+| `@debug` | Analiza errores y bugs | `@debug este error está ocurriendo...` |
+| `@security` | Auditoría de seguridad | `@security revisa este código` |
+| `@database` | SQLAlchemy, migraciones, queries | `@database optimiza esta query` |
+| `@performance` | Optimización de rendimiento | `@performance mejora el rendimiento de...` |
+
+### How to Use
+
+1. **Direct invocation**: Escribe `@agent-name` seguido de tu solicitud
+   ```
+   @code-reviewer revisa el archivo app/routes/pedidos.py
+   ```
+
+2. **Automatic invocation**: Los agentes Build/Plan pueden invocar subagentes automáticamente
+
+3. **Switch agents**: Usa la tecla **Tab** para cambiar entre agentes primarios (Build/Plan)
+
+### Agent Permissions
+
+| Agent | Read | Write | Edit | Bash | WebFetch |
+|-------|------|-------|------|------|----------|
+| code-reviewer | ✅ | ❌ | ❌ | ❌ | ✅ |
+| test-generator | ✅ | ✅ | ✅ | ✅ | ❌ |
+| debug | ✅ | ❌ | ❌ | ✅ | ✅ |
+| security | ✅ | ❌ | ❌ | ❌ | ✅ |
+| database | ✅ | ❌ | ❌ | ✅ | ❌ |
+| performance | ✅ | ✅ | ❌ | ✅ | ❌ |
+
+### Adding New Agents
+
+Los agentes se definen en `.opencode/agents/*.md`. Para agregar uno nuevo:
+
+1. Crea un archivo `.md` en `.opencode/agents/`
+2. Incluye el YAML header con `description`, `mode`, `tools`
+3. Escribe el prompt del agente
+
+O usa el comando:
+```bash
+opencode agent create
+```
