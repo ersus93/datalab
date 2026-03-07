@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Informe de Análisis - {{ informe.nro_oficial }}{% endblock %}
+
+{% block content %}
+<div class="report-header">
+    <h1>Informe de Análisis</h1>
+    <p><strong>Nro:</strong> {{ informe.nro_oficial }}</p>
+    <p><strong>Fecha:</strong> {{ informe.fecha_generacion.strftime('%d/%m/%Y') if informe.fecha_generacion else 'N/A' }}</p>
+    <p><strong>Estado:</strong> {{ informe.estado.value if informe.estado else 'N/A' }}</p>
+</div>
+
+<section class="cliente-info">
+    <h2>Datos del Cliente</h2>
+    <div class="info-grid">
+        <span class="info-label">Cliente:</span>
+        <span>{{ cliente.nombre if cliente else 'N/A' }}</span>
+
+        <span class="info-label">Dirección:</span>
+        <span>{{ cliente.direccion if cliente else 'N/A' }}</span>
+
+        <span class="info-label">Teléfono:</span>
+        <span>{{ cliente.telefono if cliente else 'N/A' }}</span>
+
+        <span class="info-label">Email:</span>
+        <span>{{ cliente.email if cliente else 'N/A' }}</span>
+    </div>
+</section>
+
+<section class="muestra-info">
+    <h2>Datos de la Muestra</h2>
+    <div class="info-grid">
+        <span class="info-label">Código:</span>
+        <span>{{ entrada.codigo if entrada else 'N/A' }}</span>
+
+        <span class="info-label">Producto:</span>
+        <span>{{ entrada.producto.nombre if entrada and entrada.producto else 'N/A' }}</span>
+
+        <span class="info-label">Lote:</span>
+        <span>{{ entrada.lote if entrada else 'N/A' }}</span>
+
+        <span class="info-label">Fecha Recepción:</span>
+        <span>{{ entrada.fech_entrada.strftime('%d/%m/%Y') if entrada and entrada.fech_entrada else 'N/A' }}</span>
+    </div>
+</section>
+
+<section class="resultados">
+    <h2>Resultados de Ensayos</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Ensayo</th>
+                <th>Método</th>
+                <th>Resultado</th>
+                <th>Unidad</th>
+                <th>Límites</th>
+                <th>Cumple</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for detalle in ensayos %}
+            <tr>
+                <td>{{ detalle.ensayo.nombre_corto if detalle.ensayo else 'N/A' }}</td>
+                <td>{{ detalle.ensayo.nombre_oficial[:50] if detalle.ensayo else 'N/A' }}</td>
+                <td>
+                    {% if detalle.valor_numerico is not none %}
+                        {{ detalle.valor_numerico }}
+                    {% elif detalle.valor_texto %}
+                        {{ detalle.valor_texto }}
+                    {% else %}
+                    N/A
+                    {% endif %}
+                </td>
+                <td>{{ detalle.ensayo.unidad_medida if detalle.ensayo else 'N/A' }}</td>
+                <td>
+                    {% if detalle.ensayo and detalle.ensayo.especificacion_min and detalle.ensayo.especificacion_max %}
+                        {{ detalle.ensayo.especificacion_min }} - {{ detalle.ensayo.especificacion_max }}
+                    {% elif detalle.ensayo and detalle.ensayo.especificacion_min %}
+                        > {{ detalle.ensayo.especificacion_min }}
+                    {% elif detalle.ensayo and detalle.ensayo.especificacion_max %}
+                        < {{ detalle.ensayo.especificacion_max }}
+                    {% else %}
+                    N/A
+                    {% endif %}
+                </td>
+                <td>
+                    {% if detalle.resultado_cumple is not none %}
+                        <span class="{% if detalle.resultado_cumple %}resultado-cumple{% else %}resultado-no-cumple{% endif %}">
+                            {{ 'Sí' if detalle.resultado_cumple else 'No' }}
+                        </span>
+                    {% else %}
+                    N/A
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" style="text-align: center;">No hay ensayos asociados</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+{% if informe.resumen_resultados %}
+<section class="resumen">
+    <h2>Resumen de Resultados</h2>
+    <p>{{ informe.resumen_resultados }}</p>
+</section>
+{% endif %}
+
+{% if informe.conclusiones %}
+<section class="conclusiones">
+    <h2>Conclusiones</h2>
+    <p>{{ informe.conclusiones }}</p>
+</section>
+{% endif %}
+
+{% if informe.observaciones %}
+<section class="observaciones">
+    <h2>Observaciones</h2>
+    <p>{{ informe.observaciones }}</p>
+</section>
+{% endif %}
+
+{% if informe.recomendaciones %}
+<section class="recomendaciones">
+    <h2>Recomendaciones</h2>
+    <p>{{ informe.recomendaciones }}</p>
+</section>
+{% endif %}
+
+<div class="firmas">
+    <div class="firma-box">
+        <div class="firma-line">Emitido por</div>
+        <p>{{ informe.emitidos_por.nombre_completo if informe.emitidos_por else '_______________' }}</p>
+    </div>
+    <div class="firma-box">
+        <div class="firma-line">Revisado por</div>
+        <p>{{ informe.revisados_por.nombre_completo if informe.revisados_por else '_______________' }}</p>
+    </div>
+</div>
+{% endblock %}

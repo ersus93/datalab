@@ -1,0 +1,179 @@
+/* Estilos para informes PDF - DataLab */
+
+:root {
+    --primary: #003366;
+    --secondary: #F5F5F5;
+    --text: #000000;
+    --border: #CCCCCC;
+    --success: #28a745;
+    --warning: #ffc107;
+    --danger: #dc3545;
+}
+
+@page {
+    size: A4;
+    margin: 3cm 2cm 2.5cm 2cm;
+    @top {
+        content: element(header);
+    }
+    @bottom {
+        content: element(footer);
+    }
+}
+
+body {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 11pt;
+    line-height: 1.5;
+    color: var(--text);
+    margin: 0;
+    padding: 0;
+}
+
+.header {
+    position: running(header);
+    border-bottom: 2px solid var(--primary);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    width: 150px;
+}
+
+.certifications {
+    width: 80px;
+}
+
+h1 {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14pt;
+    font-weight: bold;
+    color: var(--primary);
+    margin: 0 0 10px 0;
+}
+
+h2 {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+    font-weight: bold;
+    color: var(--primary);
+    margin: 15px 0 10px 0;
+}
+
+h3 {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 11pt;
+    font-weight: bold;
+    margin: 10px 0 5px 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+}
+
+th, td {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 9pt;
+    border: 1px solid var(--border);
+    padding: 6px;
+    text-align: left;
+}
+
+th {
+    background-color: var(--primary);
+    color: white;
+    font-weight: bold;
+}
+
+tr:nth-child(even) {
+    background-color: var(--secondary);
+}
+
+.footer {
+    position: running(footer);
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+    margin-top: 20px;
+    font-size: 8pt;
+    font-style: italic;
+}
+
+.disclaimer {
+    font-size: 8pt;
+    color: #666;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.firmas {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+}
+
+.firma-box {
+    width: 45%;
+    text-align: center;
+}
+
+.firma-line {
+    border-top: 1px solid var(--text);
+    margin-top: 40px;
+    padding-top: 5px;
+}
+
+.page-number::after {
+    content: "Página " counter(page) " de " counter(pages);
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 5px;
+    margin: 10px 0;
+}
+
+.info-label {
+    font-weight: bold;
+}
+
+.resultado-cumple {
+    color: var(--success);
+    font-weight: bold;
+}
+
+.resultado-no-cumple {
+    color: var(--danger);
+    font-weight: bold;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 8pt;
+    font-weight: bold;
+}
+
+.status-borrador { background: #ffc107; color: #000; }
+.status-pendiente { background: #17a2b8; color: #fff; }
+.status-emitido { background: #28a745; color: #fff; }
+.status-entregado { background: #6c757d; color: #fff; }
+.status-anulado { background: #dc3545; color: #fff; }
+
+.report-header {
+    margin-bottom: 20px;
+}
+
+.cliente-info, .muestra-info, .resultados, .resumen, .conclusiones, .observaciones {
+    margin-bottom: 20px;
+}
