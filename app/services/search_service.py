@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Optional, Set
 from collections import defaultdict
 
 from sqlalchemy import or_, and_
-from sqlalchemy.orm import Query
+from sqlalchemy.orm import Query, joinedload
 
 from app import db
 from app.database.models.cliente import Cliente
@@ -21,6 +21,7 @@ from app.database.models.entrada import Entrada, EntradaStatus
 from app.database.models.pedido import Pedido
 from app.database.models.informe import Informe, InformeStatus
 from app.database.models.reference import Area, Rama
+from app.database.models.recent_search import RecentSearch
 
 
 class SearchService:
@@ -108,6 +109,25 @@ class SearchService:
         return similarity
 
     @staticmethod
+    def _apply_fuzzy_filter(items, search_fields, query, threshold):
+        """Apply fuzzy matching filter to results."""
+        if not query or threshold >= 1.0:
+            return items
+        
+        filtered_items = []
+        for item in items:
+            for field in search_fields:
+                if hasattr(item, field):
+                    value = getattr(item, field)
+                    if value:
+                        similarity = SearchService._calculate_similarity(query, str(value))
+                        if similarity >= threshold:
+                            filtered_items.append(item)
+                            break
+        
+        return filtered_items
+
+    @staticmethod
     def _build_ilike_filter(model_class, search_fields, query):
         """Build ILIKE filter for search fields."""
         filters = []
@@ -121,7 +141,7 @@ class SearchService:
         return or_(*filters) if filters else None
 
     @staticmethod
-    def search(query, entities=None, filters=None, page=1, limit=20):
+    def search(query, entities=None, filters=None, page=1, limit=20, threshold=None):
         """Perform global search across entities."""
         if not query or not query.strip():
             return SearchService._empty_results()
@@ -156,6 +176,17 @@ class SearchService:
 
             q = db.session.query(model_class)
 
+            if entity_type == 'fabricas':
+                q = q.options(joinedload(Fabrica.cliente), joinedload(Fabrica.provincia))
+            elif entity_type == 'productos':
+                q = q.options(joinedload(Producto.destino), joinedload(Producto.rama))
+            elif entity_type == 'entradas':
+                q = q.options(joinedload(Entrada.cliente), joinedload(Entrada.producto), joinedload(Entrada.fabrica))
+            elif entity_type == 'pedidos':
+                q = q.options(joinedload(Pedido.cliente))
+            elif entity_type == 'informes':
+                q = q.options(joinedload(Informe.cliente))
+
             search_filter = SearchService._build_ilike_filter(
                 model_class, search_fields, query
             )
@@ -170,6 +201,10 @@ class SearchService:
 
             offset = (page - 1) * limit
             items = q.limit(limit).offset(offset).all()
+
+            # Apply fuzzy matching filter
+            threshold = threshold if threshold is not None else SearchService.DEFAULT_SIMILARITY_THRESHOLD
+            items = SearchService._apply_fuzzy_filter(items, search_fields, query, threshold)
 
             formatted_items = SearchService._format_results(
                 entity_type, items, search_fields, query
@@ -397,7 +432,33 @@ class SearchService:
     @staticmethod
     def get_recent_searches(user_id, limit=5):
         """Get recent searches for a user."""
-        return []
+        searches = db.session.query(RecentSearch).filter_by(user_id=user_id).order_by(
+            RecentSearch.creado_en.desc()
+        ).limit(limit).all()
+        return [s.to_dict() for s in searches]
+
+    @staticmethod
+    def save_search(user_id, query):
+        """Save a search query for a user."""
+        if not query or not query.strip():
+            return None
+
+        query = query.strip()
+
+        existing = db.session.query(RecentSearch).filter_by(
+            user_id=user_id,
+            query=query
+        ).first()
+
+        if existing:
+            existing.creado_en = datetime.utcnow()
+            db.session.commit()
+            return existing
+
+        search = RecentSearch(user_id=user_id, query=query)
+        db.session.add(search)
+        db.session.commit()
+        return search
 
     @staticmethod
     def _empty_results():

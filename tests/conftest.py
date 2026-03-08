@@ -12,6 +12,7 @@ import pytest
 from app import create_app
 from app.core.infrastructure.database import db as _db
 from app.database.models.user import User, UserRole
+from app.database.models.recent_search import RecentSearch
 from app.database.models.reference import (
     Area, Organismo, Provincia, Destino, Rama,
     Mes, Anno, TipoES, UnidadMedida
