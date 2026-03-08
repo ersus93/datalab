@@ -18,7 +18,7 @@ class TestSearchServiceLevenshtein:
         distance = SearchService._calculate_levenshtein_distance("hola", "hola")
         assert distance == 0
 
-    def testlevenshtein_one_char_difference(self):
+    def test_levenshtein_one_char_difference(self):
         """Test distancia con un caracter de diferencia."""
         from app.services.search_service import SearchService
         
@@ -279,66 +279,61 @@ class TestSearchServiceRecentSearches:
 
 
 class TestSearchAPIEndpoints:
-    """Tests para los endpoints de API de busqueda."""
+    """Tests de integracion para los endpoints de API de busqueda (Issue #66)."""
 
-    @pytest.fixture
-    def client(self, app):
-        """Fixture para el cliente de prueba."""
-        return app.test_client()
-
-    @pytest.mark.skip(reason="Requires database setup not available in unit tests")
-    def test_search_endpoint_returns_json(self, client):
+    @pytest.mark.integration
+    def test_search_endpoint_returns_json(self, logged_in_admin, db_session, sample_cliente):
         """Test que el endpoint de busqueda retorna JSON."""
-        response = client.get('/api/search?q=test')
+        response = logged_in_admin.get('/api/search?q=test')
         
-        assert response.status_code in [200, 500]  # 500 if DB not initialized
+        assert response.status_code in [200, 500]
 
-    @pytest.mark.skip(reason="Requires database setup not available in unit tests")
-    def test_search_endpoint_empty_query(self, client):
+    @pytest.mark.integration
+    def test_search_endpoint_empty_query(self, logged_in_admin, db_session, sample_cliente):
         """Test endpoint con query vacio."""
-        response = client.get('/api/search')
+        response = logged_in_admin.get('/api/search')
         
         assert response.status_code == 200
         data = response.get_json()
         assert 'results' in data
 
-    @pytest.mark.skip(reason="Requires database setup not available in unit tests")
-    def test_autocomplete_endpoint(self, client):
+    @pytest.mark.integration
+    def test_autocomplete_endpoint(self, logged_in_admin, db_session, sample_cliente):
         """Test endpoint de autocompletado."""
-        response = client.get('/api/search/autocomplete?q=te')
+        response = logged_in_admin.get('/api/search/autocomplete?q=te')
         
         assert response.status_code in [200, 500]
 
-    @pytest.mark.skip(reason="Requires database setup not available in unit tests")
-    def test_entities_endpoint(self, client):
+    @pytest.mark.integration
+    def test_entities_endpoint(self, logged_in_admin):
         """Test endpoint de configuracion de entidades."""
-        response = client.get('/api/search/entities')
+        response = logged_in_admin.get('/api/search/entities')
         
         assert response.status_code in [200, 500]
         if response.status_code == 200:
             data = response.get_json()
             assert 'entities' in data
 
-    @pytest.mark.skip(reason="Requires database setup not available in unit tests")
-    def test_filters_endpoint(self, client):
+    @pytest.mark.integration
+    def test_filters_endpoint(self, logged_in_admin):
         """Test endpoint de filtros disponibles."""
-        response = client.get('/api/search/filters')
+        response = logged_in_admin.get('/api/search/filters')
         
         assert response.status_code in [200, 500]
         if response.status_code == 200:
             data = response.get_json()
             assert 'areas' in data or 'statuses' in data
 
-    @pytest.mark.skip(reason="Requires database setup not available in unit tests")
-    def test_search_with_pagination(self, client):
+    @pytest.mark.integration
+    def test_search_with_pagination(self, logged_in_admin, db_session, sample_cliente):
         """Test busqueda con paginacion."""
-        response = client.get('/api/search?q=test&page=2&limit=10')
+        response = logged_in_admin.get('/api/search?q=test&page=2&limit=10')
         
         assert response.status_code in [200, 500]
 
-    @pytest.mark.skip(reason="Requires database setup not available in unit tests")
-    def test_search_with_filters(self, client):
+    @pytest.mark.integration
+    def test_search_with_filters(self, logged_in_admin, db_session, sample_cliente):
         """Test busqueda con filtros."""
-        response = client.get('/api/search?q=test&area=FQ&status=RECIBIDO')
+        response = logged_in_admin.get('/api/search?q=test&area=FQ&status=RECIBIDO')
         
         assert response.status_code in [200, 500]

@@ -6,7 +6,7 @@ Phase 6 Issue #56 - Global Search System
 import logging
 
 from flask import Blueprint, jsonify, request
-from flask_login import login_required
+from flask_login import current_user, login_required
 from sqlalchemy import or_
 
 from app import db
@@ -278,3 +278,76 @@ def search_legacy():
     return jsonify({
         'results': results[:10]
     })
+
+
+@bp.route('/api/search/recent', methods=['GET'])
+@login_required
+def get_recent_searches():
+    """
+    Get recent searches for the current user.
+    
+    Query parameters:
+        limit: Max number of searches (default: 10, max: 10)
+    
+    Returns:
+        JSON with list of recent searches
+    """
+    try:
+        limit = int(request.args.get('limit', 10))
+        limit = min(max(1, limit), 10)
+    except ValueError:
+        limit = 10
+    
+    try:
+        searches = SearchService.get_recent_searches(current_user.id, limit)
+        return jsonify({
+            'searches': searches
+        })
+    except Exception as e:
+        logger.error(f"Get recent searches error: {type(e).__name__}")
+        return jsonify({
+            'searches': [],
+            'message': 'An error occurred while fetching recent searches'
+        }), 500
+
+
+@bp.route('/api/search/recent', methods=['POST'])
+@login_required
+def save_recent_search():
+    """
+    Save a search query for the current user.
+    
+    Request body:
+        query: Search query string (required)
+    
+    Returns:
+        JSON confirming the operation
+    """
+    data = request.get_json()
+    query = data.get('query') if data else None
+    
+    if not query or not query.strip():
+        return jsonify({
+            'success': False,
+            'message': 'Query is required'
+        }), 400
+    
+    try:
+        search = SearchService.save_search(current_user.id, query)
+        if search:
+            return jsonify({
+                'success': True,
+                'message': 'Search saved successfully',
+                'search': search.to_dict() if hasattr(search, 'to_dict') else None
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'Failed to save search'
+            }), 500
+    except Exception as e:
+        logger.error(f"Save search error: {type(e).__name__}")
+        return jsonify({
+            'success': False,
+            'message': 'An error occurred while saving the search'
+        }), 500
