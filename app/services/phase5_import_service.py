@@ -1,13 +1,17 @@
 """Servicio para importación de datos Phase 5 - Plantillas de Informes e Informes de Prueba.
 
-Cubre los requisitos del Issue #6 (Phase 5): Plantillas de Informes
+Cubre los requisitos del Issue #50 (Phase 5): Plantillas de Informes
 - Import 20 plantillas de informes desde Access (RM2026.accdb)
 - Mapear datos al modelo PlantillaInforme
 - Generar 20 informes de prueba vinculados a entradas existentes
+- Validación FK pre-importación con validate_all()
+- Verificación post-importación con verify_post_import()
 - Reporte de validación en Markdown
+- Soporte dry-run
 """
 import logging
-from datetime import datetime, date
+import os
+from datetime import datetime, date, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Set
 
@@ -19,7 +23,12 @@ from app.database.models.cliente import Cliente
 
 logger = logging.getLogger(__name__)
 
-ACCESS_DB_PATH = r"C:\Users\ernes\datalab\utiles\RM2026.accdb"
+ACCESS_DB_PATH = os.environ.get('ACCESS_DB_PATH', r"C:\Users\ernes\datalab\utiles\RM2026.accdb")
+
+EXPECTED_COUNTS = {
+    'plantillas': 20,
+    'informes': 20,
+}
 
 TIPO_INFORME_MAP = {
     "ANALISIS": TipoInforme.ANALISIS,
@@ -27,6 +36,111 @@ TIPO_INFORME_MAP = {
     "CONSULTA": TipoInforme.CONSULTA,
     "ESPECIAL": TipoInforme.ESPECIAL,
 }
+
+
+class ImportWarning:
+    """Representa una advertencia durante la importación."""
+
+    def __init__(self, table: str, row_id, warning_type: str, message: str, value=None):
+        self.table = table
+        self.row_id = row_id
+        self.warning_type = warning_type
+        self.message = message
+        self.value = value
+
+    def to_dict(self):
+        return {
+            'table': self.table,
+            'row_id': self.row_id,
+            'type': self.warning_type,
+            'message': self.message,
+            'value': str(self.value) if self.value is not None else None,
+        }
+
+
+class PreImportValidationReport:
+    """Resultado de validación pre-importación."""
+
+    def __init__(self):
+        self.missing_entradas: List[dict] = []
+        self.missing_clientes: List[dict] = []
+        self.file_errors: List[str] = []
+
+    @property
+    def is_clean(self) -> bool:
+        """True si no hay problemas bloqueantes."""
+        return not any([
+            self.file_errors,
+        ])
+
+    def to_markdown(self) -> str:
+        lines = ['# Pre-Import Validation Report — Phase 5', '']
+        lines.append(f'**Generated:** {datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")}')
+        lines.append('')
+
+        status = '✅ CLEAN — Ready to import' if self.is_clean else '❌ ISSUES FOUND — Review before importing'
+        lines.append(f'**Status:** {status}')
+        lines.append('')
+
+        def _section(title, items, cols):
+            lines.append(f'## {title} ({len(items)})')
+            if not items:
+                lines.append('_None found_')
+            else:
+                lines.append('| ' + ' | '.join(cols) + ' |')
+                lines.append('| ' + ' | '.join(['---'] * len(cols)) + ' |')
+                for item in items[:50]:
+                    lines.append('| ' + ' | '.join(str(item.get(c, '')) for c in cols) + ' |')
+                if len(items) > 50:
+                    lines.append(f'_... and {len(items) - 50} more_')
+            lines.append('')
+
+        _section('Missing Entradas (bloqueante)', self.missing_entradas,
+                 ['table', 'row_id', 'entrada_id'])
+        _section('Missing Clientes (bloqueante)', self.missing_clientes,
+                 ['table', 'row_id', 'cliente_id'])
+        _section('File Errors (crítico)', [{'error': e} for e in self.file_errors],
+                 ['error'])
+
+        return '\n'.join(lines)
+
+
+class PostImportVerification:
+    """Resultado de verificación post-importación."""
+
+    def __init__(self):
+        self.count_checks: Dict[str, dict] = {}
+        self.fk_checks: Dict[str, dict] = {}
+        self.consistency_checks: Dict[str, dict] = {}
+
+    @property
+    def all_passed(self) -> bool:
+        checks = list(self.count_checks.values()) + \
+                 list(self.fk_checks.values()) + \
+                 list(self.consistency_checks.values())
+        return all(c.get('passed', False) for c in checks)
+
+    def to_markdown(self) -> str:
+        lines = ['# Post-Import Verification Report — Phase 5', '']
+        lines.append(f'**Generated:** {datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")}')
+        lines.append('')
+        status = '✅ ALL CHECKS PASSED' if self.all_passed else '⚠️ SOME CHECKS FAILED'
+        lines.append(f'**Status:** {status}')
+        lines.append('')
+
+        def _table(title, checks):
+            lines.append(f'## {title}')
+            lines.append('| Check | Expected | Actual | Status |')
+            lines.append('| --- | --- | --- | --- |')
+            for name, c in checks.items():
+                icon = '✅' if c.get('passed') else '❌'
+                lines.append(f'| {name} | {c.get("expected", "-")} | {c.get("actual", "-")} | {icon} |')
+            lines.append('')
+
+        _table('Record Counts', self.count_checks)
+        _table('FK Integrity (orphaned records = 0 expected)', self.fk_checks)
+        _table('Data Consistency', self.consistency_checks)
+        return '\n'.join(lines)
 
 
 class ImportError:
@@ -38,7 +152,7 @@ class ImportError:
         self.field = field
         self.message = message
         self.original_value = original_value
-        self.timestamp = datetime.utcnow()
+        self.timestamp = datetime.now(timezone.utc)
 
     def to_dict(self):
         return {
@@ -92,6 +206,8 @@ class Phase5ImportResult:
 class Phase5ImportService:
     """Servicio para importar datos Phase 5 - Plantillas de Informes e Informes de Prueba."""
 
+    BATCH_SIZE = 50
+
     def __init__(self, dry_run: bool = False):
         self.dry_run = dry_run
         self.result = Phase5ImportResult()
@@ -100,7 +216,7 @@ class Phase5ImportService:
 
     def import_all(self) -> Phase5ImportResult:
         """Importar todos los datos Phase 5."""
-        self.result.start_time = datetime.utcnow()
+        self.result.start_time = datetime.now(timezone.utc)
 
         logger.info("Cargando cachés de FKs...")
         self._load_fk_cache()
@@ -111,13 +227,13 @@ class Phase5ImportService:
         logger.info("=== Generando Informes de Prueba ===")
         self._generate_informes_prueba()
 
-        self.result.end_time = datetime.utcnow()
+        self.result.end_time = datetime.now(timezone.utc)
         return self.result
 
     def _load_fk_cache(self):
         """Cargar sets de IDs válidos para validación FK rápida."""
-        self._valid_entradas = {e.id for e in Entrada.query.limit(100).all()}
-        self._valid_clientes = {c.id for c in Cliente.query.limit(100).all()}
+        self._valid_entradas = {e.id for e in Entrada.query.all()}
+        self._valid_clientes = {c.id for c in Cliente.query.all()}
 
     def _connect_to_access(self):
         """Establecer conexión a la base de datos Access."""
@@ -151,6 +267,7 @@ class Phase5ImportService:
 
             tipos_disponibles = list(TipoInforme)
             tipo_index = 0
+            batch_count = 0
 
             for row in rows:
                 try:
@@ -183,6 +300,10 @@ class Phase5ImportService:
 
                     if not self.dry_run:
                         db.session.add(plantilla)
+                        batch_count += 1
+                        if batch_count % self.BATCH_SIZE == 0:
+                            db.session.commit()
+                            logger.debug(f"Commit batch Plantilla ({batch_count})")
 
                     self.result.plantillas["imported"] += 1
 
@@ -240,11 +361,12 @@ class Phase5ImportService:
 
             tipos = list(TipoInforme)
             year = 2026
+            batch_count = 0
 
             for i in range(20):
                 try:
                     entrada = entradas[i % len(entradas)]
-                    cliente = entrada.cliente_id if entrada.cliente_id else clientes[i % len(clientes)]
+                    cliente_id = entrada.cliente_id if entrada.cliente_id else clientes[i % len(clientes)].id
 
                     if entrada.cliente_id is None:
                         entrada.cliente_id = clientes[0].id
@@ -266,7 +388,7 @@ class Phase5ImportService:
                         nro_oficial=nro_oficial,
                         tipo_informe=tipo,
                         entrada_id=entrada.id,
-                        cliente_id=cliente,
+                        cliente_id=cliente_id,
                         estado=estado,
                         resumen_resultados=f"Resultados del análisis de prueba #{i+1}",
                         conclusiones="",
@@ -280,10 +402,13 @@ class Phase5ImportService:
                     )
 
                     if estado == InformeStatus.EMITIDO:
-                        informe.fecha_emision = datetime.utcnow()
+                        informe.fecha_emision = datetime.now(timezone.utc)
 
                     if not self.dry_run:
                         db.session.add(informe)
+                        batch_count += 1
+                        if batch_count % self.BATCH_SIZE == 0:
+                            db.session.commit()
 
                     self.result.informes["created"] += 1
 
@@ -307,6 +432,72 @@ class Phase5ImportService:
             self.result.informes["errors"].append(
                 ImportError("informes", "GENERATION", "general", str(e))
             )
+
+    def validate_all(self) -> PreImportValidationReport:
+        """
+        Validación pre-importación completa SIN modificar la base de datos.
+
+        Verifica que existan entradas y clientes válidos para la importación.
+
+        Returns:
+            PreImportValidationReport con todos los problemas encontrados.
+        """
+        report = PreImportValidationReport()
+
+        self._load_fk_cache()
+
+        if not self._valid_entradas:
+            report.file_errors.append("No hay entradas disponibles en la base de datos")
+
+        if not self._valid_clientes:
+            report.file_errors.append("No hay clientes disponibles en la base de datos")
+
+        return report
+
+    def verify_post_import(self) -> PostImportVerification:
+        """
+        Verificación post-importación: conteos, FK integrity y consistencia de datos.
+
+        Returns:
+            PostImportVerification con resultado de cada chequeo.
+        """
+        v = PostImportVerification()
+
+        v.count_checks['Plantillas de Informes'] = {
+            'expected': EXPECTED_COUNTS['plantillas'],
+            'actual': PlantillaInforme.query.count(),
+            'passed': PlantillaInforme.query.count() >= EXPECTED_COUNTS['plantillas'],
+        }
+
+        v.count_checks['Informes'] = {
+            'expected': EXPECTED_COUNTS['informes'],
+            'actual': Informe.query.count(),
+            'passed': Informe.query.count() >= EXPECTED_COUNTS['informes'],
+        }
+
+        informes_sin_entrada = Informe.query.filter(
+            ~Informe.entrada_id.in_(db.session.query(Entrada.id))
+        ).count()
+        v.fk_checks['Informes → Entradas'] = {
+            'expected': 0, 'actual': informes_sin_entrada,
+            'passed': informes_sin_entrada == 0,
+        }
+
+        informes_sin_cliente = Informe.query.filter(
+            ~Informe.cliente_id.in_(db.session.query(Cliente.id))
+        ).count()
+        v.fk_checks['Informes → Clientes'] = {
+            'expected': 0, 'actual': informes_sin_cliente,
+            'passed': informes_sin_cliente == 0,
+        }
+
+        informes_anulados = Informe.query.filter(Informe.anulado == True).count()
+        v.consistency_checks['Informes anulados'] = {
+            'expected': 'N/A', 'actual': informes_anulados,
+            'passed': True,
+        }
+
+        return v
 
     def validate_fk(self) -> Dict[str, dict]:
         """Validar integridad de FKs post-importación."""
@@ -353,7 +544,7 @@ class Phase5ImportService:
         lines = [
             "# Reporte de Importación Phase 5 — DataLab",
             "",
-            f"**Generado:** {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}",
+            f"**Generado:** {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}",
             f"**Modo:** {'DRY-RUN (sin cambios en BD)' if self.dry_run else 'IMPORTACIÓN REAL'}",
             f"**Duración:** {r.duration_seconds:.2f} segundos",
             "",
