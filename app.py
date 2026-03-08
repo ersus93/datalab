@@ -2,6 +2,8 @@
 """Punto de entrada principal para ONIE DataLab."""
 
 import os
+from dotenv import load_dotenv
+load_dotenv()
 from flask.cli import FlaskGroup
 from app import create_app, db
 from app.core.models import SystemConfig
