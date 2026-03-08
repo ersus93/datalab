@@ -111,8 +111,29 @@ class SearchModal {
             const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
             const data = await response.json();
             
-            if (data.results && data.results.length > 0) {
-                this.displayResults(data.results);
+            // Verificar si results es un objeto (categorizado) o un array
+            let flatResults = [];
+            if (data.results) {
+                if (Array.isArray(data.results)) {
+                    // Es un array, usar directamente
+                    flatResults = data.results;
+                } else if (typeof data.results === 'object') {
+                    // Es un objeto categorizado, flattenearlo
+                    Object.entries(data.results).forEach(([category, items]) => {
+                        if (Array.isArray(items)) {
+                            items.forEach(item => {
+                                flatResults.push({
+                                    ...item,
+                                    type: category
+                                });
+                            });
+                        }
+                    });
+                }
+            }
+            
+            if (flatResults.length > 0) {
+                this.displayResults(flatResults);
             } else {
                 this.showEmptyState('No se encontraron resultados');
             }
@@ -128,13 +149,39 @@ class SearchModal {
     displayResults(results) {
         if (!this.resultsContainer) return;
 
+        const typeLabels = {
+            clientes: 'Cliente',
+            fabricas: 'Fábrica',
+            productos: 'Producto',
+            proveedores: 'Proveedor',
+            pedidos: 'Pedido',
+            usuarios: 'Usuario',
+           Default: 'Resultado'
+        };
+
         this.resultsContainer.innerHTML = results
-            .map(result => `
-                <div class="search-result-item" data-url="${result.url || '#'}">
-                    <div class="search-result-title">${result.title || 'Sin título'}</div>
-                    ${result.description ? `<div class="search-result-description">${result.description}</div>` : ''}
-                </div>
-            `)
+            .map(result => {
+                const typeLabel = typeLabels[result.type] || typeLabels['Default'];
+                return `
+                    <div class="search-result-item" data-url="${result.url || '#'}">
+                        <span class="search-result-badge" style="
+                            display: inline-block;
+                            padding: 2px 8px;
+                            font-size: 11px;
+                            font-weight: 600;
+                            text-transform: uppercase;
+                            border-radius: 3px;
+                            margin-right: 8px;
+                            background-color: #e3f2fd;
+                            color: #1976d2;
+                        ">${typeLabel}</span>
+                        <div class="search-result-content" style="display: inline-block; vertical-align: middle;">
+                            <div class="search-result-title">${result.title || 'Sin título'}</div>
+                            ${result.description ? `<div class="search-result-description">${result.description}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            })
             .join('');
 
         // Agregar event listeners a los resultados

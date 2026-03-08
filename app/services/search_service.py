@@ -39,12 +39,12 @@ class SearchService:
         },
         'fabricas': {
             'model': Fabrica,
-            'search_fields': ['nombre'],
+            'search_fields': ['nombre', 'id'],
             'priority': 'high',
         },
         'productos': {
             'model': Producto,
-            'search_fields': ['nombre'],
+            'search_fields': ['nombre', 'id'],
             'priority': 'high',
         },
         'entradas': {
@@ -59,7 +59,8 @@ class SearchService:
         },
         'informes': {
             'model': Informe,
-            'search_fields': ['nro_oficial', 'resumen_resultados'],
+            'search_fields': ['nro_oficial', 'titulo', 'resumen_resultados'],
+            'field_mapping': {'titulo': 'nro_oficial'},
             'priority': 'medium',
         },
     }
@@ -128,14 +129,16 @@ class SearchService:
         return filtered_items
 
     @staticmethod
-    def _build_ilike_filter(model_class, search_fields, query):
+    def _build_ilike_filter(model_class, search_fields, query, field_mapping=None):
         """Build ILIKE filter for search fields."""
         filters = []
         pattern = f'%{query}%'
+        field_mapping = field_mapping or {}
 
         for field in search_fields:
-            if hasattr(model_class, field):
-                field_obj = getattr(model_class, field)
+            actual_field = field_mapping.get(field, field)
+            if hasattr(model_class, actual_field):
+                field_obj = getattr(model_class, actual_field)
                 filters.append(field_obj.ilike(pattern))
 
         return or_(*filters) if filters else None
@@ -173,6 +176,7 @@ class SearchService:
             entity_config = SearchService.SEARCHABLE_ENTITIES[entity_type]
             model_class = entity_config['model']
             search_fields = entity_config['search_fields']
+            field_mapping = entity_config.get('field_mapping', {})
 
             q = db.session.query(model_class)
 
@@ -188,7 +192,7 @@ class SearchService:
                 q = q.options(joinedload(Informe.cliente))
 
             search_filter = SearchService._build_ilike_filter(
-                model_class, search_fields, query
+                model_class, search_fields, query, field_mapping
             )
             if search_filter is not None:
                 q = q.filter(search_filter)
@@ -352,6 +356,7 @@ class SearchService:
                     'title': item.nro_oficial,
                     'description': item.resumen_resultados[:100] if item.resumen_resultados else 'Sin resumen',
                     'extra': {
+                        'titulo': item.nro_oficial,
                         'estado': item.estado.value if hasattr(item.estado, 'value') else item.estado,
                         'cliente': item.cliente.nombre if item.cliente else None,
                     }
