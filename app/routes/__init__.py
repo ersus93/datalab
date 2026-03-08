@@ -43,6 +43,7 @@ def register_routes(app):
     from .billing_api import billing_bp
     from .tecnico import tecnico_bp
     from .admin import admin_bp
+    from .informes import informes_bp
 
     # Registrar rutas legacy
     app.register_blueprint(dashboard_bp)
@@ -68,6 +69,7 @@ def register_routes(app):
     app.register_blueprint(tecnico_bp)
     app.register_blueprint(billing_bp)
     app.register_blueprint(admin_bp)
+    app.register_blueprint(informes_bp)
     app.register_blueprint(notifications_api_bp, url_prefix='/api/notifications')
     app.register_blueprint(dashboard_api_bp, url_prefix='/api/dashboard')
     app.register_blueprint(analytics_api_bp, url_prefix='/api/analytics')

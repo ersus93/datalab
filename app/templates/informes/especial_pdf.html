@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Informe Especial - {{ informe.nro_oficial }}</title>
+    <style>
+        @page { size: A4; margin: 3cm 2cm 2.5cm 2cm; @top-left { content: element(page-header); } @bottom-center { content: element(page-footer); } }
+        #page-header { position: running(page-header); width: 100%; border-bottom: 2px solid #003366; padding-bottom: 6px; font-family: Arial, sans-serif; }
+        .header-inner { display: flex; justify-content: space-between; align-items: center; }
+        .header-lab-name { font-size: 13pt; font-weight: bold; color: #003366; margin: 0; }
+        .header-lab-sub { font-size: 8pt; color: #555; margin: 2px 0 0 0; }
+        .header-report-info { text-align: right; font-size: 8.5pt; color: #333; }
+        .header-report-info .nro { font-weight: bold; color: #003366; font-size: 10pt; }
+        .header-pageno::after { content: "Página " counter(page) " de " counter(pages); }
+        #page-footer { position: running(page-footer); width: 100%; border-top: 1px solid #CCCCCC; padding-top: 5px; font-family: Arial, sans-serif; font-size: 7.5pt; color: #666; text-align: center; }
+        body { font-family: 'Times New Roman', Times, serif; font-size: 11pt; line-height: 1.5; color: #000; margin: 0; padding: 0; }
+        .report-title-block { text-align: center; margin-bottom: 18px; border: 2px solid #8B0000; padding: 12px; background: #fff5f5; }
+        .report-title-block h1 { font-family: Arial, sans-serif; font-size: 14pt; font-weight: bold; color: #8B0000; margin: 0 0 4px 0; }
+        .report-type-badge { display: inline-block; background: #8B0000; color: #fff; font-size: 9pt; font-family: Arial, sans-serif; padding: 2px 12px; border-radius: 3px; margin-top: 4px; }
+        section { margin-bottom: 16px; }
+        h2 { font-family: Arial, sans-serif; font-size: 11pt; font-weight: bold; color: #fff; background: #8B0000; margin: 0 0 8px 0; padding: 4px 8px; }
+        .info-table { width: 100%; border-collapse: collapse; font-size: 10pt; }
+        .info-table td { padding: 3px 6px; border: 1px solid #ddd; }
+        .info-table td.label { font-family: Arial, sans-serif; font-weight: bold; background: #F5F5F5; width: 35%; color: #8B0000; }
+        .text-block { font-size: 10pt; text-align: justify; margin: 4px 0; padding: 6px 8px; border-left: 3px solid #8B0000; background: #fff5f5; }
+        .results-table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 9pt; font-family: Arial, sans-serif; }
+        .results-table th { background: #8B0000; color: #fff; font-weight: bold; padding: 5px 6px; border: 1px solid #660000; text-align: left; }
+        .results-table td { padding: 4px 6px; border: 1px solid #CCCCCC; }
+        .results-table tr:nth-child(even) td { background: #fff5f5; }
+        .cumple-si { color: #166534; font-weight: bold; }
+        .cumple-no { color: #991B1B; font-weight: bold; }
+        .special-notice { background: #fff5f5; border: 1px solid #8B0000; padding: 10px 14px; margin: 12px 0; font-size: 10pt; }
+        .firmas { display: flex; justify-content: space-around; margin-top: 40px; page-break-inside: avoid; }
+        .firma-box { width: 42%; text-align: center; }
+        .firma-line { border-top: 1px solid #000; margin-top: 50px; padding-top: 5px; font-family: Arial, sans-serif; font-size: 9pt; font-weight: bold; color: #8B0000; }
+        .firma-name { font-size: 9pt; margin-top: 3px; }
+        .firma-stamp { width: 70px; height: 70px; border: 1px dashed #999; margin: 8px auto; display: flex; align-items: center; justify-content: center; font-size: 7pt; color: #999; font-style: italic; }
+    </style>
+</head>
+<body>
+<div id="page-header">
+    <div class="header-inner">
+        <div><p class="header-lab-name">LABORATORIO DATALAB</p><p class="header-lab-sub">Informes Especiales — Tucumán, Argentina</p></div>
+        <div class="header-report-info">
+            <div class="nro">{{ informe.nro_oficial }}</div>
+            <div>{{ informe.fecha_emision.strftime('%d/%m/%Y') if informe.fecha_emision else informe.fecha_generacion.strftime('%d/%m/%Y') if informe.fecha_generacion else '' }}</div>
+            <div class="header-pageno"></div>
+        </div>
+    </div>
+</div>
+<div id="page-footer"><div>INFORME ESPECIAL — CONFIDENCIAL — Laboratorio DataLab — informe@datalab.com.ar</div></div>
+
+<div class="report-title-block">
+    <h1>INFORME ESPECIAL</h1>
+    <span class="report-type-badge">ESPECIAL</span>
+</div>
+
+<div class="special-notice">
+    <strong>AVISO:</strong> Este informe especial ha sido emitido bajo circunstancias particulares
+    y requiere autorización específica del Director de Laboratorio para su distribución.
+</div>
+
+<section>
+    <h2>IDENTIFICACIÓN</h2>
+    <table class="info-table">
+        <tr><td class="label">Cliente</td><td>{{ cliente.nombre if cliente else '—' }}</td><td class="label">Nro. Informe</td><td><strong>{{ informe.nro_oficial }}</strong></td></tr>
+        <tr><td class="label">Muestra / Entrada</td><td>{{ entrada.codigo if entrada else '—' }}</td><td class="label">Fecha de Emisión</td><td>{{ informe.fecha_emision.strftime('%d/%m/%Y') if informe.fecha_emision else '—' }}</td></tr>
+        <tr><td class="label">Producto</td><td>{{ entrada.producto.nombre if entrada and entrada.producto else '—' }}</td><td class="label">Lote</td><td>{{ entrada.lote if entrada and entrada.lote else '—' }}</td></tr>
+    </table>
+</section>
+
+{% if informe.resumen_resultados %}
+<section><h2>ANTECEDENTES Y CONTEXTO</h2><div class="text-block">{{ informe.resumen_resultados }}</div></section>
+{% endif %}
+
+{% if ensayos %}
+<section>
+    <h2>ENSAYOS Y RESULTADOS</h2>
+    <table class="results-table">
+        <thead><tr><th>Ensayo</th><th>Método</th><th>Resultado</th><th>Unidad</th><th>Cumple</th></tr></thead>
+        <tbody>
+            {% for detalle in ensayos %}
+            <tr>
+                <td>{{ detalle.ensayo.nombre_corto if detalle.ensayo else '—' }}</td>
+                <td>{{ detalle.ensayo.nombre_oficial[:35] if detalle.ensayo and detalle.ensayo.nombre_oficial else '—' }}</td>
+                <td>{% if detalle.valor_numerico is not none %}{{ detalle.valor_numerico }}{% elif detalle.valor_texto %}{{ detalle.valor_texto }}{% else %}—{% endif %}</td>
+                <td>{{ detalle.ensayo.unidad_medida if detalle.ensayo and detalle.ensayo.unidad_medida else '—' }}</td>
+                <td><span class="{{ 'cumple-si' if detalle.resultado_cumple else 'cumple-no' if detalle.resultado_cumple is not none else '' }}">{{ 'SÍ' if detalle.resultado_cumple else 'NO' if detalle.resultado_cumple is not none else '—' }}</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endif %}
+
+{% if informe.conclusiones %}
+<section><h2>CONCLUSIONES ESPECIALES</h2><div class="text-block">{{ informe.conclusiones }}</div></section>
+{% endif %}
+
+{% if informe.recomendaciones %}
+<section><h2>RECOMENDACIONES</h2><div class="text-block">{{ informe.recomendaciones }}</div></section>
+{% endif %}
+
+{% if informe.observaciones %}
+<section><h2>OBSERVACIONES</h2><div class="text-block">{{ informe.observaciones }}</div></section>
+{% endif %}
+
+<div class="firmas">
+    <div class="firma-box">
+        <div class="firma-stamp">Sello</div>
+        <div class="firma-line">Emitido por</div>
+        <div class="firma-name">{{ informe.emitidos_por.nombre_completo if informe.emitidos_por else '______________________' }}</div>
+    </div>
+    <div class="firma-box">
+        <div class="firma-stamp">Sello</div>
+        <div class="firma-line">Director de Laboratorio</div>
+        <div class="firma-name">{{ informe.aprobados_por.nombre_completo if informe.aprobados_por else '______________________' }}</div>
+    </div>
+</div>
+</body>
+</html>

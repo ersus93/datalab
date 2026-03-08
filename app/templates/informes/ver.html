@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% block title %}{{ informe.nro_oficial }} — Informe{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+
+  <!-- Breadcrumb -->
+  <nav class="text-sm text-gray-500 mb-4">
+    <a href="{{ url_for('informes.listar') }}" class="hover:text-blue-600">Informes</a>
+    <span class="mx-2">/</span>
+    <span class="text-gray-800 font-medium">{{ informe.nro_oficial }}</span>
+  </nav>
+
+  {% set estado = informe.estado.value if informe.estado is not string else informe.estado %}
+  {% set estado_colors = {
+    'BORRADOR': 'bg-yellow-100 text-yellow-800 border-yellow-300',
+    'PENDIENTE_FIRMA': 'bg-blue-100 text-blue-800 border-blue-300',
+    'EMITIDO': 'bg-green-100 text-green-800 border-green-300',
+    'ENTREGADO': 'bg-purple-100 text-purple-800 border-purple-300',
+    'ANULADO': 'bg-red-100 text-red-800 border-red-300'
+  } %}
+
+  <!-- Header card -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+    <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <h1 class="text-2xl font-bold font-mono text-blue-700">{{ informe.nro_oficial }}</h1>
+          <span class="px-3 py-1 rounded-full text-xs font-semibold border {{ estado_colors.get(estado, 'bg-gray-100 text-gray-800 border-gray-300') }}">
+            {{ estado }}
+          </span>
+        </div>
+        <p class="text-gray-600 text-sm">
+          Tipo: <strong>{{ informe.tipo_informe.value if informe.tipo_informe is not string else informe.tipo_informe }}</strong>
+          &nbsp;·&nbsp;
+          Creado: {{ informe.created_at.strftime('%d/%m/%Y %H:%M') if informe.created_at else '—' }}
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        {% if estado == 'BORRADOR' %}
+        <a href="{{ url_for('informes.editar', id=informe.id) }}"
+           class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-sm hover:bg-blue-100 transition">
+          <i class="fas fa-edit"></i> Editar
+        </a>
+        {% endif %}
+        <a href="{{ url_for('informes.preview_pdf', id=informe.id) }}" target="_blank"
+           class="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-50 text-gray-700 border border-gray-200 rounded-lg text-sm hover:bg-gray-100 transition">
+          <i class="fas fa-eye"></i> Preview PDF
+        </a>
+        <a href="{{ url_for('informes.descargar_pdf', id=informe.id) }}"
+           class="inline-flex items-center gap-1 px-3 py-1.5 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition">
+          <i class="fas fa-file-pdf"></i> Descargar PDF
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Left: Data -->
+    <div class="lg:col-span-2 space-y-6">
+
+      <!-- Cliente & Entrada -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+        <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Datos Principales</h3>
+        <dl class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+          <dt class="text-gray-500 font-medium">Cliente</dt>
+          <dd class="text-gray-800">{{ informe.cliente.nombre if informe.cliente else '—' }}</dd>
+          <dt class="text-gray-500 font-medium">Entrada / Muestra</dt>
+          <dd class="text-gray-800 font-mono">{{ informe.entrada.codigo if informe.entrada else '—' }}</dd>
+          <dt class="text-gray-500 font-medium">Medio de Entrega</dt>
+          <dd class="text-gray-800">{{ informe.medio_entrega.value if informe.medio_entrega is not string else informe.medio_entrega }}</dd>
+          <dt class="text-gray-500 font-medium">Copias</dt>
+          <dd class="text-gray-800">{{ informe.copias_entregadas }}</dd>
+          <dt class="text-gray-500 font-medium">Fecha de Emisión</dt>
+          <dd class="text-gray-800">{{ informe.fecha_emision.strftime('%d/%m/%Y %H:%M') if informe.fecha_emision else '—' }}</dd>
+          <dt class="text-gray-500 font-medium">Fecha de Entrega</dt>
+          <dd class="text-gray-800">{{ informe.fecha_entrega.strftime('%d/%m/%Y') if informe.fecha_entrega else '—' }}</dd>
+        </dl>
+      </div>
+
+      <!-- Firmantes -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+        <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Firmas y Autorización</h3>
+        <dl class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+          <dt class="text-gray-500">Emitido por</dt>
+          <dd class="text-gray-800">{{ informe.emitidos_por.nombre_completo if informe.emitidos_por else '—' }}</dd>
+          <dt class="text-gray-500">Revisado por</dt>
+          <dd class="text-gray-800">{{ informe.revisados_por.nombre_completo if informe.revisados_por else '—' }}</dd>
+          <dt class="text-gray-500">Aprobado por</dt>
+          <dd class="text-gray-800">{{ informe.aprobados_por.nombre_completo if informe.aprobados_por else '—' }}</dd>
+        </dl>
+      </div>
+
+      <!-- Contenido -->
+      {% for label, field in [('Resumen de Resultados', informe.resumen_resultados), ('Conclusiones', informe.conclusiones), ('Observaciones', informe.observaciones), ('Recomendaciones', informe.recomendaciones)] %}
+      {% if field %}
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+        <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ label }}</h3>
+        <p class="text-sm text-gray-700 leading-relaxed">{{ field }}</p>
+      </div>
+      {% endif %}
+      {% endfor %}
+
+      <!-- Ensayos vinculados -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+        <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Ensayos Incluidos</h3>
+        {% set ensayos_list = informe.ensayos.all() if informe.ensayos else [] %}
+        {% if ensayos_list %}
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50 text-gray-500 text-xs">
+            <tr>
+              <th class="px-3 py-2 text-left">Ensayo</th>
+              <th class="px-3 py-2 text-left">Resultado</th>
+              <th class="px-3 py-2 text-left">Unidad</th>
+              <th class="px-3 py-2 text-center">Cumple</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            {% for d in ensayos_list %}
+            <tr class="hover:bg-gray-50">
+              <td class="px-3 py-2 font-medium text-gray-800">{{ d.ensayo.nombre_corto if d.ensayo else '—' }}</td>
+              <td class="px-3 py-2 text-gray-700">{% if d.valor_numerico is not none %}{{ d.valor_numerico }}{% elif d.valor_texto %}{{ d.valor_texto }}{% else %}—{% endif %}</td>
+              <td class="px-3 py-2 text-gray-500">{{ d.ensayo.unidad_medida if d.ensayo and d.ensayo.unidad_medida else '—' }}</td>
+              <td class="px-3 py-2 text-center">
+                {% if d.resultado_cumple is not none %}
+                <span class="{{ 'text-green-700 font-bold' if d.resultado_cumple else 'text-red-700 font-bold' }}">
+                  {{ '✓' if d.resultado_cumple else '✗' }}
+                </span>
+                {% else %}—{% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <p class="text-sm text-gray-400 italic">No hay ensayos vinculados.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Right: Workflow + Historial -->
+    <div class="space-y-6">
+
+      <!-- Cambio de estado -->
+      {% if transiciones %}
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+        <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Cambiar Estado</h3>
+        <form method="POST" action="{{ url_for('informes.cambiar_estado', id=informe.id) }}" class="space-y-3">
+          <div>
+            <label class="block text-xs text-gray-600 mb-1">Nuevo Estado</label>
+            <select name="nuevo_estado" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+              {% for t in transiciones %}
+              <option value="{{ t }}">{{ t }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-gray-600 mb-1">Motivo (opcional)</label>
+            <textarea name="motivo" rows="2" placeholder="Motivo del cambio..."
+                      class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs"></textarea>
+          </div>
+          <button type="submit"
+                  class="w-full py-2 bg-blue-700 text-white text-sm rounded-lg hover:bg-blue-800 transition font-medium">
+            Confirmar Cambio
+          </button>
+        </form>
+      </div>
+      {% endif %}
+
+      <!-- Historial -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+        <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Historial de Estados</h3>
+        {% if informe.history %}
+        <div class="space-y-3">
+          {% for h in informe.history | sort(attribute='changed_at', reverse=True) %}
+          <div class="text-xs border-l-2 border-blue-200 pl-3">
+            <div class="text-gray-500">{{ h.changed_at.strftime('%d/%m/%Y %H:%M') if h.changed_at else '?' }}</div>
+            <div class="font-medium text-gray-800">{{ h.from_status }} → {{ h.to_status }}</div>
+            {% if h.changed_by %}<div class="text-gray-500">por {{ h.changed_by.nombre_completo }}</div>{% endif %}
+            {% if h.reason %}<div class="text-gray-600 italic">{{ h.reason }}</div>{% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-xs text-gray-400 italic">Sin historial de cambios.</p>
+        {% endif %}
+      </div>
+
+      {% if informe.anulado and informe.motivo_anulacion %}
+      <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+        <p class="text-sm font-semibold text-red-800 mb-1">⚠ Informe Anulado</p>
+        <p class="text-xs text-red-700">{{ informe.motivo_anulacion }}</p>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

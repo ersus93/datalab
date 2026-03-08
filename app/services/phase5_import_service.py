@@ -373,7 +373,11 @@ class Phase5ImportService:
                         if not self.dry_run:
                             db.session.add(entrada)
 
-                    nro_oficial = f"INF-{year:04d}-{i+1:03d}"
+                    tipo = tipos[i % len(tipos)]
+                    tipo_prefix = {"ANALISIS": "A", "CERTIFICADO": "C", "CONSULTA": "", "ESPECIAL": "E"}
+                    prefix = tipo_prefix.get(tipo.value, "")
+                    prefix_part = f"-{prefix}" if prefix else ""
+                    nro_oficial = f"INF{prefix_part}-{year:04d}-{i+1:04d}"
 
                     existing = Informe.query.filter_by(nro_oficial=nro_oficial).first()
                     if existing:
@@ -617,3 +621,156 @@ def run_import(dry_run: bool = False, output_report: Optional[str] = None) -> Ph
         service.generate_report(output_report)
 
     return result
+
+
+# ─── VALIDADORES ADICIONALES ──────────────────────────────────────────────────
+
+class ValidadorNrosOfic:
+    """Valida los números oficiales de informes en la base de datos."""
+
+    import re as _re
+
+    # Formato esperado: INF-{prefix?}-{YYYY}-{NNNN}
+    _PATTERN = _re.compile(r'^INF(?:-[ACE])?-(\d{4})-(\d{4})$')
+
+    @classmethod
+    def verificar_formato(cls) -> List[dict]:
+        """Encuentra informes con NroOfic en formato incorrecto."""
+        import re
+        pattern = re.compile(r'^INF(?:-[ACE])?-\d{4}-\d{4}$')
+        invalidos = []
+        for inf in Informe.query.all():
+            if not pattern.match(inf.nro_oficial):
+                invalidos.append({
+                    'id': inf.id,
+                    'nro_oficial': inf.nro_oficial,
+                    'problema': 'Formato incorrecto (esperado: INF[-X]-YYYY-NNNN)',
+                })
+        return invalidos
+
+    @classmethod
+    def verificar_duplicados(cls) -> List[dict]:
+        """Detecta NroOfic duplicados."""
+        from sqlalchemy import func as sqlfunc
+        duplicados = db.session.query(
+            Informe.nro_oficial,
+            sqlfunc.count(Informe.id).label('total')
+        ).group_by(Informe.nro_oficial).having(sqlfunc.count(Informe.id) > 1).all()
+        return [{'nro_oficial': d.nro_oficial, 'count': d.total} for d in duplicados]
+
+    @classmethod
+    def verificar_secuencia(cls) -> Dict[str, List[int]]:
+        """Detecta huecos en la numeración por año."""
+        import re
+        gaps = {}
+        pattern = re.compile(r'^INF(?:-[ACE])?-(\d{4})-(\d+)$')
+        por_anio: Dict[str, List[int]] = {}
+        for inf in Informe.query.all():
+            m = pattern.match(inf.nro_oficial)
+            if m:
+                anio, num = m.group(1), int(m.group(2))
+                por_anio.setdefault(anio, []).append(num)
+        for anio, nums in por_anio.items():
+            nums.sort()
+            esperado = list(range(nums[0], nums[-1] + 1))
+            g = [n for n in esperado if n not in nums]
+            if g:
+                gaps[anio] = g
+        return gaps
+
+    @classmethod
+    def reporte_completo(cls) -> str:
+        """Genera reporte Markdown con todos los resultados."""
+        fmt = cls.verificar_formato()
+        dups = cls.verificar_duplicados()
+        gaps = cls.verificar_secuencia()
+        lines = ['# Validación de Números Oficiales de Informes', '']
+        lines.append(f'**Total informes:** {Informe.query.count()}')
+        lines.append('')
+        lines.append(f'## Formatos incorrectos ({len(fmt)})')
+        if fmt:
+            lines.append('| ID | NroOfic | Problema |')
+            lines.append('|---|---|---|')
+            for r in fmt:
+                lines.append(f"| {r['id']} | {r['nro_oficial']} | {r['problema']} |")
+        else:
+            lines.append('_Ninguno ✅_')
+        lines.append('')
+        lines.append(f'## Duplicados ({len(dups)})')
+        if dups:
+            lines.append('| NroOfic | Count |')
+            lines.append('|---|---|')
+            for d in dups:
+                lines.append(f"| {d['nro_oficial']} | {d['count']} |")
+        else:
+            lines.append('_Ninguno ✅_')
+        lines.append('')
+        lines.append(f'## Huecos en secuencia ({sum(len(v) for v in gaps.values())} gaps)')
+        if gaps:
+            for anio, nums in gaps.items():
+                lines.append(f'- Año {anio}: faltan {nums}')
+        else:
+            lines.append('_Sin huecos ✅_')
+        return '\n'.join(lines)
+
+
+class ValidadorVinculaciones:
+    """Valida las vinculaciones de informes con entradas, clientes y ensayos."""
+
+    @classmethod
+    def validar_todos(cls) -> Dict[str, List[dict]]:
+        """Valida todos los informes y retorna resultados por categoría."""
+        resultados = {'ok': [], 'errores': [], 'advertencias': []}
+        for informe in Informe.query.all():
+            nivel, errores, advertencias = cls._validar_informe(informe)
+            item = {
+                'id': informe.id,
+                'nro_oficial': informe.nro_oficial,
+                'errores': errores,
+                'advertencias': advertencias,
+            }
+            resultados[nivel].append(item)
+        return resultados
+
+    @classmethod
+    def _validar_informe(cls, informe):
+        errores, advertencias = [], []
+        # 1. Entrada existe
+        if not informe.entrada:
+            errores.append('Sin entrada vinculada')
+        else:
+            # 2. Estado entrada compatible
+            from app.database.models.entrada import EntradaStatus
+            estado_ok = ['COMPLETADO', 'ENTREGADO', 'REPORTADO']
+            est = informe.entrada.status.value if hasattr(informe.entrada.status, 'value') else str(informe.entrada.status)
+            if est not in estado_ok:
+                advertencias.append(f'Estado entrada: {est}')
+            # 3. Cliente coincide
+            if informe.cliente_id and informe.entrada.cliente_id:
+                if informe.cliente_id != informe.entrada.cliente_id:
+                    errores.append(f'Cliente no coincide (informe={informe.cliente_id}, entrada={informe.entrada.cliente_id})')
+            # 4. Fecha emision > fecha entrada
+            if informe.fecha_emision and informe.entrada.fech_entrada:
+                if informe.fecha_emision.date() < informe.entrada.fech_entrada.date() if hasattr(informe.entrada.fech_entrada, 'date') else False:
+                    errores.append('Fecha emisión anterior a fecha de entrada')
+        # 5. Cliente existe
+        if not informe.cliente:
+            errores.append('Sin cliente vinculado')
+        nivel = 'errores' if errores else ('advertencias' if advertencias else 'ok')
+        return nivel, errores, advertencias
+
+    @classmethod
+    def reporte_markdown(cls) -> str:
+        resultados = cls.validar_todos()
+        lines = ['# Validación de Vinculaciones de Informes', '']
+        lines.append(f"✅ OK: {len(resultados['ok'])}  |  ⚠️ Advertencias: {len(resultados['advertencias'])}  |  ❌ Errores: {len(resultados['errores'])}")
+        lines.append('')
+        for cat, icon in [('errores', '❌'), ('advertencias', '⚠️'), ('ok', '✅')]:
+            lines.append(f'## {icon} {cat.title()} ({len(resultados[cat])})')
+            for r in resultados[cat]:
+                if r['errores'] or r['advertencias']:
+                    lines.append(f"- **{r['nro_oficial']}**: {'; '.join(r['errores'] + r['advertencias'])}")
+            if not resultados[cat]:
+                lines.append('_Ninguno_')
+            lines.append('')
+        return '\n'.join(lines)

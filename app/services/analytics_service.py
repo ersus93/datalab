@@ -2,10 +2,22 @@
 from datetime import datetime, timedelta, date
 from typing import Any, Dict, List, Optional
 
-from sqlalchemy import func, desc, cast, Date
+from sqlalchemy import func, desc, cast, Date, text
+from sqlalchemy.dialects import sqlite
 
 from app import db
 from app.utils.cache import cache, CACHE_TTL_DEFAULT
+
+
+def _month_trunc(col):
+    """Trunca una columna DateTime a año-mes de forma compatible con SQLite y PostgreSQL."""
+    from sqlalchemy import inspect as sa_inspect
+    engine = db.engine
+    dialect_name = engine.dialect.name
+    if dialect_name == 'postgresql':
+        return func.to_char(col, 'YYYY-MM')
+    # SQLite (default)
+    return func.strftime('%Y-%m', col)
 
 
 class AnalyticsService:
@@ -186,15 +198,15 @@ class AnalyticsService:
         start_date = end_date - timedelta(days=months * 30)
 
         results = db.session.query(
-            func.strftime('%Y-%m', DetalleEnsayo.fecha_completado).label('month'),
+            _month_trunc(DetalleEnsayo.fecha_completado).label('month'),
             func.count(DetalleEnsayo.id).label('count')
         ).filter(
             DetalleEnsayo.estado == DetalleEnsayoStatus.COMPLETADO.value,
             DetalleEnsayo.fecha_completado >= start_date
         ).group_by(
-            func.strftime('%Y-%m', DetalleEnsayo.fecha_completado)
+            _month_trunc(DetalleEnsayo.fecha_completado)
         ).order_by(
-            func.strftime('%Y-%m', DetalleEnsayo.fecha_completado)
+            _month_trunc(DetalleEnsayo.fecha_completado)
         ).all()
 
         data = [{"month": r.month, "count": r.count} for r in results]
@@ -282,7 +294,7 @@ class AnalyticsService:
         ]
 
         monthly_results = db.session.query(
-            func.strftime('%Y-%m', Entrada.fech_entrada).label('month'),
+            _month_trunc(Entrada.fech_entrada).label('month'),
             Cliente.tipo.label('tipo_cliente'),
             func.count(Entrada.id).label('count')
         ).join(
@@ -290,10 +302,10 @@ class AnalyticsService:
         ).filter(
             Entrada.anulado == False
         ).group_by(
-            func.strftime('%Y-%m', Entrada.fech_entrada),
+            _month_trunc(Entrada.fech_entrada),
             Cliente.tipo
         ).order_by(
-            func.strftime('%Y-%m', Entrada.fech_entrada)
+            _month_trunc(Entrada.fech_entrada)
         ).all()
 
         area_data = [

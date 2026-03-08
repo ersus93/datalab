@@ -1,8 +1,8 @@
 """
 Billing Service - Servicio para gestión de uso y facturación
 """
-from datetime import datetime
-from typing import List, Optional
+from datetime import datetime, date, timedelta
+from typing import List, Optional, Dict
 from sqlalchemy import func
 from app import db
 from app.database.models.utilizado import Utilizado, UtilizadoStatus, Factura
@@ -189,4 +189,185 @@ class BillingService:
             'facturas': [f.to_dict() for f in facturas],
             'total_facturado': sum(float(f.total) for f in facturas),
             'cantidad': len(facturas)
+        }
+
+    # ─── NUEVOS MÉTODOS ──────────────────────────────────────────────────────
+
+    @staticmethod
+    def get_reporte_mensual(anio: int, mes: int) -> Dict:
+        """Reporte de uso para un mes específico.
+
+        Args:
+            anio: Año (ej. 2025)
+            mes: Mes 1-12
+
+        Returns:
+            dict con totales del mes.
+        """
+        fecha_inicio = date(anio, mes, 1)
+        if mes == 12:
+            fecha_fin = date(anio + 1, 1, 1) - timedelta(days=1)
+        else:
+            fecha_fin = date(anio, mes + 1, 1) - timedelta(days=1)
+
+        mes_str = fecha_inicio.strftime('%Y-%m')
+        utilizados = Utilizado.query.filter(
+            Utilizado.mes_facturacion == mes_str
+        ).all()
+
+        clientes_unicos = {u.entrada.cliente_id for u in utilizados if u.entrada and u.entrada.cliente_id}
+
+        return {
+            'anio': anio,
+            'mes': mes,
+            'mes_str': mes_str,
+            'total_utilizados': len(utilizados),
+            'total_facturado': sum(float(u.importe) for u in utilizados),
+            'clientes_unicos': len(clientes_unicos),
+            'pendientes': sum(1 for u in utilizados if u.estado == UtilizadoStatus.PENDIENTE.value),
+            'facturados': sum(1 for u in utilizados if u.estado == UtilizadoStatus.FACTURADO.value),
+        }
+
+    @staticmethod
+    def get_comparativo_mensual(anio: int) -> List[Dict]:
+        """Comparativo de los 12 meses de un año.
+
+        Args:
+            anio: Año a analizar.
+
+        Returns:
+            Lista de 12 dicts con datos por mes.
+        """
+        resultados = []
+        nombres_mes = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                       'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+        for mes in range(1, 13):
+            datos = BillingService.get_reporte_mensual(anio, mes)
+            datos['nombre_mes'] = nombres_mes[mes]
+            resultados.append(datos)
+        return resultados
+
+    @staticmethod
+    def get_ranking_ensayos(
+        fecha_inicio: Optional[date] = None,
+        fecha_fin: Optional[date] = None,
+        top_n: int = 20,
+        cliente_id: Optional[int] = None,
+    ) -> List[Dict]:
+        """Top-N ensayos más utilizados en un período.
+
+        Args:
+            fecha_inicio: Fecha de inicio del filtro.
+            fecha_fin: Fecha de fin del filtro.
+            top_n: Máximo de resultados (default 20).
+            cliente_id: Filtrar por cliente específico.
+
+        Returns:
+            Lista ordenada por cantidad descendente.
+        """
+        query = db.session.query(
+            Ensayo.id,
+            Ensayo.nombre_corto,
+            Ensayo.area_id,
+            func.count(Utilizado.id).label('cantidad'),
+            func.sum(Utilizado.importe).label('total_importe'),
+        ).join(Utilizado, Utilizado.ensayo_id == Ensayo.id)
+
+        if cliente_id:
+            query = query.join(Entrada, Utilizado.entrada_id == Entrada.id).filter(
+                Entrada.cliente_id == cliente_id
+            )
+        if fecha_inicio:
+            query = query.filter(Utilizado.fecha_uso >= datetime.combine(fecha_inicio, datetime.min.time()))
+        if fecha_fin:
+            query = query.filter(Utilizado.fecha_uso <= datetime.combine(fecha_fin, datetime.max.time()))
+
+        resultados = query.group_by(Ensayo.id, Ensayo.nombre_corto, Ensayo.area_id) \
+                         .order_by(func.count(Utilizado.id).desc()) \
+                         .limit(top_n).all()
+
+        return [
+            {
+                'ensayo_id': r.id,
+                'ensayo': r.nombre_corto,
+                'area_id': r.area_id,
+                'cantidad': r.cantidad,
+                'total_importe': float(r.total_importe) if r.total_importe else 0.0,
+            }
+            for r in resultados
+        ]
+
+    @staticmethod
+    def verificar_precios_factura(factura_id: int) -> List[Dict]:
+        """Compara precios facturados vs precio actual del catálogo.
+
+        Args:
+            factura_id: ID de la factura a verificar.
+
+        Returns:
+            Lista de discrepancias (vacía si todo coincide).
+        """
+        utilizados = Utilizado.query.filter_by(factura_id=factura_id).all()
+        discrepancias = []
+        for u in utilizados:
+            if not u.ensayo:
+                continue
+            precio_actual = float(u.ensayo.precio_referencia) if hasattr(u.ensayo, 'precio_referencia') and u.ensayo.precio_referencia else 0.0
+            precio_facturado = float(u.precio_unitario) if u.precio_unitario else 0.0
+            if abs(precio_facturado - precio_actual) > 0.01:
+                discrepancias.append({
+                    'utilizado_id': u.id,
+                    'ensayo': u.ensayo.nombre_corto,
+                    'precio_facturado': precio_facturado,
+                    'precio_actual': precio_actual,
+                    'diferencia': precio_facturado - precio_actual,
+                })
+        return discrepancias
+
+    @staticmethod
+    def verificar_utilizados_sin_facturar(
+        cliente_id: Optional[int] = None,
+        mes_facturacion: Optional[str] = None,
+    ) -> Dict:
+        """Detecta ensayos completados que aún no han sido facturados.
+
+        Returns:
+            dict con lista de utilizados pendientes y totales.
+        """
+        query = Utilizado.query.filter(Utilizado.estado == UtilizadoStatus.PENDIENTE.value)
+        if cliente_id:
+            query = query.join(Entrada).filter(Entrada.cliente_id == cliente_id)
+        if mes_facturacion:
+            query = query.filter(Utilizado.mes_facturacion == mes_facturacion)
+
+        pendientes = query.all()
+        return {
+            'cantidad': len(pendientes),
+            'total_importe': sum(float(u.importe) for u in pendientes),
+            'items': [u.to_dict() for u in pendientes],
+        }
+
+    @staticmethod
+    def conciliar_factura(factura_id: int) -> Dict:
+        """Verifica que el total de la factura coincida con la suma de sus ítems.
+
+        Returns:
+            dict con resultado de la conciliación.
+        """
+        factura = Factura.query.get(factura_id)
+        if not factura:
+            return {'error': f'Factura {factura_id} no encontrada'}
+
+        utilizados = Utilizado.query.filter_by(factura_id=factura_id).all()
+        suma_items = sum(float(u.importe) for u in utilizados if u.estado != UtilizadoStatus.ANULADO.value)
+        total_factura = float(factura.total) if factura.total else 0.0
+        diferencia = total_factura - suma_items
+
+        return {
+            'factura_id': factura_id,
+            'numero_factura': factura.numero_factura,
+            'total_factura': total_factura,
+            'suma_items': suma_items,
+            'diferencia': diferencia,
+            'ok': abs(diferencia) < 0.01,
         }

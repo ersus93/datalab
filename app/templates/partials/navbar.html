@@ -8,6 +8,20 @@
             
 {% if current_user.is_authenticated %}
             <div class="flex items-center space-x-4">
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('informes.listar') }}" class="text-sm hover:text-yellow-200 flex items-center space-x-1" title="Informes Oficiales">
+                    <i class="fas fa-file-alt"></i>
+                    <span class="hidden md:inline">Informes</span>
+                </a>
+                <a href="{{ url_for('analytics.index') }}" class="text-sm hover:text-yellow-200 flex items-center space-x-1" title="Analytics">
+                    <i class="fas fa-chart-bar"></i>
+                    <span class="hidden md:inline">Analytics</span>
+                </a>
+                <a href="{{ url_for('billing.billing_index') }}" class="text-sm hover:text-yellow-200 flex items-center space-x-1" title="Facturación">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <span class="hidden md:inline">Facturación</span>
+                </a>
+                {% endif %}
                 {# Dropdown de Notificaciones #}
                 {% from 'components/notifications/notification_dropdown.html' import notification_dropdown %}
                 {{ notification_dropdown() }}
@@ -21,7 +35,6 @@
                     <span>{{ _('Cerrar Sesión') }}</span>
                 </a>
             </div>
-            {% endif %}
         </div>
     </div>
 </nav>

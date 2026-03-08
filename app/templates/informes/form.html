@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block title %}{{ informe.nro_oficial if informe else 'Nuevo Informe' }} — DataLab{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-800">
+      {{ 'Nuevo Informe' if not informe else 'Editar Informe #' + informe.nro_oficial }}
+    </h1>
+    <a href="{{ url_for('informes.listar') }}" class="text-gray-500 hover:text-gray-700 text-sm">
+      <i class="fas fa-arrow-left mr-1"></i> Volver
+    </a>
+  </div>
+
+  <form method="POST" class="space-y-6">
+
+    {% if not informe %}
+    <!-- Solo en CREACIÓN -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <h2 class="text-base font-semibold text-gray-700 mb-4">Identificación</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Informe *</label>
+          <select name="tipo_informe" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+            <option value="">— Seleccionar —</option>
+            {% for val, label in tipos %}
+            <option value="{{ val }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Entrada (Muestra) *</label>
+          <select name="entrada_id" id="entrada_id" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+            <option value="">— Seleccionar —</option>
+            {% for ent in entradas %}
+            <option value="{{ ent.id }}">{{ ent.codigo }} — {{ ent.cliente.nombre if ent.cliente else '?' }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Cliente *</label>
+          <select name="cliente_id" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+            <option value="">— Seleccionar —</option>
+            {% for c in clientes %}
+            <option value="{{ c.id }}">{{ c.nombre }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ensayos a incluir (carga dinámica vía JS) -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6" id="ensayos-section" style="display:none">
+      <h2 class="text-base font-semibold text-gray-700 mb-4">Ensayos a incluir</h2>
+      <div id="ensayos-container" class="space-y-1 max-h-48 overflow-y-auto"></div>
+    </div>
+    {% else %}
+    <!-- En EDICIÓN: mostrar ensayos de la entrada -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <h2 class="text-base font-semibold text-gray-700 mb-4">Ensayos a incluir</h2>
+      <div class="space-y-1 max-h-48 overflow-y-auto">
+        {% for d in ensayos_entrada %}
+        <label class="flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-50 px-2 py-1 rounded cursor-pointer">
+          <input type="checkbox" name="ensayos_ids" value="{{ d.id }}"
+                 {{ 'checked' if d.id in ensayos_vinculados }}
+                 class="rounded text-blue-600">
+          <span class="font-mono text-xs text-gray-400">[{{ d.id }}]</span>
+          {{ d.ensayo.nombre_corto if d.ensayo else '?' }}
+          <span class="text-xs text-gray-400">({{ d.estado }})</span>
+        </label>
+        {% else %}
+        <p class="text-sm text-gray-400 italic">No hay ensayos para esta entrada.</p>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Contenido del informe -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <h2 class="text-base font-semibold text-gray-700 mb-4">Contenido del Informe</h2>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Resumen de Resultados *</label>
+          <textarea name="resumen_resultados" rows="4" required
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-y"
+                    placeholder="Descripción general de los resultados obtenidos...">{{ informe.resumen_resultados if informe else '' }}</textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Conclusiones</label>
+          <textarea name="conclusiones" rows="3"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-y">{{ informe.conclusiones if informe else '' }}</textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Observaciones</label>
+          <textarea name="observaciones" rows="3"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-y">{{ informe.observaciones if informe else '' }}</textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Recomendaciones</label>
+          <textarea name="recomendaciones" rows="3"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-y">{{ informe.recomendaciones if informe else '' }}</textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Entrega -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <h2 class="text-base font-semibold text-gray-700 mb-4">Datos de Entrega</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Medio de Entrega</label>
+          <select name="medio_entrega" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+            {% for val, label in medios %}
+            <option value="{{ val }}" {{ 'selected' if informe and (informe.medio_entrega.value if informe.medio_entrega is not string else informe.medio_entrega) == val }}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Número de Páginas</label>
+          <input type="number" name="numero_paginas" min="1" value="{{ informe.numero_paginas if informe else 1 }}"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Copias Entregadas</label>
+          <input type="number" name="copias_entregadas" min="1" value="{{ informe.copias_entregadas if informe else 1 }}"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        </div>
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-3">
+      <a href="{{ url_for('informes.listar') }}"
+         class="px-5 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50">Cancelar</a>
+      <button type="submit"
+              class="px-5 py-2 bg-blue-700 text-white rounded-lg text-sm font-medium hover:bg-blue-800 transition">
+        <i class="fas fa-save mr-1"></i>
+        {{ 'Crear Informe' if not informe else 'Guardar Cambios' }}
+      </button>
+    </div>
+
+  </form>
+</div>
+
+{% if not informe %}
+<script>
+document.getElementById('entrada_id').addEventListener('change', function() {
+  const entradaId = this.value;
+  if (!entradaId) { document.getElementById('ensayos-section').style.display = 'none'; return; }
+  fetch(`{{ url_for('informes.api_ensayos_entrada', entrada_id=0) }}`.replace('0', entradaId))
+    .then(r => r.json())
+    .then(data => {
+      const container = document.getElementById('ensayos-container');
+      container.innerHTML = '';
+      if (data.length === 0) {
+        container.innerHTML = '<p class="text-sm text-gray-400 italic">No hay ensayos para esta entrada.</p>';
+      } else {
+        data.forEach(d => {
+          container.innerHTML += `
+            <label class="flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-50 px-2 py-1 rounded cursor-pointer">
+              <input type="checkbox" name="ensayos_ids" value="${d.id}" class="rounded text-blue-600">
+              <span class="font-mono text-xs text-gray-400">[${d.id}]</span> ${d.ensayo}
+              <span class="text-xs text-gray-400">(${d.estado})</span>
+            </label>`;
+        });
+      }
+      document.getElementById('ensayos-section').style.display = 'block';
+    });
+});
+</script>
+{% endif %}
+
+{% endblock %}
