@@ -3,16 +3,25 @@
 Phase 6 Issue #56 - Global Search System
 """
 
-import json
+import logging
+
 from flask import Blueprint, jsonify, request
-from app.services.search_service import SearchService
-from app.database.models import Pedido, Cliente, OrdenTrabajo
+from flask_login import login_required
 from sqlalchemy import or_
+
+from app import db
+from app.database.models import Cliente, OrdenTrabajo, Pedido
+from app.services.search_service import SearchService
+
+logger = logging.getLogger(__name__)
 
 bp = Blueprint('search', __name__)
 
+MAX_QUERY_LENGTH = 200
+
 
 @bp.route('/api/search')
+@login_required
 def search():
     """
     Global search endpoint with filtering and categorization.
@@ -38,13 +47,17 @@ def search():
             'message': 'No search query provided'
         })
     
-    # Parse entities parameter
+    if len(query) > MAX_QUERY_LENGTH:
+        return jsonify({
+            'results': [],
+            'message': f'Query exceeds maximum length of {MAX_QUERY_LENGTH} characters'
+        }), 400
+    
     entities_param = request.args.get('entities')
     entities = None
     if entities_param:
         entities = [e.strip() for e in entities_param.split(',') if e.strip()]
     
-    # Parse filters
     filters = {}
     
     date_from = request.args.get('date_from')
@@ -62,7 +75,6 @@ def search():
     if status:
         filters['status'] = status
     
-    # Pagination
     try:
         page = int(request.args.get('page', 1))
         limit = int(request.args.get('limit', 20))
@@ -70,11 +82,9 @@ def search():
         page = 1
         limit = 20
     
-    # Validate limits
     page = max(1, page)
     limit = min(max(1, limit), 100)
     
-    # Perform search using SearchService
     try:
         results = SearchService.search(
             query=query,
@@ -85,14 +95,16 @@ def search():
         )
         return jsonify(results)
     except Exception as e:
+        logger.error(f"Search error: {type(e).__name__}")
         return jsonify({
-            'error': str(e),
+            'error': 'An error occurred while processing your search',
             'results': {},
             'message': 'Search error occurred'
         }), 500
 
 
 @bp.route('/api/search/autocomplete')
+@login_required
 def autocomplete():
     """
     Autocomplete suggestions endpoint.
@@ -106,6 +118,13 @@ def autocomplete():
     """
     query = request.args.get('q', '')
     
+    if len(query) > MAX_QUERY_LENGTH:
+        return jsonify({
+            'suggestions': [],
+            'query': query[:MAX_QUERY_LENGTH],
+            'message': f'Query exceeds maximum length of {MAX_QUERY_LENGTH} characters'
+        }), 400
+    
     if len(query) < 2:
         return jsonify({
             'suggestions': [],
@@ -118,11 +137,20 @@ def autocomplete():
     except ValueError:
         limit = 10
     
-    suggestions = SearchService.get_autocomplete_suggestions(query, limit)
-    return jsonify(suggestions)
+    try:
+        suggestions = SearchService.get_autocomplete_suggestions(query, limit)
+        return jsonify(suggestions)
+    except Exception as e:
+        logger.error(f"Autocomplete error: {type(e).__name__}")
+        return jsonify({
+            'suggestions': [],
+            'query': query,
+            'message': 'An error occurred while fetching suggestions'
+        }), 500
 
 
 @bp.route('/api/search/entities')
+@login_required
 def search_entities():
     """
     Get available searchable entities configuration.
@@ -130,21 +158,29 @@ def search_entities():
     Returns:
         JSON with entity configuration
     """
-    entities = SearchService.get_searchable_entities()
-    
-    config = {}
-    for entity_type, entity_config in entities.items():
-        config[entity_type] = {
-            'search_fields': entity_config['search_fields'],
-            'priority': entity_config['priority']
-        }
-    
-    return jsonify({
-        'entities': config
-    })
+    try:
+        entities = SearchService.get_searchable_entities()
+        
+        config = {}
+        for entity_type, entity_config in entities.items():
+            config[entity_type] = {
+                'search_fields': entity_config['search_fields'],
+                'priority': entity_config['priority']
+            }
+        
+        return jsonify({
+            'entities': config
+        })
+    except Exception as e:
+        logger.error(f"Search entities error: {type(e).__name__}")
+        return jsonify({
+            'entities': {},
+            'message': 'An error occurred while fetching entity configuration'
+        }), 500
 
 
 @bp.route('/api/search/filters')
+@login_required
 def search_filters():
     """
     Get available filter options.
@@ -152,27 +188,41 @@ def search_filters():
     Returns:
         JSON with available areas and statuses
     """
-    areas = SearchService.get_available_areas()
-    statuses = SearchService.get_available_statuses()
-    
-    return jsonify({
-        'areas': areas,
-        'statuses': statuses
-    })
+    try:
+        areas = SearchService.get_available_areas()
+        statuses = SearchService.get_available_statuses()
+        
+        return jsonify({
+            'areas': areas,
+            'statuses': statuses
+        })
+    except Exception as e:
+        logger.error(f"Search filters error: {type(e).__name__}")
+        return jsonify({
+            'areas': [],
+            'statuses': [],
+            'message': 'An error occurred while fetching filter options'
+        }), 500
 
 
-# Legacy endpoint for backward compatibility
 @bp.route('/api/search/legacy')
+@login_required
 def search_legacy():
     """Legacy search endpoint - redirects to new format."""
     query = request.args.get('q', '')
+    
     if not query:
         return jsonify({'results': []})
-
+    
+    if len(query) > MAX_QUERY_LENGTH:
+        return jsonify({
+            'results': [],
+            'message': f'Query exceeds maximum length of {MAX_QUERY_LENGTH} characters'
+        }), 400
+    
     results = []
-
+    
     try:
-        # Buscar en pedidos
         pedidos = Pedido.query.filter(
             or_(
                 Pedido.numero_pedido.ilike(f'%{query}%'),
@@ -180,7 +230,6 @@ def search_legacy():
             )
         ).limit(5).all()
 
-        # Buscar en clientes
         clientes = Cliente.query.filter(
             or_(
                 Cliente.nombre.ilike(f'%{query}%'),
@@ -188,7 +237,6 @@ def search_legacy():
             )
         ).limit(5).all()
 
-        # Buscar en ordenes de trabajo
         ordenes = OrdenTrabajo.query.filter(
             or_(
                 OrdenTrabajo.numero.ilike(f'%{query}%'),
@@ -220,8 +268,12 @@ def search_legacy():
                 'type': 'orden'
             })
 
-    except Exception:
-        results = []
+    except Exception as e:
+        logger.error(f"Legacy search error: {type(e).__name__}")
+        return jsonify({
+            'results': [],
+            'message': 'An error occurred while performing the search'
+        }), 500
 
     return jsonify({
         'results': results[:10]

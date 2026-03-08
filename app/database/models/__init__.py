@@ -32,6 +32,7 @@ from .notification_preference import NotificationPreference
 from .status_history import StatusHistory
 from .utilizado import Utilizado, UtilizadoStatus, Factura
 from .detalle_ensayo import DetalleEnsayo, DetalleEnsayoStatus
+from .recent_search import RecentSearch
 
 __all__ = [
     'Cliente',
@@ -69,4 +70,5 @@ __all__ = [
     'StatusHistory',
     'DetalleEnsayo',
     'DetalleEnsayoStatus',
+    'RecentSearch',
 ]
