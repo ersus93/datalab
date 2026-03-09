@@ -33,8 +33,8 @@ class EnsayoESXProducto(db.Model):
     creado_en = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relationships
-    producto  = db.relationship('Producto',  backref=db.backref('ensayos_es_asociados', lazy='dynamic'))
-    ensayo_es = db.relationship('EnsayoES',  backref=db.backref('productos_asociados',  lazy='dynamic'))
+    producto  = db.relationship('Producto',  backref=db.backref('ensayos_es_asociados', lazy='dynamic', overlaps="ensayos_es,productos"), overlaps="ensayos_es,productos")
+    ensayo_es = db.relationship('EnsayoES',  backref=db.backref('productos_asociados',  lazy='dynamic', overlaps="ensayos_es,productos"), overlaps="ensayos_es,productos")
 
     __table_args__ = (
         db.Index('ix_ensayos_es_x_productos_producto_id',  'producto_id'),

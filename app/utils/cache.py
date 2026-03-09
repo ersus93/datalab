@@ -6,8 +6,6 @@ from typing import Any, Callable, Optional
 
 import redis
 
-from app import db
-
 logger = logging.getLogger(__name__)
 
 CACHE_TTL_DEFAULT = 300

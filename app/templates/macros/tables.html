@@ -25,7 +25,7 @@
 </th>
 {% endmacro %}
 
-{% macro pagination(pagination_obj, endpoint, **kwargs) %}
+{% macro pagination(pagination_obj, endpoint) %}
 {% if pagination_obj.pages > 1 %}
 <div class="flex justify-between items-center mt-4">
     <div class="text-sm text-gray-600">

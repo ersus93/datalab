@@ -2,6 +2,8 @@
 """Punto de entrada principal para ONIE DataLab."""
 
 import os
+import logging
+logging.basicConfig(level=logging.WARNING, format='%(levelname)s %(name)s: %(message)s')
 from dotenv import load_dotenv
 load_dotenv()
 from flask.cli import FlaskGroup

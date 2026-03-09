@@ -1,5 +1,7 @@
 """Script para crear/resetear usuario administrador en DataLab."""
 import os
+from dotenv import load_dotenv
+load_dotenv()  # Carga el .env ANTES de crear la app - mismo DB que usa la web
 os.environ.setdefault('FLASK_ENV', 'development')
 
 from app import create_app, db

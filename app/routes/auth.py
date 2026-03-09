@@ -19,13 +19,9 @@ def login():
     from app.database.models.user import User
 
     # Si el usuario ya está autenticado, redirigir al dashboard
-    if request.method == "GET" and hasattr(
-        login_user, "current_user"
-    ):  # pragma: no cover
-        from flask_login import current_user
-
-        if current_user.is_authenticated:
-            return redirect(url_for("dashboard.index"))
+    from flask_login import current_user
+    if request.method == "GET" and current_user.is_authenticated:
+        return redirect(url_for("dashboard.index"))
 
     form = LoginForm()
 

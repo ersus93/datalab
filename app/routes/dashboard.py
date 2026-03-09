@@ -97,8 +97,50 @@ def index():
             'pending_deliveries': []
         }
 
+    # Objeto metrics que espera el template dashboard.html
+    from app.database.models.pedido import Pedido
+    from app.database.models import OrdenTrabajo
+    from app.database.models.detalle_ensayo import DetalleEnsayo
+
+    try:
+        total_pedidos = Pedido.query.count()
+    except Exception:
+        total_pedidos = 0
+    try:
+        total_ensayos = DetalleEnsayo.query.count()
+    except Exception:
+        total_ensayos = 0
+    try:
+        total_ordenes = OrdenTrabajo.query.count()
+    except Exception:
+        total_ordenes = 0
+
+    metrics = {
+        'total_clients': {
+            'value': str(stats['total_clientes']),
+            'change': '+0%',
+            'period': 'registrados',
+        },
+        'total_orders': {
+            'value': str(total_pedidos),
+            'change': '+0%',
+            'period': 'registrados',
+        },
+        'total_tests': {
+            'value': str(total_ensayos),
+            'change': '+0%',
+            'period': 'completados',
+        },
+        'work_orders': {
+            'value': str(total_ordenes),
+            'change': '+0%',
+            'period': 'activas',
+        },
+    }
+
     return render_template('pages/dashboard/dashboard.html',
                            stats=stats,
+                           metrics=metrics,
                            provincia_data=provincia_data,
                            top_clientes=top_clientes,
                            sector_data=sector_data,

@@ -122,7 +122,7 @@ class DetalleEnsayo(db.Model):
 
     # Relaciones
     entrada = db.relationship("Entrada", backref="detalles_ensayo", lazy=True)
-    ensayo = db.relationship("Ensayo", backref="detalles_ensayo", lazy=True)
+    ensayo = db.relationship("Ensayo", back_populates="detalles", lazy=True)
     tecnico_asignado = db.relationship("User", backref="ensayos_asignados", lazy=True)
     utilizados = db.relationship("Utilizado", back_populates="detalle_ensayo", lazy=True)
 

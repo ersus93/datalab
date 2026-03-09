@@ -13,28 +13,28 @@
     <div class="card-body">
         <div class="row g-3">
             <div class="col-6">
-                <a href="{{ url_for('entrada.nueva') }}" class="btn btn-primary w-100 d-flex flex-column align-items-center py-3 quick-action-btn">
+                <a href="{{ url_for('entradas.nueva') }}" class="btn btn-primary w-100 d-flex flex-column align-items-center py-3 quick-action-btn">
                     <i class="fas fa-plus-circle fa-2x mb-2"></i>
                     <span class="fw-semibold">Nueva Entrada</span>
                     <small class="text-white-50">Registrar muestra</small>
                 </a>
             </div>
             <div class="col-6">
-                <a href="{{ url_for('pedido.nuevo') }}" class="btn btn-success w-100 d-flex flex-column align-items-center py-3 quick-action-btn">
+                <a href="{{ url_for('pedidos.nuevo') }}" class="btn btn-success w-100 d-flex flex-column align-items-center py-3 quick-action-btn">
                     <i class="fas fa-clipboard-list fa-2x mb-2"></i>
                     <span class="fw-semibold">Nuevo Pedido</span>
                     <small class="text-white-50">Crear orden</small>
                 </a>
             </div>
             <div class="col-6">
-                <a href="{{ url_for('entrada.listar') }}?estado=EN_PROCESO" class="btn btn-warning w-100 d-flex flex-column align-items-center py-3 quick-action-btn">
+                <a href="{{ url_for('entradas.listar') }}?estado=EN_PROCESO" class="btn btn-warning w-100 d-flex flex-column align-items-center py-3 quick-action-btn">
                     <i class="fas fa-clock fa-2x mb-2"></i>
                     <span class="fw-semibold text-dark">Ver Pendientes</span>
                     <small class="text-dark-50">En proceso</small>
                 </a>
             </div>
             <div class="col-6">
-                <a href="{{ url_for('informes.index') }}" class="btn btn-info w-100 d-flex flex-column align-items-center py-3 quick-action-btn">
+                <a href="{{ url_for('informes.listar') }}" class="btn btn-info w-100 d-flex flex-column align-items-center py-3 quick-action-btn">
                     <i class="fas fa-chart-bar fa-2x mb-2"></i>
                     <span class="fw-semibold">Reportes</span>
                     <small class="text-white-50">Ver informes</small>

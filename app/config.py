@@ -45,7 +45,10 @@ class DevelopmentConfig(BaseConfig):
         "DATABASE_URL", "sqlite:///datalab_dev.db"
     )
     SQLALCHEMY_ECHO = True
-    REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
+    # Redis opcional en dev - si no hay servidor, se desactiva
+    REDIS_URL = os.environ.get("REDIS_URL") or None
+    # Suprimir envio de emails en desarrollo
+    MAIL_SUPPRESS_SEND = True
 
 
 class TestingConfig(BaseConfig):

@@ -55,6 +55,7 @@ class Producto(db.Model):
         secondary='ensayos_es_x_productos',
         back_populates='productos',
         lazy='dynamic',
+        overlaps="ensayos_es_asociados,producto,ensayo_es,productos_asociados",
     )
 
     def __repr__(self):

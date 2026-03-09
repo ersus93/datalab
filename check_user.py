@@ -1,4 +1,6 @@
 import os
+from dotenv import load_dotenv
+load_dotenv()  # Carga el .env ANTES de crear la app
 os.environ.setdefault('FLASK_ENV', 'development')
 from app import create_app, db
 from app.database.models.user import User
