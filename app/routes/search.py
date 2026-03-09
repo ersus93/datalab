@@ -225,8 +225,8 @@ def search_legacy():
     try:
         pedidos = Pedido.query.filter(
             or_(
-                Pedido.numero_pedido.ilike(f'%{query}%'),
-                Pedido.descripcion.ilike(f'%{query}%')
+                Pedido.codigo.ilike(f'%{query}%'),
+                Pedido.observaciones.ilike(f'%{query}%')
             )
         ).limit(5).all()
 
@@ -239,15 +239,15 @@ def search_legacy():
 
         ordenes = OrdenTrabajo.query.filter(
             or_(
-                OrdenTrabajo.numero.ilike(f'%{query}%'),
+                OrdenTrabajo.nro_ofic.ilike(f'%{query}%'),
                 OrdenTrabajo.descripcion.ilike(f'%{query}%')
             )
         ).limit(5).all()
 
         for pedido in pedidos:
             results.append({
-                'title': f'Pedido #{pedido.numero_pedido}',
-                'description': pedido.descripcion[:100] + '...' if pedido.descripcion and len(pedido.descripcion) > 100 else pedido.descripcion or '',
+                'title': f'Pedido #{pedido.codigo}',
+                'description': pedido.observaciones[:100] + '...' if pedido.observaciones and len(pedido.observaciones) > 100 else pedido.observaciones or '',
                 'url': f'/pedidos/{pedido.id}',
                 'type': 'pedido'
             })
@@ -262,7 +262,7 @@ def search_legacy():
 
         for orden in ordenes:
             results.append({
-                'title': f'Orden #{orden.numero}',
+                'title': f'Orden #{orden.nro_ofic}',
                 'description': orden.descripcion[:100] + '...' if orden.descripcion and len(orden.descripcion) > 100 else orden.descripcion or '',
                 'url': f'/ordenes/{orden.id}',
                 'type': 'orden'
@@ -350,4 +350,36 @@ def save_recent_search():
         return jsonify({
             'success': False,
             'message': 'An error occurred while saving the search'
+        }), 500
+
+
+@bp.route('/api/search/recent/<int:id>', methods=['DELETE'])
+@login_required
+def delete_recent_search(id):
+    """
+    Delete a recent search by ID.
+    
+    Args:
+        id: ID of the search to delete
+    
+    Returns:
+        JSON confirming the operation
+    """
+    try:
+        success = SearchService.delete_search(id, current_user.id)
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Search deleted successfully'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'Search not found or not owned by user'
+            }), 404
+    except Exception as e:
+        logger.error(f"Delete search error: {type(e).__name__}")
+        return jsonify({
+            'success': False,
+            'message': 'An error occurred while deleting the search'
         }), 500

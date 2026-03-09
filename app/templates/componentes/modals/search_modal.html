@@ -23,10 +23,99 @@
                            autocomplete="off"
                            autofocus
                            aria-label="Término de búsqueda">
+                    <div id="autocomplete-suggestions" class="autocomplete-suggestions"></div>
+                    <button type="button" 
+                            id="filter-toggle-btn"
+                            class="btn btn-link filter-toggle-btn"
+                            aria-label="Alternar filtros"
+                            aria-expanded="false">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                        </svg>
+                    </button>
                 </div>
+                
+                <!-- Filter Panel -->
+                <div id="filter-panel" class="filter-panel collapse">
+                    <div class="filter-panel__content">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Rango de Fechas</label>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text">Desde</span>
+                                            <input type="date" 
+                                                   id="filter-date-from" 
+                                                   class="form-control"
+                                                   aria-label="Fecha desde">
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text">Hasta</span>
+                                            <input type="date" 
+                                                   id="filter-date-to" 
+                                                   class="form-control"
+                                                   aria-label="Fecha hasta">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Área</label>
+                                <select id="filter-area" class="form-select form-select-sm" aria-label="Filtrar por área">
+                                    <option value="">Todas las áreas</option>
+                                    <option value="FQ">FQ</option>
+                                    <option value="MB">MB</option>
+                                    <option value="ES">ES</option>
+                                    <option value="OS">OS</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Entidades</label>
+                                <div class="filter-checkbox-group">
+                                    <div class="form-check form-check-inline">
+                                        <input type="checkbox" class="form-check-input" id="filter-entity-clientes" value="clientes">
+                                        <label class="form-check-label" for="filter-entity-clientes">Clientes</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input type="checkbox" class="form-check-input" id="filter-entity-fabricas" value="fabricas">
+                                        <label class="form-check-label" for="filter-entity-fabricas">Fábricas</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input type="checkbox" class="form-check-input" id="filter-entity-productos" value="productos">
+                                        <label class="form-check-label" for="filter-entity-productos">Productos</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input type="checkbox" class="form-check-input" id="filter-entity-entradas" value="entradas">
+                                        <label class="form-check-label" for="filter-entity-entradas">Entradas</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input type="checkbox" class="form-check-input" id="filter-entity-pedidos" value="pedidos">
+                                        <label class="form-check-label" for="filter-entity-pedidos">Pedidos</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input type="checkbox" class="form-check-input" id="filter-entity-informes" value="informes">
+                                        <label class="form-check-label" for="filter-entity-informes">Informes</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <div id="search-results" class="search-results">
-                    <div class="search-modal__empty">
-                        <p>Escribe para buscar...</p>
+                    <div id="recent-searches-container" class="recent-searches-container" style="display: none;">
+                        <div class="recent-searches__header">
+                            <span class="recent-searches__title">Búsquedas Recientes</span>
+                        </div>
+                        <div id="recent-searches-list" class="recent-searches__list"></div>
+                    </div>
+                    <div id="search-results-content" class="search-results-content">
+                        <div class="search-modal__empty">
+                            <p>Escribe para buscar...</p>
+                        </div>
                     </div>
                 </div>
             </div>
