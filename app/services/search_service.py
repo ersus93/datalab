@@ -466,6 +466,21 @@ class SearchService:
         return search
 
     @staticmethod
+    def delete_search(search_id, user_id):
+        """Delete a recent search by ID for a specific user."""
+        search = db.session.query(RecentSearch).filter_by(
+            id=search_id,
+            user_id=user_id
+        ).first()
+
+        if search:
+            db.session.delete(search)
+            db.session.commit()
+            return True
+
+        return False
+
+    @staticmethod
     def _empty_results():
         """Return empty results structure."""
         return {

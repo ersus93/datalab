@@ -148,3 +148,211 @@
     padding: var(--spacing-8);
     color: var(--text-secondary);
 }
+
+/* Filter Toggle Button */
+.filter-toggle-btn {
+    position: absolute;
+    right: var(--spacing-2);
+    top: 50%;
+    transform: translateY(-50%);
+    padding: var(--spacing-2);
+    color: var(--text-secondary);
+    border-radius: var(--radius-md);
+    transition: var(--transition-all);
+}
+
+.filter-toggle-btn:hover {
+    background-color: var(--gray-100);
+    color: var(--text-primary);
+}
+
+.filter-toggle-btn.active {
+    background-color: var(--primary-50);
+    color: var(--primary-600);
+}
+
+/* Filter Panel */
+.filter-panel {
+    margin-top: var(--spacing-3);
+    padding: var(--spacing-3);
+    background-color: var(--gray-50);
+    border-radius: var(--radius-md);
+    border: var(--border-width) solid var(--gray-100);
+}
+
+.filter-panel.collapse {
+    display: none;
+}
+
+.filter-panel.collapse.show {
+    display: block;
+}
+
+.filter-panel__content {
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.filter-checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
+}
+
+.filter-checkbox-group .form-check {
+    margin-right: var(--spacing-2);
+}
+
+.filter-checkbox-group .form-check-label {
+    font-size: var(--font-size-sm);
+}
+
+/* Autocomplete Suggestions */
+.autocomplete-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--background-primary);
+    border: var(--border-width) solid var(--gray-200);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    margin-top: 4px;
+}
+
+.autocomplete-suggestion {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-2) var(--spacing-3);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.autocomplete-suggestion:last-child {
+    border-bottom: none;
+}
+
+.autocomplete-suggestion:hover,
+.autocomplete-suggestion.selected {
+    background-color: var(--gray-50);
+}
+
+.autocomplete-icon {
+    margin-right: var(--spacing-2);
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.autocomplete-text {
+    flex: 1;
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+}
+
+.autocomplete-type {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    background-color: var(--gray-100);
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    margin-left: var(--spacing-2);
+}
+
+/* Recent Searches */
+.recent-searches-container {
+    padding: var(--spacing-2) 0;
+}
+
+.recent-searches__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-2) var(--spacing-3);
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.recent-searches__title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.recent-searches__list {
+    display: flex;
+    flex-direction: column;
+}
+
+.recent-search-item {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-3);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    border-bottom: 1px solid var(--gray-50);
+}
+
+.recent-search-item:last-child {
+    border-bottom: none;
+}
+
+.recent-search-item:hover {
+    background-color: var(--gray-50);
+}
+
+.recent-search-item__icon {
+    width: 16px;
+    height: 16px;
+    color: var(--text-secondary);
+    margin-right: var(--spacing-3);
+    flex-shrink: 0;
+}
+
+.recent-search-item__text {
+    flex: 1;
+    color: var(--text-primary);
+    font-size: var(--font-size-base);
+}
+
+.recent-search-item__delete {
+    opacity: 0;
+    background: none;
+    border: none;
+    padding: var(--spacing-1);
+    cursor: pointer;
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.recent-search-item:hover .recent-search-item__delete {
+    opacity: 1;
+}
+
+.recent-search-item__delete:hover {
+    background-color: var(--red-100);
+    color: var(--red-600);
+}
+
+.search-results-content {
+    min-height: 100px;
+}
