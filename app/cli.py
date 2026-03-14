@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Comandos CLI personalizados para DataLab."""
 
+import subprocess
 import click
 from flask.cli import with_appcontext
 
@@ -277,8 +278,98 @@ def seed_reference_command():
         click.echo(f"⚠️  Expected 69 records, got {total}")
 
 
+# ============================================================
+# TAILWIND CSS CLI COMMANDS
+# ============================================================
+
+@click.command('tailwind:watch')
+@with_appcontext
+def tailwind_watch():
+    """
+    Watch and rebuild Tailwind CSS during development.
+    
+    Runs TailwindCSS CLI in watch mode, automatically rebuilding
+    output.css when input files change.
+    
+    Usage:
+        flask tailwind:watch
+    
+    Opens a separate terminal for this long-running process.
+    """
+    click.echo('🎨 Starting TailwindCSS watch mode...')
+    click.echo('📁 Input: app/static/css/input.css')
+    click.echo('📁 Output: app/static/css/output.css')
+    click.echo('⚡ Press CTRL+C to stop watching\n')
+    
+    try:
+        subprocess.run(
+            [
+                '.\\tailwindcss.exe',
+                '-i', 'app/static/css/input.css',
+                '-o', 'app/static/css/output.css',
+                '--watch'
+            ],
+            shell=True,
+            check=True
+        )
+    except subprocess.CalledProcessError as e:
+        click.echo(click.style(f'❌ Error: {e}', fg='red'))
+        raise click.Abort()
+    except KeyboardInterrupt:
+        click.echo('\n✨ Stopped watching. CSS changes will no longer auto-rebuild.')
+
+
+@click.command('tailwind:build')
+@with_appcontext
+def tailwind_build():
+    """
+    Build Tailwind CSS for production (minified).
+    
+    Compiles input.css to output.css with full purging and minification.
+    Run this before deploying to production.
+    
+    Usage:
+        flask tailwind:build
+    """
+    click.echo('🏗️  Building TailwindCSS for production...')
+    click.echo('📁 Input: app/static/css/input.css')
+    click.echo('📁 Output: app/static/css/output.css')
+    click.echo('⚡ Minification enabled\n')
+    
+    try:
+        result = subprocess.run(
+            [
+                '.\\tailwindcss.exe',
+                '-i', 'app/static/css/input.css',
+                '-o', 'app/static/css/output.css',
+                '--minify'
+            ],
+            shell=True,
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        
+        # Show build stats
+        import os
+        output_path = 'app/static/css/output.css'
+        if os.path.exists(output_path):
+            size = os.path.getsize(output_path)
+            click.echo(click.style(f'✅ Build complete!', fg='green'))
+            click.echo(f'📦 Output size: {size:,} bytes ({size/1024:.1f} KB)')
+        
+    except subprocess.CalledProcessError as e:
+        click.echo(click.style(f'❌ Build failed: {e.stderr}', fg='red'))
+        raise click.Abort()
+
+
 def register_cli_commands(app):
     """Register custom CLI commands."""
+    # Tailwind CSS commands
+    app.cli.add_command(tailwind_watch)
+    app.cli.add_command(tailwind_build)
+    
+    # Reference data seeding
     app.cli.add_command(seed_reference_command)
 
     # Phase 1/2 import commands
