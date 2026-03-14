@@ -202,8 +202,10 @@
   }
 
   .glass-input:focus {
-    @apply outline-none bg-white/8 border-primary-500/50;
-    box-shadow: 
+    outline: none;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(56, 189, 248, 0.50);
+    box-shadow:
       0 0 0 3px rgba(56, 189, 248, 0.12),
       inset 0 1px 0 rgba(255, 255, 255, 0.06);
   }
@@ -213,7 +215,9 @@
   }
 
   .glass-input:disabled {
-    @apply bg-white/2 border-glass-border text-text-muted cursor-not-allowed opacity-38;
+    background: rgba(255, 255, 255, 0.02);
+    @apply border-glass-border text-text-muted cursor-not-allowed;
+    opacity: 0.38;
   }
 
   /* Glass Input Error State */
