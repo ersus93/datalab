@@ -1,0 +1,35 @@
+/* ============================================================
+   SVG FILTERS - Liquid Glass Refraction
+   Filtros SVG para refracción avanzada (Chrome/Edge only)
+   Fallback: backdrop-filter blur para Firefox/Safari
+   ============================================================ */
+
+@layer components {
+  /* Glass con refracción SVG (Chrome/Edge) */
+  .glass-refract {
+    backdrop-filter: url(#liquid-glass-refraction);
+    -webkit-backdrop-filter: url(#liquid-glass-refraction);
+  }
+
+  /* Fallback para Firefox/Safari */
+  @supports not (backdrop-filter: url(#liquid-glass-refraction)) {
+    .glass-refract {
+      backdrop-filter: blur(18px) saturate(180%);
+      -webkit-backdrop-filter: blur(18px) saturate(180%);
+    }
+  }
+}
+
+/* 
+   SVG Filter Container
+   Inyectar en base.html antes de </body>:
+   
+   <svg class="fixed inset-0 w-0 h-0 pointer-events-none" aria-hidden="true">
+     <defs>
+       <filter id="liquid-glass-refraction">
+         <feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="3" result="noise"/>
+         <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G"/>
+       </filter>
+     </defs>
+   </svg>
+*/
