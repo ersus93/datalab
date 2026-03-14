@@ -1,11 +1,12 @@
-<footer class="bg-gray-800 text-white mt-auto">
-    <div class="container mx-auto px-4 py-6">
-        <div class="flex flex-col md:flex-row justify-between items-center">
-            <p class="text-center md:text-left text-sm">
-                &copy; {{ now.year if now else '2026' }} DataLab - {{ _('Sistema de Gestión de Laboratorio') }}
+<footer class="footer" role="contentinfo">
+    <div class="footer__container">
+        <div class="footer__bottom">
+            <p class="footer__copyright">
+                <i class="fas fa-flask mr-1" style="color: #38bdf8;" aria-hidden="true"></i>
+                &copy; {{ now.year if now else '2026' }} DataLab &mdash; {{ _('Sistema de Gestión de Laboratorio') }}
             </p>
-            <p class="text-center md:text-right text-xs text-gray-400 mt-2 md:mt-0">
-                ONIE - Oficina Nacional de Inspección Estatal
+            <p class="footer__org">
+                ONIE &mdash; Oficina Nacional de Inspección Estatal
             </p>
         </div>
     </div>

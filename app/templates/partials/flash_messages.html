@@ -1,24 +1,23 @@
 {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-        <div class="container mx-auto px-4 py-4">
+        <div class="flash-messages" role="region" aria-label="{{ _('Notificaciones') }}">
             {% for category, message in messages %}
-                {% set alert_class = 'bg-blue-100 text-blue-800 border-blue-200' %}
-                {% set icon_class = 'fa-info-circle' %}
-                
-                {% if category == 'success' %}
-                    {% set alert_class = 'bg-green-100 text-green-800 border-green-200' %}
-                    {% set icon_class = 'fa-check-circle' %}
-                {% elif category == 'error' or category == 'danger' %}
-                    {% set alert_class = 'bg-red-100 text-red-800 border-red-200' %}
-                    {% set icon_class = 'fa-exclamation-circle' %}
-                {% elif category == 'warning' %}
-                    {% set alert_class = 'bg-yellow-100 text-yellow-800 border-yellow-200' %}
-                    {% set icon_class = 'fa-exclamation-triangle' %}
-                {% endif %}
-                
-                <div class="p-4 mb-4 rounded border {{ alert_class }} flex items-center" role="alert">
-                    <i class="fas {{ icon_class }} mr-2"></i>
-                    <span>{{ message }}</span>
+                {% set cat = category if category in ['success','error','danger','warning','info'] else 'info' %}
+                {% set mapped = 'danger' if cat == 'error' else cat %}
+                <div class="alert alert--{{ mapped }} alert--dismissible" role="alert" aria-live="polite">
+                    <span class="alert__icon" aria-hidden="true">
+                        {% if mapped == 'success' %}<i class="fas fa-check-circle"></i>
+                        {% elif mapped == 'danger' %}<i class="fas fa-exclamation-circle"></i>
+                        {% elif mapped == 'warning' %}<i class="fas fa-exclamation-triangle"></i>
+                        {% else %}<i class="fas fa-info-circle"></i>
+                        {% endif %}
+                    </span>
+                    <div class="alert__content">
+                        <p class="alert__message">{{ message }}</p>
+                    </div>
+                    <button class="alert__close" onclick="this.parentElement.remove()" aria-label="{{ _('Cerrar') }}">
+                        <i class="fas fa-times alert__close-icon" aria-hidden="true"></i>
+                    </button>
                 </div>
             {% endfor %}
         </div>

@@ -426,6 +426,68 @@
     animation-delay: 1000ms;
 }
 
+/* ─── GLASS ANIMATIONS ─── */
+
+/* Shimmer para loading states */
+@keyframes shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position:  200% 0; }
+}
+
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--glass-1) 25%,
+        rgba(255,255,255,0.08) 50%,
+        var(--glass-1) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.8s ease-in-out infinite;
+    border-radius: var(--radius-md);
+}
+
+/* Glow pulse para elementos activos */
+@keyframes glow-pulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(56,189,248,0.30); }
+    50%      { box-shadow: 0 0 20px rgba(56,189,248,0.55), 0 0 40px rgba(56,189,248,0.20); }
+}
+
+.animate-glow {
+    animation: glow-pulse 2.5s ease-in-out infinite;
+}
+
+/* Float suave para elementos destacados */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-6px); }
+}
+
+.animate-float {
+    animation: float 4s ease-in-out infinite;
+}
+
+/* Fade in con slide desde abajo (para cards de página) */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 0.4s var(--ease-out) both;
+}
+
+/* Stagger helper (usar con delay-*) */
+.stagger-children > * {
+    animation: fadeInUp 0.35s var(--ease-out) both;
+}
+
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 60ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 120ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 180ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 240ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 300ms; }
+
 /* Utilidades para reducir movimiento (accesibilidad) */
 @media (prefers-reduced-motion: reduce) {
     .animate-spin,
@@ -440,10 +502,14 @@
     .animate-slide-in-down,
     .animate-scale-in,
     .animate-scale-out,
-    .animate-bounce-in {
+    .animate-bounce-in,
+    .animate-glow,
+    .animate-float,
+    .animate-fade-in-up,
+    .skeleton {
         animation: none;
     }
-    
+
     .transition-all,
     .transition-colors,
     .transition-opacity,

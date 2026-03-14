@@ -3,8 +3,7 @@
 /* Container principal del dashboard */
 .dashboard-container {
     padding: var(--spacing-6);
-    background-color: var(--gray-50);
-    min-height: calc(100vh - var(--header-height));
+    min-height: 100dvh;
 }
 
 /* Header del dashboard */
@@ -14,19 +13,24 @@
     justify-content: space-between;
     margin-bottom: var(--spacing-8);
     padding: var(--spacing-4) 0;
-    border-bottom: var(--border-width) solid var(--gray-200);
+    border-bottom: 1px solid var(--glass-border-subtle);
 }
 
 .dashboard-header__title {
     font-size: var(--font-size-2xl);
     font-weight: var(--font-weight-bold);
-    color: var(--gray-900);
+    color: var(--text-primary);
     margin: 0;
     line-height: var(--line-height-tight);
+    background: linear-gradient(135deg, #f8fafc 30%, #38bdf8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.02em;
 }
 
 .dashboard-header__subtitle {
-    color: var(--gray-600);
+    color: var(--text-muted);
     margin-top: var(--spacing-1);
     font-size: var(--font-size-sm);
 }
@@ -37,13 +41,68 @@
     gap: var(--spacing-3);
 }
 
+/* ─── STATS GRID (Tailwind override para dark) ─── */
+/* Las cards del dashboard usan clases Tailwind inline. Sobreescribir: */
+.bg-white {
+    background: var(--glass-2) !important;
+    backdrop-filter: var(--glass-blur-md) !important;
+    -webkit-backdrop-filter: var(--glass-blur-md) !important;
+    border: 1px solid var(--glass-border) !important;
+}
+
+.shadow { box-shadow: var(--glass-shadow-sm) !important; }
+.shadow-lg { box-shadow: var(--glass-shadow-lg) !important; }
+
+/* Colores de icon backgrounds Tailwind → dark glass */
+.bg-blue-100   { background: rgba(56,189,248,0.12) !important; }
+.bg-green-100  { background: rgba(52,211,153,0.12) !important; }
+.bg-purple-100 { background: rgba(167,139,250,0.12) !important; }
+.bg-orange-100 { background: rgba(251,146,60,0.12)  !important; }
+
+.text-blue-600   { color: #38bdf8 !important; }
+.text-green-600  { color: #34d399 !important; }
+.text-purple-600 { color: #a78bfa !important; }
+.text-orange-600 { color: #fb923c !important; }
+
+/* Texto en cards */
+.text-gray-500 { color: var(--text-muted) !important; }
+.text-gray-600 { color: var(--text-secondary) !important; }
+.text-gray-400 { color: var(--text-muted) !important; }
+.text-2xl.font-bold { color: var(--text-primary) !important; font-family: var(--font-family-mono); }
+
+/* Botones de acción rápida Tailwind */
+.bg-blue-600   { background: linear-gradient(135deg, #0ea5e9, #0284c7) !important; }
+.bg-green-600  { background: linear-gradient(135deg, #10b981, #059669) !important; }
+.bg-purple-600 { background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important; }
+
+.hover\:bg-blue-700:hover   { background: linear-gradient(135deg, #38bdf8, #0ea5e9) !important; }
+.hover\:bg-green-700:hover  { background: linear-gradient(135deg, #34d399, #10b981) !important; }
+.hover\:bg-purple-700:hover { background: linear-gradient(135deg, #a78bfa, #8b5cf6) !important; }
+
+/* Panels de gráficas */
+.border-b { border-bottom: 1px solid var(--glass-border-subtle) !important; }
+.font-semibold { color: var(--text-primary) !important; }
+
+/* Hover en tabla de registros recientes */
+.border-b.last\:border-0 { border-bottom-color: var(--glass-border-subtle) !important; }
+.font-medium { color: var(--text-primary) !important; }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 1024px) {
+    .dashboard-container { padding: var(--spacing-4); }
+}
+
+@media (max-width: 640px) {
+    .dashboard-container { padding: var(--spacing-3); }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .metrics-grid {
         grid-template-columns: 1fr;
         gap: var(--spacing-md);
     }
-    
+
     .metric-card {
         padding: var(--spacing-md);
     }
@@ -54,7 +113,7 @@
         grid-template-columns: 1fr;
         gap: var(--spacing-sm);
     }
-    
+
     .metric-card {
         padding: var(--spacing-sm);
     }

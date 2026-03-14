@@ -5,7 +5,7 @@ h1, .h1 {
     font-size: var(--font-size-4xl);
     font-weight: var(--font-weight-bold);
     line-height: var(--line-height-tight);
-    color: var(--gray-900);
+    color: var(--text-primary);
     margin-bottom: var(--spacing-6);
     letter-spacing: var(--letter-spacing-tight);
 }
@@ -14,7 +14,7 @@ h2, .h2 {
     font-size: var(--font-size-3xl);
     font-weight: var(--font-weight-bold);
     line-height: var(--line-height-tight);
-    color: var(--gray-900);
+    color: var(--text-primary);
     margin-bottom: var(--spacing-5);
     letter-spacing: var(--letter-spacing-tight);
 }
@@ -23,7 +23,7 @@ h3, .h3 {
     font-size: var(--font-size-2xl);
     font-weight: var(--font-weight-semibold);
     line-height: var(--line-height-snug);
-    color: var(--gray-900);
+    color: var(--text-primary);
     margin-bottom: var(--spacing-4);
 }
 
@@ -31,7 +31,7 @@ h4, .h4 {
     font-size: var(--font-size-xl);
     font-weight: var(--font-weight-semibold);
     line-height: var(--line-height-snug);
-    color: var(--gray-900);
+    color: var(--text-primary);
     margin-bottom: var(--spacing-3);
 }
 
@@ -39,7 +39,7 @@ h5, .h5 {
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-medium);
     line-height: var(--line-height-normal);
-    color: var(--gray-900);
+    color: var(--text-primary);
     margin-bottom: var(--spacing-3);
 }
 
@@ -47,7 +47,7 @@ h6, .h6 {
     font-size: var(--font-size-base);
     font-weight: var(--font-weight-medium);
     line-height: var(--line-height-normal);
-    color: var(--gray-900);
+    color: var(--text-primary);
     margin-bottom: var(--spacing-2);
 }
 
@@ -55,7 +55,7 @@ h6, .h6 {
 p, .text-base {
     font-size: var(--font-size-base);
     line-height: var(--line-height-relaxed);
-    color: var(--gray-700);
+    color: var(--text-secondary);
     margin-bottom: var(--spacing-4);
 }
 
@@ -197,15 +197,15 @@ p, .text-base {
 
 /* Colores de texto */
 .text-primary {
-    color: var(--primary-600);
+    color: var(--primary-400);
 }
 
 .text-secondary {
-    color: var(--gray-600);
+    color: var(--text-secondary);
 }
 
 .text-muted {
-    color: var(--gray-500);
+    color: var(--text-muted);
 }
 
 .text-white {
@@ -217,32 +217,32 @@ p, .text-base {
 }
 
 .text-success {
-    color: var(--success-600);
+    color: var(--success-500);
 }
 
 .text-warning {
-    color: var(--warning-600);
+    color: var(--warning-500);
 }
 
 .text-danger {
-    color: var(--danger-600);
+    color: var(--error-500);
 }
 
 .text-info {
-    color: var(--info-600);
+    color: var(--info-500);
 }
 
 /* Escalas de grises */
-.text-gray-50 { color: var(--gray-50); }
-.text-gray-100 { color: var(--gray-100); }
-.text-gray-200 { color: var(--gray-200); }
-.text-gray-300 { color: var(--gray-300); }
-.text-gray-400 { color: var(--gray-400); }
-.text-gray-500 { color: var(--gray-500); }
-.text-gray-600 { color: var(--gray-600); }
-.text-gray-700 { color: var(--gray-700); }
-.text-gray-800 { color: var(--gray-800); }
-.text-gray-900 { color: var(--gray-900); }
+.text-gray-50  { color: rgba(248,250,252,0.04) !important; }
+.text-gray-100 { color: rgba(248,250,252,0.08) !important; }
+.text-gray-200 { color: rgba(248,250,252,0.12) !important; }
+.text-gray-300 { color: rgba(248,250,252,0.20) !important; }
+.text-gray-400 { color: rgba(148,163,184,0.75) !important; }
+.text-gray-500 { color: rgba(148,163,184,0.55) !important; }
+.text-gray-600 { color: var(--text-tertiary) !important; }
+.text-gray-700 { color: var(--text-secondary) !important; }
+.text-gray-800 { color: var(--text-primary) !important; }
+.text-gray-900 { color: var(--text-primary) !important; }
 
 /* Estilos de listas */
 .list-none {
@@ -281,14 +281,14 @@ li:last-child {
 
 /* Enlaces */
 a {
-    color: var(--primary-600);
+    color: var(--primary-400);
     text-decoration: none;
     transition: var(--transition-colors);
     border-radius: var(--border-radius-sm);
 }
 
 a:hover {
-    color: var(--primary-700);
+    color: var(--primary-300);
     text-decoration: underline;
 }
 
@@ -299,24 +299,24 @@ a:focus {
 
 /* Variantes de enlaces */
 .link {
-    color: var(--primary-600);
+    color: var(--primary-400);
     text-decoration: underline;
     text-underline-offset: 2px;
     transition: var(--transition-colors);
 }
 
 .link:hover {
-    color: var(--primary-700);
+    color: var(--primary-300);
     text-decoration-thickness: 2px;
 }
 
 .link--muted {
-    color: var(--gray-600);
+    color: var(--text-secondary);
     text-decoration: none;
 }
 
 .link--muted:hover {
-    color: var(--gray-900);
+    color: var(--text-primary);
     text-decoration: underline;
 }
 
@@ -324,11 +324,13 @@ a:focus {
 blockquote {
     font-size: var(--font-size-lg);
     font-style: italic;
-    color: var(--gray-700);
-    border-left: 4px solid var(--primary-500);
+    color: var(--text-secondary);
+    border-left: 4px solid var(--primary-400);
     padding-left: var(--spacing-4);
     margin: var(--spacing-6) 0;
-    background-color: var(--gray-50);
+    background: var(--glass-1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     padding: var(--spacing-4);
     border-radius: var(--border-radius-md);
 }
@@ -337,8 +339,11 @@ blockquote {
 code {
     font-family: var(--font-mono);
     font-size: 0.875em;
-    color: var(--gray-800);
-    background-color: var(--gray-100);
+    color: var(--primary-400);
+    background: var(--glass-1);
+    border: 1px solid var(--glass-border-subtle);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     padding: var(--spacing-1) var(--spacing-2);
     border-radius: var(--border-radius-sm);
 }
@@ -346,8 +351,11 @@ code {
 pre {
     font-family: var(--font-mono);
     font-size: var(--font-size-sm);
-    color: var(--gray-800);
-    background-color: var(--gray-100);
+    color: var(--primary-400);
+    background: var(--glass-1);
+    border: 1px solid var(--glass-border-subtle);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     padding: var(--spacing-4);
     border-radius: var(--border-radius-md);
     overflow-x: auto;
@@ -358,12 +366,13 @@ pre code {
     background-color: transparent;
     padding: 0;
     border-radius: 0;
+    border: none;
 }
 
 /* Texto destacado */
 mark, .highlight {
-    background-color: var(--warning-200);
-    color: var(--warning-900);
+    background-color: rgba(251,191,36,0.20);
+    color: var(--warning-500);
     padding: var(--spacing-1) var(--spacing-2);
     border-radius: var(--border-radius-sm);
 }
@@ -371,7 +380,7 @@ mark, .highlight {
 /* Texto pequeño */
 small, .text-small {
     font-size: var(--font-size-xs);
-    color: var(--gray-600);
+    color: var(--text-muted);
 }
 
 /* Texto en mayúsculas */
@@ -458,3 +467,27 @@ small, .text-small {
 .select-auto {
     user-select: auto;
 }
+
+/* ─── GRADIENT TEXT (glass design system) ─── */
+.text-gradient-primary {
+    background: linear-gradient(135deg, #38bdf8 0%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.text-gradient-success {
+    background: linear-gradient(135deg, #34d399 0%, #06b6d4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ─── COLOR OVERRIDES para dark theme ─── */
+.text-primary   { color: var(--primary-400) !important; }
+.text-secondary { color: var(--text-secondary) !important; }
+.text-muted     { color: var(--text-muted) !important; }
+.text-success   { color: var(--success-500) !important; }
+.text-warning   { color: var(--warning-500) !important; }
+.text-danger    { color: var(--error-500) !important; }
+.text-info      { color: var(--info-500) !important; }

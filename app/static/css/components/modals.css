@@ -5,7 +5,9 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -21,9 +23,12 @@
 }
 
 .modal {
-    background-color: var(--background-primary);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-xl);
+    background: rgba(10, 16, 38, 0.85);
+    backdrop-filter: var(--glass-blur-lg);
+    -webkit-backdrop-filter: var(--glass-blur-lg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--glass-shadow-lg), 0 0 60px rgba(0,0,0,0.50);
     max-width: 90vw;
     max-height: 90vh;
     width: 100%;
@@ -42,7 +47,7 @@
     align-items: center;
     justify-content: space-between;
     padding: var(--spacing-6);
-    border-bottom: var(--border-width) solid var(--gray-100);
+    border-bottom: 1px solid var(--glass-border-subtle);
 }
 
 .modal-title {
@@ -55,7 +60,7 @@
 .modal-close {
     background: none;
     border: none;
-    color: var(--text-tertiary);
+    color: var(--text-muted);
     cursor: pointer;
     padding: var(--spacing-2);
     border-radius: var(--radius-md);
@@ -66,7 +71,7 @@
 }
 
 .modal-close:hover {
-    background-color: var(--gray-100);
+    background: var(--glass-2);
     color: var(--text-primary);
 }
 
@@ -87,8 +92,8 @@
     justify-content: flex-end;
     gap: var(--spacing-3);
     padding: var(--spacing-6);
-    border-top: var(--border-width) solid var(--gray-100);
-    background-color: var(--gray-50);
+    border-top: 1px solid var(--glass-border-subtle);
+    background: rgba(0,0,0,0.20);
 }
 
 /* Tamaños de modal */
@@ -126,6 +131,7 @@
     height: 3rem;
     margin: 0 auto var(--spacing-4);
     color: var(--warning-500);
+    filter: drop-shadow(0 0 8px rgba(251,191,36,0.40));
 }
 
 .modal-confirm-title {
@@ -169,18 +175,18 @@
         margin: var(--spacing-2);
         max-width: calc(100vw - var(--spacing-4));
     }
-    
+
     .modal-header,
     .modal-body,
     .modal-footer {
         padding: var(--spacing-4);
     }
-    
+
     .modal-footer {
         flex-direction: column;
         gap: var(--spacing-2);
     }
-    
+
     .modal-footer .btn {
         width: 100%;
     }
