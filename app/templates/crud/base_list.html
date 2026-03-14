@@ -1,28 +1,35 @@
 {% extends 'base.html' %}
+{% from 'components/glass_card.html' import glass_card, glass_card_header, glass_card_body, glass_card_footer %}
+{% from 'components/glass_button.html' import glass_button, glass_button_icon %}
 
 {% block content %}
-<div class="bg-white rounded-lg shadow p-6">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">{% block list_title %}{{ _('Listado') }}{% endblock %}</h1>
-        {% block create_button %}{% endblock %}
-    </div>
-    
-    <!-- Search/Filter -->
-    {% block filters %}{% endblock %}
-    
-    <!-- Table -->
-    <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-                {% block table_headers %}{% endblock %}
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-                {% block table_rows %}{% endblock %}
-            </tbody>
-        </table>
-    </div>
-    
-    <!-- Pagination -->
-    {% block pagination %}{% endblock %}
+{% call glass_card(variant='lg') %}
+{% call glass_card_header() %}
+<div class="flex justify-between items-center flex-wrap gap-4">
+    <h1 class="text-2xl font-bold text-text-primary">{% block list_title %}{{ _('Listado') }}{% endblock %}</h1>
+    {% block create_button %}{% endblock %}
 </div>
+{% endcall %}
+{% call glass_card_body() %}
+
+<!-- Search/Filter -->
+{% block filters %}{% endblock %}
+
+<!-- Table -->
+<div class="overflow-x-auto">
+    <table class="glass-table min-w-full">
+        <thead>
+            {% block table_headers %}{% endblock %}
+        </thead>
+        <tbody>
+            {% block table_rows %}{% endblock %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+{% block pagination %}{% endblock %}
+
+{% endcall %}
+{% endcall %}
 {% endblock %}

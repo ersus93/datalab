@@ -8,7 +8,7 @@
 {% block cancel_url %}{{ url_for('clientes.listar') }}{% endblock %}
 
 {% block form_fields %}
-{{ render_field(form.nombre) }}
+{{ render_field(form.nombre, placeholder=_('Ej: Laboratorio Central')) }}
 {{ render_select(form.organismo_id) }}
 {{ render_select(form.tipo_cliente) }}
 {{ render_checkbox(form.activo) }}

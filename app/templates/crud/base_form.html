@@ -1,25 +1,36 @@
 {% extends 'base.html' %}
+{% from 'components/glass_card.html' import glass_card, glass_card_header, glass_card_body, glass_card_footer %}
+{% from 'components/glass_button.html' import glass_button, glass_button_icon %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto bg-white rounded-lg shadow p-6">
-    <h1 class="text-2xl font-bold mb-6">{% block form_title %}{{ _('Formulario') }}{% endblock %}</h1>
-    
-    <form method="POST" {% block form_enctype %}{% endblock %}>
+<div class="max-w-2xl mx-auto">
+    {% call glass_card(variant='lg') %}
+    {% call glass_card_header() %}
+    <h1 class="text-2xl font-bold text-text-primary">{% block form_title %}{{ _('Formulario') }}{% endblock %}</h1>
+    {% endcall %}
+    {% call glass_card_body() %}
+
+    <form method="POST" {% block form_enctype %}{% endblock %} class="space-y-6">
         {{ form.hidden_tag() }}
-        
+
         {% block form_fields %}{% endblock %}
-        
-        <div class="flex justify-end space-x-4 mt-6 pt-4 border-t">
-            <a href="{% block cancel_url %}{{ url_for('dashboard.index') }}{% endblock %}" 
-               class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 text-gray-700">
+
+        {% call glass_card_footer() %}
+        <div class="flex justify-end space-x-4">
+            <a href="{% block cancel_url %}{{ url_for('dashboard.index') }}{% endblock %}"
+               class="btn btn-secondary">
                 <i class="fas fa-times mr-1"></i>
                 {{ _('Cancelar') }}
             </a>
-            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+            <button type="submit" class="btn btn-primary">
                 <i class="fas fa-save mr-1"></i>
                 {{ _('Guardar') }}
             </button>
         </div>
+        {% endcall %}
     </form>
+
+    {% endcall %}
+    {% endcall %}
 </div>
 {% endblock %}

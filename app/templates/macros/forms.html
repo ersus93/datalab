@@ -1,57 +1,94 @@
 {% macro render_field(field, label=None) %}
-<div class="mb-4">
-    <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ field.id }}">
+<div class="mb-6">
+    <label class="block text-text-secondary text-sm font-medium mb-2" for="{{ field.id }}">
         {{ label or field.label.text }}
-        {% if field.flags.required %}<span class="text-red-500">*</span>{% endif %}
+        {% if field.flags.required %}<span class="text-error-500 ml-1">*</span>{% endif %}
     </label>
-    {{ field(class='w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500' + (' border-red-500' if field.errors else ' border-gray-300'), **kwargs) }}
+    {{ field(class='glass-input w-full' + (' glass-input--error' if field.errors else ''), **kwargs) }}
     {% if field.errors %}
         {% for error in field.errors %}
-            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+            <p class="text-error-500 text-xs mt-1 flex items-center gap-1">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ error }}
+            </p>
         {% endfor %}
     {% endif %}
 </div>
 {% endmacro %}
 
 {% macro render_checkbox(field) %}
-<div class="mb-4">
-    <label class="flex items-center cursor-pointer">
-        {{ field(class="mr-2") }}
-        <span class="text-gray-700 text-sm">{{ field.label.text }}</span>
+<div class="mb-6">
+    <label class="flex items-center cursor-pointer group">
+        <div class="relative flex items-center">
+            {{ field(class="w-5 h-5 rounded border-glass-border text-primary-500 focus:ring-primary-500 focus:ring-offset-0 bg-glass-1 cursor-pointer transition-all") }}
+        </div>
+        <span class="ml-3 text-text-secondary text-sm group-hover:text-text-primary transition-colors">{{ field.label.text }}</span>
     </label>
     {% if field.errors %}
         {% for error in field.errors %}
-            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+            <p class="text-error-500 text-xs mt-1 flex items-center gap-1">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ error }}
+            </p>
         {% endfor %}
     {% endif %}
 </div>
 {% endmacro %}
 
 {% macro render_select(field, label=None) %}
-<div class="mb-4">
-    <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ field.id }}">
+<div class="mb-6">
+    <label class="block text-text-secondary text-sm font-medium mb-2" for="{{ field.id }}">
         {{ label or field.label.text }}
-        {% if field.flags.required %}<span class="text-red-500">*</span>{% endif %}
+        {% if field.flags.required %}<span class="text-error-500 ml-1">*</span>{% endif %}
     </label>
-    {{ field(class='w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500' + (' border-red-500' if field.errors else ' border-gray-300')) }}
+    {{ field(class='glass-input w-full' + (' glass-input--error' if field.errors else '')) }}
     {% if field.errors %}
         {% for error in field.errors %}
-            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+            <p class="text-error-500 text-xs mt-1 flex items-center gap-1">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ error }}
+            </p>
         {% endfor %}
     {% endif %}
 </div>
 {% endmacro %}
 
 {% macro render_textarea(field, label=None, rows=4) %}
-<div class="mb-4">
-    <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ field.id }}">
+<div class="mb-6">
+    <label class="block text-text-secondary text-sm font-medium mb-2" for="{{ field.id }}">
         {{ label or field.label.text }}
-        {% if field.flags.required %}<span class="text-red-500">*</span>{% endif %}
+        {% if field.flags.required %}<span class="text-error-500 ml-1">*</span>{% endif %}
     </label>
-    {{ field(class='w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500' + (' border-red-500' if field.errors else ' border-gray-300'), rows=rows) }}
+    {{ field(class='glass-input w-full' + (' glass-input--error' if field.errors else ''), rows=rows) }}
     {% if field.errors %}
         {% for error in field.errors %}
-            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+            <p class="text-error-500 text-xs mt-1 flex items-center gap-1">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ error }}
+            </p>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endmacro %}
+
+{% macro render_field_with_icon(field, icon, label=None) %}
+<div class="mb-6">
+    <label class="block text-text-secondary text-sm font-medium mb-2" for="{{ field.id }}">
+        {{ label or field.label.text }}
+        {% if field.flags.required %}<span class="text-error-500 ml-1">*</span>{% endif %}
+    </label>
+    <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <i class="{{ icon }} text-text-muted"></i>
+        </div>
+        {{ field(class='glass-input w-full pl-10' + (' glass-input--error' if field.errors else ''), **kwargs) }}
+    </div>
+    {% if field.errors %}
+        {% for error in field.errors %}
+            <p class="text-error-500 text-xs mt-1 flex items-center gap-1">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ error }}
+            </p>
         {% endfor %}
     {% endif %}
 </div>
