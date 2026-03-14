@@ -1,26 +1,30 @@
 {% extends "base.html" %}
+{% from 'components/glass_card.html' import glass_card, glass_card_header, glass_card_body, glass_card_footer %}
+{% from 'components/glass_button.html' import glass_button, glass_button_icon %}
+
 {% block title %}Informes — DataLab{% endblock %}
 
 {% block content %}
 <div class="max-w-7xl mx-auto">
 
   <!-- Header -->
-  <div class="flex items-center justify-between mb-6">
+  <div class="flex items-center justify-between mb-8 flex-wrap gap-4">
     <div>
-      <h1 class="text-2xl font-bold text-gray-800">Informes Oficiales</h1>
-      <p class="text-sm text-gray-500 mt-1">Gestión de informes técnicos y certificados</p>
+      <h1 class="text-2xl font-bold text-gradient">Informes Oficiales</h1>
+      <p class="text-sm text-text-muted mt-1">Gestión de informes técnicos y certificados</p>
     </div>
-    <a href="{{ url_for('informes.crear') }}"
-       class="inline-flex items-center px-4 py-2 bg-blue-700 text-white rounded-lg text-sm font-medium hover:bg-blue-800 transition">
-      <i class="fas fa-plus mr-2"></i> Nuevo Informe
-    </a>
+    {% call glass_button(variant='primary', icon='fas fa-plus') %}
+    Nuevo Informe
+    {% endcall %}
   </div>
 
   <!-- Filtros -->
-  <form method="GET" class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6 flex flex-wrap gap-3">
+  {% call glass_card(variant='sm', class='mb-6') %}
+  {% call glass_card_body() %}
+  <form method="GET" class="flex flex-wrap gap-3">
     <div class="flex-1 min-w-[160px]">
-      <label class="block text-xs font-medium text-gray-600 mb-1">Estado</label>
-      <select name="estado" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+      <label class="block text-xs font-medium text-text-secondary mb-1">Estado</label>
+      <select name="estado" class="glass-input w-full">
         <option value="">Todos</option>
         {% for e in estados %}
         <option value="{{ e }}" {{ 'selected' if filtro_estado == e }}>{{ e }}</option>
@@ -28,8 +32,8 @@
       </select>
     </div>
     <div class="flex-1 min-w-[160px]">
-      <label class="block text-xs font-medium text-gray-600 mb-1">Tipo</label>
-      <select name="tipo" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+      <label class="block text-xs font-medium text-text-secondary mb-1">Tipo</label>
+      <select name="tipo" class="glass-input w-full">
         <option value="">Todos</option>
         {% for t in tipos %}
         <option value="{{ t }}" {{ 'selected' if filtro_tipo == t }}>{{ t }}</option>
@@ -37,8 +41,8 @@
       </select>
     </div>
     <div class="flex-1 min-w-[200px]">
-      <label class="block text-xs font-medium text-gray-600 mb-1">Cliente</label>
-      <select name="cliente_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+      <label class="block text-xs font-medium text-text-secondary mb-1">Cliente</label>
+      <select name="cliente_id" class="glass-input w-full">
         <option value="">Todos</option>
         {% for c in clientes %}
         <option value="{{ c.id }}" {{ 'selected' if filtro_cliente == c.id }}>{{ c.nombre }}</option>
@@ -46,56 +50,76 @@
       </select>
     </div>
     <div class="flex items-end">
-      <button type="submit" class="px-4 py-2 bg-gray-700 text-white rounded-lg text-sm hover:bg-gray-800">
-        <i class="fas fa-filter mr-1"></i> Filtrar
-      </button>
+      {% call glass_button(variant='secondary', icon='fas fa-filter', type='submit') %}
+      Filtrar
+      {% endcall %}
     </div>
   </form>
+  {% endcall %}
+  {% endcall %}
 
   <!-- Tabla -->
-  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-    <table class="w-full text-sm">
-      <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
+  {% call glass_card(variant='lg') %}
+  {% call glass_card_body() %}
+  <div class="overflow-x-auto">
+    <table class="glass-table w-full text-sm">
+      <thead>
         <tr>
-          <th class="px-4 py-3 text-left">Nro. Oficial</th>
-          <th class="px-4 py-3 text-left">Tipo</th>
-          <th class="px-4 py-3 text-left">Cliente</th>
-          <th class="px-4 py-3 text-left">Estado</th>
-          <th class="px-4 py-3 text-left">Fecha Generación</th>
-          <th class="px-4 py-3 text-left">Acciones</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Nro. Oficial</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Tipo</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Cliente</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Estado</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Fecha Generación</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Acciones</th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-gray-100">
+      <tbody class="divide-y divide-glass-border-subtle">
         {% for inf in informes.items %}
         {% set estado = inf.estado.value if inf.estado is not string else inf.estado %}
-        <tr class="hover:bg-gray-50 transition">
-          <td class="px-4 py-3 font-mono font-semibold text-blue-700">{{ inf.nro_oficial }}</td>
-          <td class="px-4 py-3 text-gray-700">{{ inf.tipo_informe.value if inf.tipo_informe is not string else inf.tipo_informe }}</td>
-          <td class="px-4 py-3 text-gray-700">{{ inf.cliente.nombre if inf.cliente else '—' }}</td>
+        <tr class="hover:bg-glass-1 transition">
+          <td class="px-4 py-3 font-mono font-semibold text-primary-400">{{ inf.nro_oficial }}</td>
+          <td class="px-4 py-3 text-text-secondary">{{ inf.tipo_informe.value if inf.tipo_informe is not string else inf.tipo_informe }}</td>
+          <td class="px-4 py-3 text-text-secondary">{{ inf.cliente.nombre if inf.cliente else '—' }}</td>
           <td class="px-4 py-3">
-            {% set estado_colors = {'BORRADOR': 'bg-yellow-100 text-yellow-800', 'PENDIENTE_FIRMA': 'bg-blue-100 text-blue-800', 'EMITIDO': 'bg-green-100 text-green-800', 'ENTREGADO': 'bg-purple-100 text-purple-800', 'ANULADO': 'bg-red-100 text-red-800'} %}
-            <span class="px-2 py-1 rounded-full text-xs font-medium {{ estado_colors.get(estado, 'bg-gray-100 text-gray-800') }}">
+            {% set estado_colors = {
+              'BORRADOR': 'bg-warning-50 text-warning-500 border-warning-500/30',
+              'PENDIENTE_FIRMA': 'bg-primary-50 text-primary-400 border-primary-500/30',
+              'EMITIDO': 'bg-success-50 text-success-500 border-success-500/30',
+              'ENTREGADO': 'bg-secondary-50 text-secondary-400 border-secondary-500/30',
+              'ANULADO': 'bg-error-50 text-error-500 border-error-500/30'
+            } %}
+            <span class="px-3 py-1 rounded-full text-xs font-medium border {{ estado_colors.get(estado, 'bg-glass-1 text-text-secondary border-glass-border') }}">
               {{ estado }}
             </span>
           </td>
-          <td class="px-4 py-3 text-gray-600">
-            {{ inf.created_at.strftime('%d/%m/%Y') if inf.created_at else '—' }}
+          <td class="px-4 py-3 text-text-secondary font-mono text-xs">
+            {{ inf.fecha_generacion.strftime('%d/%m/%Y %H:%M') if inf.fecha_generacion else '-' }}
           </td>
           <td class="px-4 py-3">
             <div class="flex gap-2">
-              <a href="{{ url_for('informes.ver', id=inf.id) }}" title="Ver"
-                 class="text-blue-600 hover:text-blue-800"><i class="fas fa-eye"></i></a>
-              {% if estado == 'BORRADOR' %}
-              <a href="{{ url_for('informes.editar', id=inf.id) }}" title="Editar"
-                 class="text-green-600 hover:text-green-800"><i class="fas fa-edit"></i></a>
+              <a href="{{ url_for('informes.ver', id=inf.id) }}" class="btn btn-ghost btn-sm" title="Ver">
+                <i class="fas fa-eye"></i>
+              </a>
+              <a href="{{ url_for('informes.descargar_pdf', id=inf.id) }}" class="btn btn-ghost btn-sm" title="Descargar PDF">
+                <i class="fas fa-download"></i>
+              </a>
+              {% if current_user.is_admin() or current_user.is_laboratory_manager() %}
+              <a href="{{ url_for('informes.editar', id=inf.id) }}" class="btn btn-ghost btn-sm" title="Editar">
+                <i class="fas fa-edit"></i>
+              </a>
               {% endif %}
-              <a href="{{ url_for('informes.descargar_pdf', id=inf.id) }}" title="Descargar PDF"
-                 class="text-red-600 hover:text-red-800"><i class="fas fa-file-pdf"></i></a>
             </div>
           </td>
         </tr>
         {% else %}
-        <tr><td colspan="6" class="px-4 py-8 text-center text-gray-400 italic">No hay informes con los filtros aplicados.</td></tr>
+        <tr>
+          <td colspan="6" class="px-4 py-8 text-center">
+            <div class="text-text-muted">
+              <i class="fas fa-file-alt text-4xl mb-3 opacity-50"></i>
+              <p class="text-lg">No hay informes registrados</p>
+            </div>
+          </td>
+        </tr>
         {% endfor %}
       </tbody>
     </table>
@@ -103,18 +127,34 @@
 
   <!-- Paginación -->
   {% if informes.pages > 1 %}
-  <div class="flex justify-center mt-4 gap-2">
-    {% if informes.has_prev %}
-    <a href="{{ url_for('informes.listar', page=informes.prev_num, estado=filtro_estado, tipo=filtro_tipo, cliente_id=filtro_cliente) }}"
-       class="px-3 py-1 bg-white border border-gray-300 rounded text-sm hover:bg-gray-50">← Anterior</a>
-    {% endif %}
-    <span class="px-3 py-1 text-sm text-gray-600">{{ informes.page }} / {{ informes.pages }}</span>
-    {% if informes.has_next %}
-    <a href="{{ url_for('informes.listar', page=informes.next_num, estado=filtro_estado, tipo=filtro_tipo, cliente_id=filtro_cliente) }}"
-       class="px-3 py-1 bg-white border border-gray-300 rounded text-sm hover:bg-gray-50">Siguiente →</a>
-    {% endif %}
+  {% call glass_card_footer() %}
+  <div class="flex items-center justify-between">
+    <div class="text-sm text-text-muted">
+      {% if informes.total > 0 %}
+      Mostrando {{ informes.from }} - {{ informes.to }} de {{ informes.total }}
+      {% else %}
+      Sin resultados
+      {% endif %}
+    </div>
+    <div class="flex gap-2">
+      {% if informes.has_prev %}
+      <a href="{{ url_for('informes.listar', page=informes.prev_num, **request.args) }}" 
+         class="btn btn-secondary btn-sm">
+        <i class="fas fa-chevron-left"></i> Anterior
+      </a>
+      {% endif %}
+      {% if informes.has_next %}
+      <a href="{{ url_for('informes.listar', page=informes.next_num, **request.args) }}" 
+         class="btn btn-secondary btn-sm">
+        Siguiente <i class="fas fa-chevron-right"></i>
+      </a>
+      {% endif %}
+    </div>
   </div>
+  {% endcall %}
   {% endif %}
+  {% endcall %}
+  {% endcall %}
 
 </div>
 {% endblock %}
