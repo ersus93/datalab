@@ -1,48 +1,57 @@
 {% extends 'base.html' %}
-{% from 'macros/tables.html' import action_buttons, pagination, empty_state %}
+{% from 'components/glass_card.html' import glass_card, glass_card_header, glass_card_body, glass_card_footer %}
+{% from 'components/glass_button.html' import glass_button, glass_button_icon %}
 
 {% block title %}{{ _('Fábricas') }}{% endblock %}
 
 {% block content %}
 <div class="max-w-6xl mx-auto">
     <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-900">{{ _('Fábricas') }}</h1>
-        <a href="{{ url_for('fabricas.nueva') }}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-            <i class="fas fa-plus mr-1"></i>
-            {{ _('Nueva Fábrica') }}
-        </a>
+    <div class="flex justify-between items-center mb-8 flex-wrap gap-4">
+        <h1 class="text-3xl font-bold text-gradient">{{ _('Fábricas') }}</h1>
+        {% call glass_button(variant='primary', icon='fas fa-plus') %}
+        {{ _('Nueva Fábrica') }}
+        {% endcall %}
     </div>
 
     <!-- Estadísticas por Provincia -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    {% call glass_card(variant='md') %}
+    {% call glass_card_header() %}
+    <h2 class="text-lg font-semibold text-text-primary">{{ _('Fábricas por Provincia') }}</h2>
+    {% endcall %}
+    {% call glass_card_body() %}
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         {% for provincia in provincias %}
         {% set count = stats_provincia[provincia.id] or 0 %}
         {% set colors = {
-            'Pinar del Río': 'bg-green-100 text-green-800 border-green-300',
-            'Artemisa': 'bg-blue-100 text-blue-800 border-blue-300',
-            'Mayabeque': 'bg-orange-100 text-orange-800 border-orange-300',
-            'La Habana': 'bg-purple-100 text-purple-800 border-purple-300'
+            'Pinar del Río': 'bg-success-50 text-success-500 border-success-500/30',
+            'Artemisa': 'bg-primary-50 text-primary-400 border-primary-500/30',
+            'Mayabeque': 'bg-warning-50 text-warning-500 border-warning-500/30',
+            'La Habana': 'bg-secondary-50 text-secondary-400 border-secondary-500/30'
         } %}
-        {% set default_color = 'bg-gray-100 text-gray-800 border-gray-300' %}
+        {% set default_color = 'bg-glass-1 text-text-primary border-glass-border' %}
         {% set color_class = colors.get(provincia.nombre, default_color) %}
-        <a href="{{ url_for('fabricas.listar', provincia=provincia.id) }}" 
-           class="block p-4 rounded-lg border {{ color_class }} hover:opacity-80 transition-opacity">
-            <div class="text-sm font-medium">{{ provincia.nombre }}</div>
-            <div class="text-2xl font-bold">{{ count }}</div>
+        <a href="{{ url_for('fabricas.listar', provincia=provincia.id) }}"
+           class="block p-4 rounded-lg border {{ color_class }} hover:shadow-glass-md transition-all hover:-translate-y-1">
+            <div class="text-sm font-medium opacity-75">{{ provincia.nombre }}</div>
+            <div class="text-2xl font-bold font-mono">{{ count }}</div>
             <div class="text-xs opacity-75">{{ _('fábricas') }}</div>
         </a>
         {% endfor %}
     </div>
+    {% endcall %}
+    {% endcall %}
 
     <!-- Filtros -->
-    <form method="GET" class="mb-4 flex flex-wrap gap-4">
+    {% call glass_card(variant='sm', class='mt-6') %}
+    {% call glass_card_body() %}
+    <form method="GET" class="flex flex-wrap gap-4">
         <div class="flex-1 min-w-[200px]">
             <input type="text" name="q" value="{{ request.args.get('q', '') }}" placeholder="{{ _('Buscar por nombre...') }}"
-                   class="w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500">
+                   class="glass-input w-full">
         </div>
         <div>
-            <select name="cliente" class="px-3 py-2 border rounded focus:outline-none focus:border-blue-500">
+            <select name="cliente" class="glass-input">
                 <option value="">{{ _('Todos los clientes') }}</option>
                 {% for cliente in clientes %}
                 <option value="{{ cliente.id }}" {% if request.args.get('cliente')|int == cliente.id %}selected{% endif %}>
@@ -52,7 +61,7 @@
             </select>
         </div>
         <div>
-            <select name="provincia" class="px-3 py-2 border rounded focus:outline-none focus:border-blue-500">
+            <select name="provincia" class="glass-input">
                 <option value="">{{ _('Todas las provincias') }}</option>
                 {% for provincia in provincias %}
                 <option value="{{ provincia.id }}" {% if request.args.get('provincia')|int == provincia.id %}selected{% endif %}>
@@ -61,67 +70,80 @@
                 {% endfor %}
             </select>
         </div>
-        <button type="submit" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
-            <i class="fas fa-search mr-1"></i>
-            {{ _('Filtrar') }}
-        </button>
+        {% call glass_button(variant='secondary', icon='fas fa-search', type='submit') %}
+        {{ _('Filtrar') }}
+        {% endcall %}
         {% if request.args.get('q') or request.args.get('cliente') or request.args.get('provincia') %}
-        <a href="{{ url_for('fabricas.listar') }}" class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100">
+        <a href="{{ url_for('fabricas.listar') }}" class="btn btn-ghost">
             <i class="fas fa-times mr-1"></i>
             {{ _('Limpiar') }}
         </a>
         {% endif %}
     </form>
+    {% endcall %}
+    {% endcall %}
 
     <!-- Tabla de Fábricas -->
-    <div class="bg-white rounded-lg shadow overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+    {% call glass_card(variant='lg', class='mt-6') %}
+    {% call glass_card_body() %}
+    <div class="overflow-x-auto">
+        <table class="glass-table min-w-full">
+            <thead>
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Nombre') }}</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Cliente') }}</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Provincia') }}</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Estado') }}</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Acciones') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">{{ _('Nombre') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">{{ _('Cliente') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">{{ _('Provincia') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">{{ _('Estado') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">{{ _('Acciones') }}</th>
                 </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
+            <tbody>
                 {% for fabrica in fabricas.items %}
-                <tr class="hover:bg-gray-50">
+                <tr class="hover:bg-glass-1 transition-colors">
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <a href="{{ url_for('fabricas.ver', id=fabrica.id) }}" class="text-blue-600 hover:text-blue-800 font-medium">
+                        <a href="{{ url_for('fabricas.ver', id=fabrica.id) }}" class="text-primary-400 hover:text-primary-300 font-medium">
                             {{ fabrica.nombre }}
                         </a>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <a href="{{ url_for('clientes.ver', id=fabrica.cliente.id) }}" class="text-gray-600 hover:text-gray-800">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
+                        <a href="{{ url_for('clientes.ver', id=fabrica.cliente.id) }}" class="hover:text-text-primary transition-colors">
                             {{ fabrica.cliente.nombre }}
                         </a>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
                         {{ fabrica.provincia.nombre if fabrica.provincia else '-' }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         {% if fabrica.activo %}
-                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-success-50 text-success-500 border border-success-500/30">
+                            <span class="status-dot status-dot--active mr-2"></span>
                             {{ _('Activa') }}
                         </span>
                         {% else %}
-                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-error-50 text-error-500 border border-error-500/30">
+                            <span class="status-dot status-dot--inactive mr-2"></span>
                             {{ _('Inactiva') }}
                         </span>
                         {% endif %}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <a href="{{ url_for('fabricas.editar', id=fabrica.id) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">
-                            <i class="fas fa-edit"></i> {{ _('Editar') }}
-                        </a>
+                        <div class="flex gap-2">
+                            <a href="{{ url_for('fabricas.editar', id=fabrica.id) }}" class="btn btn-ghost btn-sm" title="{{ _('Editar') }}">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{{ url_for('fabricas.ver', id=fabrica.id) }}" class="btn btn-ghost btn-sm" title="{{ _('Ver') }}">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </div>
                     </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="5" class="px-6 py-4">
-                        {{ empty_state(_('No hay fábricas registradas')) }}
+                    <td colspan="5" class="px-6 py-8 text-center">
+                        <div class="text-text-muted">
+                            <i class="fas fa-industry text-4xl mb-3 opacity-50"></i>
+                            <p class="text-lg">{{ _('No hay fábricas registradas') }}</p>
+                        </div>
                     </td>
                 </tr>
                 {% endfor %}
@@ -131,9 +153,35 @@
 
     <!-- Paginación -->
     {% if fabricas.pages > 1 %}
-    <div class="mt-4">
-        {{ pagination(fabricas, 'fabricas.listar', q=request.args.get('q', ''), cliente=request.args.get('cliente', ''), provincia=request.args.get('provincia', '')) }}
+    {% call glass_card_footer() %}
+    <div class="flex items-center justify-between">
+        <div class="text-sm text-text-muted">
+            {% if fabricas.total > 0 %}
+            {{ _('Mostrando') }} {{ fabricas.from }} - {{ fabricas.to }} {{ _('de') }} {{ fabricas.total }}
+            {% else %}
+            {{ _('Sin resultados') }}
+            {% endif %}
+        </div>
+        <div class="flex gap-2">
+            {% if fabricas.has_prev %}
+            <a href="{{ url_for('fabricas.listar', page=fabricas.prev_num, **request.args) }}" 
+               class="btn btn-secondary btn-sm">
+                <i class="fas fa-chevron-left"></i>
+                {{ _('Anterior') }}
+            </a>
+            {% endif %}
+            {% if fabricas.has_next %}
+            <a href="{{ url_for('fabricas.listar', page=fabricas.next_num, **request.args) }}" 
+               class="btn btn-secondary btn-sm">
+                {{ _('Siguiente') }}
+                <i class="fas fa-chevron-right"></i>
+            </a>
+            {% endif %}
+        </div>
     </div>
+    {% endcall %}
     {% endif %}
+    {% endcall %}
+    {% endcall %}
 </div>
 {% endblock %}
