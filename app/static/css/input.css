@@ -150,7 +150,7 @@
   }
 
   .btn:disabled {
-    @apply opacity-38 cursor-not-allowed;
+    @apply opacity-40 cursor-not-allowed;
   }
 
   /* Primary Button */
