@@ -1,154 +1,191 @@
 {% extends 'base.html' %}
+{% from 'components/glass_card.html' import glass_card, glass_card_header, glass_card_body, glass_card_footer %}
+{% from 'components/glass_button.html' import glass_button, glass_button_icon %}
 
 {% block title %}{{ _('Dashboard') }} - DataLab{% endblock %}
 
 {% block content %}
-<div class="mb-6">
-    <h1 class="text-2xl font-bold">{{ _('Dashboard de Datos Maestros') }}</h1>
-    <p class="text-gray-600">{{ _('Resumen de clientes, fábricas y productos') }}</p>
+<!-- Header del Dashboard -->
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-gradient mb-2">
+        {{ _('Dashboard de Datos Maestros') }}
+    </h1>
+    <p class="text-text-muted">
+        {{ _('Resumen de clientes, fábricas y productos') }}
+    </p>
 </div>
 
-<!-- Cards de Estadísticas -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-    <!-- Clientes -->
-    <a href="{{ url_for('clientes.listar') }}" class="block bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+<!-- Stats Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Clientes Card -->
+    <a href="{{ url_for('clientes.listar') }}" class="block group">
+        {% call glass_card(variant='md', hover=True) %}
         <div class="flex items-center">
-            <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+            <div class="p-3 rounded-full bg-primary-50 text-primary-400 group-hover:scale-110 transition-transform">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                 </svg>
             </div>
             <div class="ml-4">
-                <p class="text-sm text-gray-500">{{ _('Clientes') }}</p>
-                <p class="text-2xl font-bold">{{ stats.total_clientes }}</p>
+                <p class="text-sm text-text-secondary">{{ _('Clientes') }}</p>
+                <p class="text-2xl font-bold text-text-primary font-mono">{{ stats.total_clientes }}</p>
             </div>
         </div>
+        {% endcall %}
     </a>
 
-    <!-- Fábricas -->
-    <a href="{{ url_for('fabricas.listar') }}" class="block bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+    <!-- Fábricas Card -->
+    <a href="{{ url_for('fabricas.listar') }}" class="block group">
+        {% call glass_card(variant='md', hover=True) %}
         <div class="flex items-center">
-            <div class="p-3 rounded-full bg-green-100 text-green-600">
+            <div class="p-3 rounded-full bg-success-50 text-success-500 group-hover:scale-110 transition-transform">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                 </svg>
             </div>
             <div class="ml-4">
-                <p class="text-sm text-gray-500">{{ _('Fábricas') }}</p>
-                <p class="text-2xl font-bold">{{ stats.total_fabricas }}</p>
+                <p class="text-sm text-text-secondary">{{ _('Fábricas') }}</p>
+                <p class="text-2xl font-bold text-text-primary font-mono">{{ stats.total_fabricas }}</p>
                 {% if stats.total_clientes > 0 %}
-                <p class="text-xs text-gray-400">~{{ (stats.total_fabricas / stats.total_clientes)|round(1) }} {{ _('por cliente') }}</p>
+                <p class="text-xs text-text-muted mt-1">
+                    ~{{ (stats.total_fabricas / stats.total_clientes)|round(1) }} {{ _('por cliente') }}
+                </p>
                 {% endif %}
             </div>
         </div>
+        {% endcall %}
     </a>
 
-    <!-- Productos -->
-    <a href="{{ url_for('productos.listar') }}" class="block bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+    <!-- Productos Card -->
+    <a href="{{ url_for('productos.listar') }}" class="block group">
+        {% call glass_card(variant='md', hover=True) %}
         <div class="flex items-center">
-            <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+            <div class="p-3 rounded-full bg-secondary-50 text-secondary-400 group-hover:scale-110 transition-transform">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                 </svg>
             </div>
             <div class="ml-4">
-                <p class="text-sm text-gray-500">{{ _('Productos') }}</p>
-                <p class="text-2xl font-bold">{{ stats.total_productos }}</p>
+                <p class="text-sm text-text-secondary">{{ _('Productos') }}</p>
+                <p class="text-2xl font-bold text-text-primary font-mono">{{ stats.total_productos }}</p>
             </div>
         </div>
+        {% endcall %}
     </a>
 
-    <!-- Provincias -->
-    <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-center">
-            <div class="p-3 rounded-full bg-orange-100 text-orange-600">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
-            </div>
-            <div class="ml-4">
-                <p class="text-sm text-gray-500">{{ _('Provincias') }}</p>
-                <p class="text-2xl font-bold">{{ stats.total_provincias }}</p>
-                <p class="text-xs text-gray-400">{{ _('Cobertura total') }}</p>
-            </div>
+    <!-- Provincias Card -->
+    {% call glass_card(variant='md') %}
+    <div class="flex items-center">
+        <div class="p-3 rounded-full bg-warning-50 text-warning-500">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+        </div>
+        <div class="ml-4">
+            <p class="text-sm text-text-secondary">{{ _('Provincias') }}</p>
+            <p class="text-2xl font-bold text-text-primary font-mono">{{ stats.total_provincias }}</p>
+            <p class="text-xs text-text-muted mt-1">{{ _('Cobertura total') }}</p>
         </div>
     </div>
+    {% endcall %}
 </div>
 
 <!-- Botones de Acción Rápida -->
-<div class="flex flex-wrap gap-3 mb-6">
-    <a href="{{ url_for('clientes.nuevo') }}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-        <i class="fas fa-plus mr-2"></i>{{ _('Nuevo Cliente') }}
-    </a>
-    <a href="{{ url_for('fabricas.nueva') }}" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
-        <i class="fas fa-plus mr-2"></i>{{ _('Nueva Fábrica') }}
-    </a>
-    <a href="{{ url_for('productos.nuevo') }}" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">
-        <i class="fas fa-plus mr-2"></i>{{ _('Nuevo Producto') }}
-    </a>
+<div class="flex flex-wrap gap-3 mb-8">
+    {% call glass_button(variant='primary', icon='fas fa-plus') %}
+    {{ _('Nuevo Cliente') }}
+    {% endcall %}
+    
+    {% call glass_button(variant='success', icon='fas fa-plus') %}
+    {{ _('Nueva Fábrica') }}
+    {% endcall %}
+    
+    {% call glass_button(variant='secondary', icon='fas fa-plus') %}
+    {{ _('Nuevo Producto') }}
+    {% endcall %}
 </div>
 
 <!-- Gráficos -->
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
     <!-- Distribución por Provincia -->
-    <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-lg font-semibold mb-4">{{ _('Distribución por Provincia') }}</h3>
-        <div id="provincia-chart" style="height: 300px;"></div>
-    </div>
+    {% call glass_card(variant='lg') %}
+    {% call glass_card_header() %}
+    <h3 class="text-lg font-semibold text-text-primary">
+        {{ _('Distribución por Provincia') }}
+    </h3>
+    {% endcall %}
+    {% call glass_card_body() %}
+    <div id="provincia-chart" style="height: 300px;"></div>
+    {% endcall %}
+    {% endcall %}
 
     <!-- Top Clientes -->
-    <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-lg font-semibold mb-4">{{ _('Top 10 Clientes por Fábricas') }}</h3>
-        <div id="clientes-chart" style="height: 300px;"></div>
-    </div>
+    {% call glass_card(variant='lg') %}
+    {% call glass_card_header() %}
+    <h3 class="text-lg font-semibold text-text-primary">
+        {{ _('Top 10 Clientes por Fábricas') }}
+    </h3>
+    {% endcall %}
+    {% call glass_card_body() %}
+    <div id="clientes-chart" style="height: 300px;"></div>
+    {% endcall %}
+    {% endcall %}
 </div>
 
 <!-- Segunda fila de gráficos -->
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
     <!-- Distribución por Sector -->
-    <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-lg font-semibold mb-4">{{ _('Distribución por Sector') }}</h3>
-        <div id="sector-chart" style="height: 300px;"></div>
-    </div>
+    {% call glass_card(variant='lg') %}
+    {% call glass_card_header() %}
+    <h3 class="text-lg font-semibold text-text-primary">
+        {{ _('Distribución por Sector') }}
+    </h3>
+    {% endcall %}
+    {% call glass_card_body() %}
+    <div id="sector-chart" style="height: 300px;"></div>
+    {% endcall %}
+    {% endcall %}
 
     <!-- Últimos Registros -->
-    <div class="bg-white rounded-lg shadow">
-        <div class="p-4 border-b">
-            <h3 class="text-lg font-semibold">{{ _('Registros Recientes') }}</h3>
-        </div>
-        <div class="p-4">
-            <div class="space-y-3">
-                {% for cliente in latest_clientes %}
-                <div class="flex items-center justify-between py-2 border-b last:border-0">
-                    <div>
-                        <p class="font-medium">{{ cliente.nombre[:40] }}{% if cliente.nombre|length > 40 %}...{% endif %}</p>
-                        <p class="text-sm text-gray-500">{{ _('Cliente') }}</p>
-                    </div>
-                    <span class="text-sm text-gray-400">{{ cliente.fecha_creacion | timeago }}</span>
-                </div>
-                {% endfor %}
-                {% for fabrica in latest_fabricas %}
-                <div class="flex items-center justify-between py-2 border-b last:border-0">
-                    <div>
-                        <p class="font-medium">{{ fabrica.nombre[:40] }}{% if fabrica.nombre|length > 40 %}...{% endif %}</p>
-                        <p class="text-sm text-gray-500">{{ _('Fábrica') }}</p>
-                    </div>
-                    <span class="text-sm text-gray-400">{{ fabrica.creado_en | timeago }}</span>
-                </div>
-                {% endfor %}
-                {% for producto in latest_productos %}
-                <div class="flex items-center justify-between py-2 border-b last:border-0">
-                    <div>
-                        <p class="font-medium">{{ producto.nombre[:40] }}{% if producto.nombre|length > 40 %}...{% endif %}</p>
-                        <p class="text-sm text-gray-500">{{ _('Producto') }}</p>
-                    </div>
-                    <span class="text-sm text-gray-400">{{ producto.creado_en | timeago }}</span>
-                </div>
-                {% endfor %}
+    {% call glass_card(variant='lg') %}
+    {% call glass_card_header() %}
+    <h3 class="text-lg font-semibold text-text-primary">
+        {{ _('Registros Recientes') }}
+    </h3>
+    {% endcall %}
+    {% call glass_card_body() %}
+    <div class="space-y-3">
+        {% for cliente in latest_clientes %}
+        <div class="flex items-center justify-between py-3 border-b border-glass-border-subtle last:border-0 hover:bg-glass-1 transition-colors px-2 -mx-2 rounded">
+            <div>
+                <p class="font-medium text-text-primary">{{ cliente.nombre[:40] }}{% if cliente.nombre|length > 40 %}...{% endif %}</p>
+                <p class="text-sm text-text-secondary">{{ _('Cliente') }}</p>
             </div>
+            <span class="text-sm text-text-muted">{{ cliente.fecha_creacion | timeago }}</span>
         </div>
+        {% endfor %}
+        {% for fabrica in latest_fabricas %}
+        <div class="flex items-center justify-between py-3 border-b border-glass-border-subtle last:border-0 hover:bg-glass-1 transition-colors px-2 -mx-2 rounded">
+            <div>
+                <p class="font-medium text-text-primary">{{ fabrica.nombre[:40] }}{% if fabrica.nombre|length > 40 %}...{% endif %}</p>
+                <p class="text-sm text-text-secondary">{{ _('Fábrica') }}</p>
+            </div>
+            <span class="text-sm text-text-muted">{{ fabrica.creado_en | timeago }}</span>
+        </div>
+        {% endfor %}
+        {% for producto in latest_productos %}
+        <div class="flex items-center justify-between py-3 border-b border-glass-border-subtle last:border-0 hover:bg-glass-1 transition-colors px-2 -mx-2 rounded">
+            <div>
+                <p class="font-medium text-text-primary">{{ producto.nombre[:40] }}{% if producto.nombre|length > 40 %}...{% endif %}</p>
+                <p class="text-sm text-text-secondary">{{ _('Producto') }}</p>
+            </div>
+            <span class="text-sm text-text-muted">{{ producto.creado_en | timeago }}</span>
+        </div>
+        {% endfor %}
     </div>
+    {% endcall %}
+    {% endcall %}
 </div>
 {% endblock %}
 
@@ -162,7 +199,7 @@ var provinciaData = [{
     type: 'pie',
     hole: 0.4,
     marker: {
-        colors: ['#28a745', '#007bff', '#fd7e14', '#6f42c1', '#dc3545', '#17a2b8', '#ffc107', '#e83e8c']
+        colors: ['#34d399', '#38bdf8', '#fb923c', '#a78bfa', '#f87171', '#22d3ee', '#fbbf24', '#f472b6']
     },
     textinfo: 'label+percent',
     textposition: 'outside'
@@ -171,7 +208,10 @@ var provinciaData = [{
 Plotly.newPlot('provincia-chart', provinciaData, {
     showlegend: true,
     legend: { orientation: 'h' },
-    margin: { t: 10, b: 10, l: 10, r: 10 }
+    margin: { t: 10, b: 10, l: 10, r: 10 },
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    font: { color: 'rgba(248, 250, 252, 0.92)' }
 }, {responsive: true});
 
 // Gráfico de Top Clientes (Bar Chart)
@@ -180,13 +220,24 @@ var clientesData = [{
     x: {{ top_clientes | map(attribute='factory_count') | list | tojson }},
     type: 'bar',
     orientation: 'h',
-    marker: { color: '#007bff' }
+    marker: { color: '#38bdf8' }
 }];
 
 Plotly.newPlot('clientes-chart', clientesData, {
-    xaxis: { title: '{{ _("Número de Fábricas") }}' },
-    yaxis: { automargin: true },
-    margin: { t: 10, b: 40, l: 150, r: 10 }
+    xaxis: { 
+        title: '{{ _("Número de Fábricas") }}',
+        gridcolor: 'rgba(255,255,255,0.1)',
+        color: 'rgba(148, 163, 184, 0.85)'
+    },
+    yaxis: { 
+        automargin: true,
+        gridcolor: 'rgba(255,255,255,0.1)',
+        color: 'rgba(148, 163, 184, 0.85)'
+    },
+    margin: { t: 10, b: 40, l: 150, r: 10 },
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    font: { color: 'rgba(248, 250, 252, 0.92)' }
 }, {responsive: true});
 
 // Gráfico de Sectores (Bar Chart)
@@ -194,13 +245,24 @@ var sectorData = [{
     x: {{ sector_data | map(attribute='nombre') | list | tojson }},
     y: {{ sector_data | map(attribute='count') | list | tojson }},
     type: 'bar',
-    marker: { color: '#6f42c1' }
+    marker: { color: '#a78bfa' }
 }];
 
 Plotly.newPlot('sector-chart', sectorData, {
-    xaxis: { tickangle: -45 },
-    yaxis: { title: '{{ _("Productos") }}' },
-    margin: { t: 10, b: 100, l: 50, r: 10 }
+    xaxis: { 
+        tickangle: -45,
+        gridcolor: 'rgba(255,255,255,0.1)',
+        color: 'rgba(148, 163, 184, 0.85)'
+    },
+    yaxis: { 
+        title: '{{ _("Productos") }}',
+        gridcolor: 'rgba(255,255,255,0.1)',
+        color: 'rgba(148, 163, 184, 0.85)'
+    },
+    margin: { t: 10, b: 100, l: 50, r: 10 },
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    font: { color: 'rgba(248, 250, 252, 0.92)' }
 }, {responsive: true});
 </script>
 {% endblock %}
