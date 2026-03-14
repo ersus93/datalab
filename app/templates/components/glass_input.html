@@ -1,0 +1,106 @@
+{# app/templates/components/glass_input.html #}
+{# Glass Input Component - Liquid Glass Design System #}
+
+{% macro glass_input(name, label='', type='text', placeholder='', required=False, error='', help_text='', icon='', class='', value='', **kwargs) %}
+<div class="form-group {{ class }}">
+    {% if label %}
+    <label for="{{ name }}" class="block text-sm font-medium text-text-secondary mb-2 {{ 'form-label--required' if required else '' }}">
+        {{ label }}
+    </label>
+    {% endif %}
+    
+    <div class="relative">
+        {% if icon %}
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <i class="{{ icon }} text-text-muted"></i>
+        </div>
+        {% endif %}
+        
+        <input
+            type="{{ type }}"
+            name="{{ name }}"
+            id="{{ name }}"
+            value="{{ value }}"
+            placeholder="{{ placeholder }}"
+            {% if required %}required{% endif %}
+            class="glass-input w-full {{ 'pl-10' if icon else '' }} {{ 'glass-input--error' if error else '' }}"
+            {% for key, value in kwargs.items() %}{{ key }}="{{ value }}"{% endfor %}
+        />
+    </div>
+    
+    {% if error %}
+    <p class="mt-2 text-sm text-error-500 flex items-center gap-1">
+        <i class="fas fa-exclamation-circle"></i>
+        {{ error }}
+    </p>
+    {% elif help_text %}
+    <p class="mt-2 text-sm text-text-muted">
+        {{ help_text }}
+    </p>
+    {% endif %}
+</div>
+{% endmacro %}
+
+{% macro glass_textarea(name, label='', placeholder='', rows=4, required=False, error='', help_text='', class='', value='', **kwargs) %}
+<div class="form-group {{ class }}">
+    {% if label %}
+    <label for="{{ name }}" class="block text-sm font-medium text-text-secondary mb-2 {{ 'form-label--required' if required else '' }}">
+        {{ label }}
+    </label>
+    {% endif %}
+    
+    <textarea
+        name="{{ name }}"
+        id="{{ name }}"
+        rows="{{ rows }}"
+        placeholder="{{ placeholder }}"
+        {% if required %}required{% endif %}
+        class="glass-input w-full {{ 'glass-input--error' if error else '' }}"
+        {% for key, value in kwargs.items() %}{{ key }}="{{ value }}"{% endfor %}
+    >{{ value }}</textarea>
+    
+    {% if error %}
+    <p class="mt-2 text-sm text-error-500 flex items-center gap-1">
+        <i class="fas fa-exclamation-circle"></i>
+        {{ error }}
+    </p>
+    {% elif help_text %}
+    <p class="mt-2 text-sm text-text-muted">
+        {{ help_text }}
+    </p>
+    {% endif %}
+</div>
+{% endmacro %}
+
+{% macro glass_select(name, label='', options=[], required=False, error='', help_text='', class='', value='', **kwargs) %}
+<div class="form-group {{ class }}">
+    {% if label %}
+    <label for="{{ name }}" class="block text-sm font-medium text-text-secondary mb-2 {{ 'form-label--required' if required else '' }}">
+        {{ label }}
+    </label>
+    {% endif %}
+    
+    <select
+        name="{{ name }}"
+        id="{{ name }}"
+        class="glass-input w-full {{ 'glass-input--error' if error else '' }}"
+        {% if required %}required{% endif %}
+        {% for key, value in kwargs.items() %}{{ key }}="{{ value }}"{% endfor %}
+    >
+        {% for option in options %}
+        <option value="{{ option.value }}" {{ 'selected' if option.value == value else '' }}>{{ option.label }}</option>
+        {% endfor %}
+    </select>
+    
+    {% if error %}
+    <p class="mt-2 text-sm text-error-500 flex items-center gap-1">
+        <i class="fas fa-exclamation-circle"></i>
+        {{ error }}
+    </p>
+    {% elif help_text %}
+    <p class="mt-2 text-sm text-text-muted">
+        {{ help_text }}
+    </p>
+    {% endif %}
+</div>
+{% endmacro %}
