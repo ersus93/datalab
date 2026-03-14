@@ -92,3 +92,7 @@ worktrees/
 # Access database files and sensitive data
 utiles/
 .opencode/
+
+# Tailwind CSS
+tailwindcss.exe              # TailwindCSS CLI Standalone
+app/static/css/output.css    # TailwindCSS compiled output
