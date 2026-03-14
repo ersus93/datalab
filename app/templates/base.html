@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    
+
     <title>{% block title %}DataLab{% endblock %}</title>
     <meta name="description" content="{% block description %}{{ _('Sistema de gestión y elaboración de informes para laboratorio') }}{% endblock %}">
     <meta name="author" content="ONIE - Oficina Nacional de Inspección Estatal">
-    
+
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
 
     <!-- Google Fonts: Plus Jakarta Sans + JetBrains Mono -->
@@ -16,28 +16,39 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- TailwindCSS Output (Liquid Glass Design System) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
+    
+    <!-- Liquid Glass Custom Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/liquid-glass/background-orbs.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/liquid-glass/svg-filters.css') }}">
+
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     {% block extra_css %}{% endblock %}
 
     <meta name="theme-color" content="#070c18">
 </head>
-<body class="min-h-dvh flex flex-col">
-    
+<body class="min-h-dvh flex flex-col relative overflow-x-hidden">
+
+    <!-- Background Orbs (Liquid Glass) -->
+    <div class="orb orb--blue"></div>
+    <div class="orb orb--violet"></div>
+
     <!-- Navbar -->
     {% include 'partials/navbar.html' %}
-    
+
     <!-- Flash Messages -->
     {% include 'partials/flash_messages.html' %}
-    
+
     <!-- Main Content -->
-    <main class="flex-grow main-content">
-        <div class="main-body">
+    <main class="flex-grow main-content relative z-10">
+        <div class="container mx-auto px-4 py-6">
         {% block content %}{% endblock %}
         </div>
     </main>
-    
+
     <!-- Footer -->
     {% include 'partials/footer.html' %}
 
@@ -45,6 +56,16 @@
     {% if current_user.is_authenticated %}
     <script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
     {% endif %}
+
+    <!-- SVG Filters for Liquid Glass (Chrome/Edge only) -->
+    <svg class="fixed inset-0 w-0 h-0 pointer-events-none" aria-hidden="true">
+      <defs>
+        <filter id="liquid-glass-refraction">
+          <feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="3" result="noise"/>
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G"/>
+        </filter>
+      </defs>
+    </svg>
 
     {% block extra_js %}{% endblock %}
 </body>
