@@ -1,25 +1,24 @@
 {% extends 'crud/base_list.html' %}
-{% from 'macros/tables.html' import action_buttons, pagination, empty_state %}
+{% from 'components/glass_button.html' import glass_button, glass_button_icon %}
 
 {% block title %}{{ _('Entradas de Muestras') }}{% endblock %}
 
 {% block list_title %}{{ _('Entradas de Muestras') }}{% endblock %}
 
 {% block create_button %}
-<a href="{{ url_for('entradas.nueva') }}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-    <i class="fas fa-plus mr-1"></i>
-    {{ _('Nueva Entrada') }}
-</a>
+{% call glass_button(variant='primary', icon='fas fa-plus') %}
+{{ _('Nueva Entrada') }}
+{% endcall %}
 {% endblock %}
 
 {% block filters %}
-<form method="GET" class="mb-4 flex flex-wrap gap-4">
+<form method="GET" class="mb-6 flex flex-wrap gap-4">
     <div class="flex-1 min-w-[200px]">
         <input type="text" name="q" value="{{ q }}" placeholder="{{ _('Buscar por código o lote...') }}"
-               class="w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500">
+               class="glass-input w-full">
     </div>
     <div>
-        <select name="cliente" class="px-3 py-2 border rounded focus:outline-none focus:border-blue-500">
+        <select name="cliente" class="glass-input">
             <option value="">{{ _('Todos los clientes') }}</option>
             {% for cliente in clientes %}
             <option value="{{ cliente.id }}" {% if request.args.get('cliente')|int == cliente.id %}selected{% endif %}>
@@ -29,7 +28,7 @@
         </select>
     </div>
     <div>
-        <select name="producto" class="px-3 py-2 border rounded focus:outline-none focus:border-blue-500">
+        <select name="producto" class="glass-input">
             <option value="">{{ _('Todos los productos') }}</option>
             {% for producto in productos %}
             <option value="{{ producto.id }}" {% if request.args.get('producto')|int == producto.id %}selected{% endif %}>
@@ -39,7 +38,7 @@
         </select>
     </div>
     <div>
-        <select name="status" class="px-3 py-2 border rounded focus:outline-none focus:border-blue-500">
+        <select name="status" class="glass-input">
             <option value="">{{ _('Todos los estados') }}</option>
             <option value="RECIBIDO" {% if request.args.get('status') == 'RECIBIDO' %}selected{% endif %}>{{ _('Recibido') }}</option>
             <option value="EN_PROCESO" {% if request.args.get('status') == 'EN_PROCESO' %}selected{% endif %}>{{ _('En Proceso') }}</option>
@@ -47,12 +46,11 @@
             <option value="ENTREGADO" {% if request.args.get('status') == 'ENTREGADO' %}selected{% endif %}>{{ _('Entregado') }}</option>
         </select>
     </div>
-    <button type="submit" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
-        <i class="fas fa-search mr-1"></i>
-        {{ _('Filtrar') }}
-    </button>
+    {% call glass_button(variant='secondary', icon='fas fa-search', type='submit') %}
+    {{ _('Filtrar') }}
+    {% endcall %}
     {% if q or request.args.get('cliente') or request.args.get('producto') or request.args.get('status') %}
-    <a href="{{ url_for('entradas.listar') }}" class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100">
+    <a href="{{ url_for('entradas.listar') }}" class="btn btn-ghost">
         <i class="fas fa-times mr-1"></i>
         {{ _('Limpiar') }}
     </a>
@@ -62,86 +60,104 @@
 
 {% block table_headers %}
 <tr>
-    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Código') }}</th>
-    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Lote') }}</th>
-    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Producto') }}</th>
-    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Cliente') }}</th>
-    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Estado') }}</th>
-    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Cant. Recibida') }}</th>
-    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Saldo') }}</th>
-    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Fecha') }}</th>
-    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Acciones') }}</th>
+    <th class="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">{{ _('Código') }}</th>
+    <th class="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">{{ _('Lote') }}</th>
+    <th class="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">{{ _('Producto') }}</th>
+    <th class="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">{{ _('Cliente') }}</th>
+    <th class="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">{{ _('Estado') }}</th>
+    <th class="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">{{ _('Cant. Recibida') }}</th>
+    <th class="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">{{ _('Saldo') }}</th>
+    <th class="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">{{ _('Fecha') }}</th>
+    <th class="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">{{ _('Acciones') }}</th>
 </tr>
 {% endblock %}
 
 {% block table_rows %}
 {% for entrada in entradas.items %}
-<tr class="hover:bg-gray-50">
+<tr class="hover:bg-glass-1 transition-colors">
     <td class="px-6 py-4 whitespace-nowrap">
-        <a href="{{ url_for('entradas.ver', id=entrada.id) }}" class="text-blue-600 hover:text-blue-800 font-medium">
+        <a href="{{ url_for('entradas.ver', id=entrada.id) }}" class="text-primary-400 hover:text-primary-300 font-mono font-medium">
             {{ entrada.codigo }}
         </a>
     </td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary font-mono">
         {{ entrada.lote or '-' }}
     </td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
         {{ entrada.producto.nombre if entrada.producto else '-' }}
     </td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
         {{ entrada.cliente.nombre if entrada.cliente else '-' }}
     </td>
     <td class="px-6 py-4 whitespace-nowrap">
-        {% if entrada.status == 'RECIBIDO' %}
-        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-            {{ _('Recibido') }}
+        {% set status_colors = {
+            'RECIBIDO': 'bg-info-50 text-info-500 border-info-500/30',
+            'EN_PROCESO': 'bg-primary-50 text-primary-400 border-primary-500/30',
+            'COMPLETADO': 'bg-success-50 text-success-500 border-success-500/30',
+            'ENTREGADO': 'bg-secondary-50 text-secondary-400 border-secondary-500/30'
+        } %}
+        {% set status_class = status_colors.get(entrada.estado, 'bg-glass-1 text-text-secondary border-glass-border') %}
+        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ status_class }}">
+            <span class="status-dot status-dot--{{ 'active' if entrada.estado != 'RECIBIDO' else 'inactive' }} mr-2"></span>
+            {{ _(entrada.estado) }}
         </span>
-        {% elif entrada.status == 'EN_PROCESO' %}
-        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-            {{ _('En Proceso') }}
-        </span>
-        {% elif entrada.status == 'COMPLETADO' %}
-        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
-            {{ _('Completado') }}
-        </span>
-        {% elif entrada.status == 'ENTREGADO' %}
-        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-            {{ _('Entregado') }}
-        </span>
-        {% elif entrada.status == 'ANULADO' %}
-        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-            {{ _('Anulado') }}
-        </span>
-        {% endif %}
     </td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-        {{ entrada.cantidad_recib }}
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary font-mono">
+        {{ entrada.cant_recibida }} {{ entrada.unidad_medida.sigla if entrada.unidad_medida else '' }}
     </td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-        {% if entrada.saldo > 0 %}
-        <span class="font-semibold text-orange-600">{{ entrada.saldo }}</span>
-        {% else %}
-        <span class="text-green-600">{{ entrada.saldo }}</span>
-        {% endif %}
+    <td class="px-6 py-4 whitespace-nowrap text-sm font-mono {{ 'text-success-500 font-bold' if entrada.saldo > 0 else 'text-text-muted' }}">
+        {{ entrada.saldo }} {{ entrada.unidad_medida.sigla if entrada.unidad_medida else '' }}
     </td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-        {{ entrada.fech_entrada.strftime('%d/%m/%Y') if entrada.fech_entrada else '-' }}
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
+        {{ entrada.fecha_creacion.strftime('%d/%m/%Y') if entrada.fecha_creacion else '-' }}
     </td>
     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-        <a href="{{ url_for('entradas.editar', id=entrada.id) }}" class="text-blue-600 hover:text-blue-800" title="{{ _('Editar') }}">
-            <i class="fas fa-edit"></i>
-        </a>
+        <div class="flex gap-2">
+            <a href="{{ url_for('entradas.ver', id=entrada.id) }}" class="btn btn-ghost btn-sm" title="{{ _('Ver') }}">
+                <i class="fas fa-eye"></i>
+            </a>
+            <a href="{{ url_for('entradas.editar', id=entrada.id) }}" class="btn btn-ghost btn-sm" title="{{ _('Editar') }}">
+                <i class="fas fa-edit"></i>
+            </a>
+        </div>
     </td>
 </tr>
 {% else %}
 <tr>
-    <td colspan="9" class="px-6 py-4">
-        {{ empty_state(_('No hay entradas registradas')) }}
+    <td colspan="9" class="px-6 py-8 text-center">
+        <div class="text-text-muted">
+            <i class="fas fa-flask text-4xl mb-3 opacity-50"></i>
+            <p class="text-lg">{{ _('No hay entradas de muestras registradas') }}</p>
+        </div>
     </td>
 </tr>
 {% endfor %}
 {% endblock %}
 
 {% block pagination %}
-{{ pagination(entradas, 'entradas.listar', q=q) }}
+<div class="mt-6 flex items-center justify-between">
+    <div class="text-sm text-text-muted">
+        {% if entradas.total > 0 %}
+        {{ _('Mostrando') }} {{ entradas.from }} - {{ entradas.to }} {{ _('de') }} {{ entradas.total }}
+        {% else %}
+        {{ _('Sin resultados') }}
+        {% endif %}
+    </div>
+    <div class="flex gap-2">
+        {% if entradas.has_prev %}
+        <a href="{{ url_for('entradas.listar', page=entradas.prev_num, **request.args) }}" 
+           class="btn btn-secondary btn-sm">
+            <i class="fas fa-chevron-left"></i>
+            {{ _('Anterior') }}
+        </a>
+        {% endif %}
+        {% if entradas.has_next %}
+        <a href="{{ url_for('entradas.listar', page=entradas.next_num, **request.args) }}" 
+           class="btn btn-secondary btn-sm">
+            {{ _('Siguiente') }}
+            <i class="fas fa-chevron-right"></i>
+        </a>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}
