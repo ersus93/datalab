@@ -1,12 +1,41 @@
-<footer class="footer" role="contentinfo">
-    <div class="footer__container">
-        <div class="footer__bottom">
-            <p class="footer__copyright">
-                <i class="fas fa-flask mr-1" style="color: #38bdf8;" aria-hidden="true"></i>
-                &copy; {{ now.year if now else '2026' }} DataLab &mdash; {{ _('Sistema de Gestión de Laboratorio') }}
+<footer class="glass-panel mt-auto border-t border-glass-border-subtle" role="contentinfo">
+    <div class="container mx-auto px-4 py-6">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+            <!-- Copyright -->
+            <div class="text-sm text-text-muted">
+                <p>&copy; {{ now().year }} DataLab - ONIE. {{ _('Todos los derechos reservados.') }}</p>
+            </div>
+
+            <!-- Links -->
+            <div class="flex flex-wrap gap-4 text-sm">
+                <a href="#" class="text-text-secondary hover:text-primary-400 transition-colors">
+                    <i class="fas fa-book mr-1"></i> {{ _('Ayuda') }}
+                </a>
+                <a href="#" class="text-text-secondary hover:text-primary-400 transition-colors">
+                    <i class="fas fa-envelope mr-1"></i> {{ _('Contacto') }}
+                </a>
+                <a href="#" class="text-text-secondary hover:text-primary-400 transition-colors">
+                    <i class="fas fa-shield-alt mr-1"></i> {{ _('Privacidad') }}
+                </a>
+                <a href="#" class="text-text-secondary hover:text-primary-400 transition-colors">
+                    <i class="fas fa-file-alt mr-1"></i> {{ _('Términos') }}
+                </a>
+            </div>
+
+            <!-- Version -->
+            <div class="flex items-center gap-2 text-xs text-text-muted">
+                <span class="px-2 py-1 rounded bg-glass-1 border border-glass-border">v2.0.0</span>
+                <span class="hidden md:inline">{{ _('Liquid Glass Design') }}</span>
+            </div>
+        </div>
+
+        <!-- Additional Info -->
+        <div class="mt-4 pt-4 border-t border-glass-border-subtle text-center text-xs text-text-muted">
+            <p>
+                {{ _('Sistema de Gestión para Laboratorio - Oficina Nacional de Inspección Estatal') }}
             </p>
-            <p class="footer__org">
-                ONIE &mdash; Oficina Nacional de Inspección Estatal
+            <p class="mt-1">
+                <i class="fas fa-code mr-1"></i> {{ _('Hecho con') }} <i class="fas fa-heart text-error-500 mx-1"></i> {{ _('para Cuba') }}
             </p>
         </div>
     </div>

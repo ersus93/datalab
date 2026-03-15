@@ -1,48 +1,76 @@
-<nav class="top-header" role="navigation" aria-label="Navegación principal">
-    <div class="header-left">
-        <!-- Botón menú móvil -->
-        <button class="mobile-menu-btn" id="sidebarToggle" aria-label="Abrir menú">
-            <i class="fas fa-bars" aria-hidden="true"></i>
-        </button>
+<nav class="top-header glass-nav fixed top-0 left-0 right-0 z-50 border-b border-glass-border-subtle" role="navigation" aria-label="Navegación principal">
+    <div class="flex items-center justify-between px-4 py-3">
+        <div class="flex items-center gap-4">
+            <!-- Botón menú móvil -->
+            <button class="btn btn-ghost btn-sm md:hidden" id="sidebarToggle" aria-label="Abrir menú">
+                <i class="fas fa-bars text-text-primary" aria-hidden="true"></i>
+            </button>
 
-        <!-- Brand solo en mobile (el sidebar ya lo tiene en desktop) -->
-        <a href="{{ url_for('dashboard.index') }}" class="sidebar-brand hidden-desktop" aria-label="DataLab inicio">
-            <i class="fas fa-flask" style="color: #38bdf8; filter: drop-shadow(0 0 6px rgba(56,189,248,0.6));" aria-hidden="true"></i>
-            <span class="sidebar-title">DataLab</span>
-        </a>
+            <!-- Brand -->
+            <a href="{{ url_for('dashboard.index') }}" class="flex items-center gap-2 group" aria-label="DataLab inicio">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-glass-md group-hover:shadow-glass-glow transition-all">
+                    <i class="fas fa-flask text-white text-lg" aria-hidden="true"></i>
+                </div>
+                <span class="sidebar-title text-lg font-bold text-gradient hidden md:block">DataLab</span>
+            </a>
+        </div>
+
+        {% if current_user.is_authenticated %}
+        <div class="flex items-center gap-2 md:gap-4">
+            <!-- Informes -->
+            <a href="{{ url_for('informes.listar') }}" class="btn btn-ghost btn-sm hidden md:inline-flex" title="{{ _('Informes Oficiales') }}" aria-label="{{ _('Informes Oficiales') }}">
+                <i class="fas fa-file-alt text-text-secondary hover:text-primary-400 transition-colors" aria-hidden="true"></i>
+                <span class="ml-2 text-sm text-text-secondary hidden lg:inline">{{ _('Informes') }}</span>
+            </a>
+
+            <!-- Analytics -->
+            <a href="{{ url_for('analytics.index') }}" class="btn btn-ghost btn-sm hidden md:inline-flex" title="{{ _('Analytics') }}" aria-label="{{ _('Analytics') }}">
+                <i class="fas fa-chart-bar text-text-secondary hover:text-secondary-400 transition-colors" aria-hidden="true"></i>
+                <span class="ml-2 text-sm text-text-secondary hidden lg:inline">{{ _('Analytics') }}</span>
+            </a>
+
+            <!-- Facturación -->
+            <a href="{{ url_for('billing.billing_index') }}" class="btn btn-ghost btn-sm hidden md:inline-flex" title="{{ _('Facturación') }}" aria-label="{{ _('Facturación') }}">
+                <i class="fas fa-file-invoice-dollar text-text-secondary hover:text-success-500 transition-colors" aria-hidden="true"></i>
+                <span class="ml-2 text-sm text-text-secondary hidden lg:inline">{{ _('Facturación') }}</span>
+            </a>
+
+            <!-- Notificaciones -->
+            {% if current_user.is_authenticated %}
+            <div class="relative" x-data="{ open: false }">
+                <button @click="open = !open" class="btn btn-ghost btn-sm relative" title="{{ _('Notificaciones') }}" aria-label="{{ _('Notificaciones') }}">
+                    <i class="fas fa-bell text-text-secondary hover:text-primary-400 transition-colors" aria-hidden="true"></i>
+                    <span class="absolute top-1 right-1 w-2 h-2 bg-error-500 rounded-full animate-pulse"></span>
+                </button>
+                <!-- Dropdown de notificaciones (simplificado) -->
+                <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-80 glass-card rounded-xl shadow-glass-lg border border-glass-border overflow-hidden" style="display: none;">
+                    <div class="p-4 border-b border-glass-border-subtle">
+                        <h3 class="text-sm font-semibold text-text-primary">{{ _('Notificaciones') }}</h3>
+                    </div>
+                    <div class="max-h-64 overflow-y-auto">
+                        <div class="p-4 text-sm text-text-muted text-center">
+                            <i class="fas fa-inbox text-2xl mb-2 opacity-50"></i>
+                            <p>{{ _('No hay notificaciones nuevas') }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Usuario -->
+            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-glass-1 border border-glass-border-subtle">
+                <i class="fas fa-user-circle text-xl text-primary-400" aria-hidden="true"></i>
+                <span class="text-sm font-medium text-text-primary hidden lg:block">{{ current_user.nombre_completo or current_user.username }}</span>
+            </div>
+
+            <!-- Logout -->
+            <a href="{{ url_for('auth.logout') }}" class="btn btn-ghost btn-sm" title="{{ _('Cerrar Sesión') }}" aria-label="{{ _('Cerrar Sesión') }}">
+                <i class="fas fa-sign-out-alt text-text-secondary hover:text-error-500 transition-colors" aria-hidden="true"></i>
+            </a>
+        </div>
+        {% endif %}
     </div>
-
-    {% if current_user.is_authenticated %}
-    <div class="header-right">
-        <!-- Informes -->
-        <a href="{{ url_for('informes.listar') }}" class="header-btn" title="{{ _('Informes Oficiales') }}" aria-label="{{ _('Informes Oficiales') }}">
-            <i class="fas fa-file-alt" aria-hidden="true"></i>
-        </a>
-
-        <!-- Analytics -->
-        <a href="{{ url_for('analytics.index') }}" class="header-btn" title="{{ _('Analytics') }}" aria-label="{{ _('Analytics') }}">
-            <i class="fas fa-chart-bar" aria-hidden="true"></i>
-        </a>
-
-        <!-- Facturación -->
-        <a href="{{ url_for('billing.billing_index') }}" class="header-btn" title="{{ _('Facturación') }}" aria-label="{{ _('Facturación') }}">
-            <i class="fas fa-file-invoice-dollar" aria-hidden="true"></i>
-        </a>
-
-        <!-- Notificaciones -->
-        {% from 'components/notifications/notification_dropdown.html' import notification_dropdown %}
-        {{ notification_dropdown() }}
-
-        <!-- Usuario -->
-        <span class="header__user-name" aria-label="{{ _('Usuario actual') }}">
-            <i class="fas fa-user-circle mr-1" style="color: #38bdf8;" aria-hidden="true"></i>
-            {{ current_user.nombre_completo or current_user.username }}
-        </span>
-
-        <!-- Logout -->
-        <a href="{{ url_for('auth.logout') }}" class="header-btn" title="{{ _('Cerrar Sesión') }}" aria-label="{{ _('Cerrar Sesión') }}">
-            <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
-        </a>
-    </div>
-    {% endif %}
 </nav>
+
+<!-- Spacer para el navbar fijo -->
+<div class="h-16"></div>

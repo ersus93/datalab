@@ -1,10 +1,61 @@
 {% extends 'base.html' %}
-{% block title %}404 — No encontrado{% endblock %}
+{% from 'components/glass_card.html' import glass_card, glass_card_body %}
+{% from 'components/glass_button.html' import glass_button %}
+
+{% block title %}404 — {{ _('No encontrado') }}{% endblock %}
+
 {% block content %}
-<div class="container mt-5 text-center">
-  <h1 class="display-1 text-warning">404</h1>
-  <h2>Página No Encontrada</h2>
-  <p class="text-muted">{{ message or 'El recurso solicitado no existe.' }}</p>
-  <a href="{{ url_for('dashboard.index') }}" class="btn btn-primary mt-3">Volver al inicio</a>
+<div class="min-h-[60vh] flex items-center justify-center">
+    <div class="max-w-md w-full">
+        {% call glass_card(variant='lg') %}
+        {% call glass_card_body() %}
+        <div class="text-center py-8">
+            <!-- Icono 404 -->
+            <div class="mb-6">
+                <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-warning-50/50 border-2 border-warning-500/30 mb-4">
+                    <span class="text-5xl font-bold text-warning-500">404</span>
+                </div>
+            </div>
+
+            <!-- Título -->
+            <h1 class="text-2xl font-bold text-text-primary mb-2">
+                <i class="fas fa-exclamation-triangle mr-2 text-warning-500"></i>
+                {{ _('Página No Encontrada') }}
+            </h1>
+
+            <!-- Descripción -->
+            <p class="text-text-muted mb-6">
+                {{ message or 'El recurso solicitado no existe o ha sido movido.' }}
+            </p>
+
+            <!-- Acciones -->
+            <div class="flex gap-3 justify-center">
+                {% call glass_button(variant='primary', icon='fas fa-home', href=url_for('dashboard.index')) %}
+                {{ _('Volver al Inicio') }}
+                {% endcall %}
+                <a href="javascript:history.back()" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left mr-1"></i> {{ _('Atrás') }}
+                </a>
+            </div>
+
+            <!-- Ayuda -->
+            <div class="mt-8 pt-6 border-t border-glass-border-subtle">
+                <p class="text-sm text-text-muted mb-3">{{ _('¿Necesitas ayuda?') }}</p>
+                <div class="flex gap-4 justify-center text-sm">
+                    <a href="{{ url_for('dashboard.index') }}" class="text-primary-400 hover:text-primary-300 transition-colors">
+                        <i class="fas fa-home mr-1"></i> {{ _('Inicio') }}
+                    </a>
+                    <a href="#" class="text-primary-400 hover:text-primary-300 transition-colors">
+                        <i class="fas fa-question-circle mr-1"></i> {{ _('Ayuda') }}
+                    </a>
+                    <a href="#" class="text-primary-400 hover:text-primary-300 transition-colors">
+                        <i class="fas fa-envelope mr-1"></i> {{ _('Contacto') }}
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endcall %}
+        {% endcall %}
+    </div>
 </div>
 {% endblock %}
