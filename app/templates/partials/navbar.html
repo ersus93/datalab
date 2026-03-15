@@ -6,10 +6,10 @@
                 <i class="fas fa-bars text-text-primary" aria-hidden="true"></i>
             </button>
 
-            <!-- Brand -->
+            <!-- Brand con Logo Personalizado -->
             <a href="{{ url_for('dashboard.index') }}" class="flex items-center gap-2 group" aria-label="DataLab inicio">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-glass-md group-hover:shadow-glass-glow transition-all">
-                    <i class="fas fa-flask text-white text-lg" aria-hidden="true"></i>
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-glass-md group-hover:shadow-glass-glow transition-all overflow-hidden">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22white%22 stroke-width=%222%22><path d=%22M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5%22/></svg>';" alt="DataLab Logo" class="w-10 h-10 object-contain">
                 </div>
                 <span class="sidebar-title text-lg font-bold text-gradient hidden md:block">DataLab</span>
             </a>
