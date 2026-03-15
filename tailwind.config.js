@@ -35,16 +35,16 @@ module.exports = {
           900: '#4c1d95',
         },
 
-        // Glass Tokens
+        // Glass Tokens (MÁS OPACOS - mejor contraste)
         glass: {
-          1: 'rgba(255, 255, 255, 0.040)',
-          2: 'rgba(255, 255, 255, 0.070)',
-          3: 'rgba(255, 255, 255, 0.110)',
-          hover: 'rgba(255, 255, 255, 0.130)',
-          active: 'rgba(255, 255, 255, 0.170)',
-          border: 'rgba(255, 255, 255, 0.110)',
-          'border-subtle': 'rgba(255, 255, 255, 0.060)',
-          'border-strong': 'rgba(255, 255, 255, 0.190)',
+          1: 'rgba(255, 255, 255, 0.08)',
+          2: 'rgba(255, 255, 255, 0.12)',
+          3: 'rgba(255, 255, 255, 0.16)',
+          hover: 'rgba(255, 255, 255, 0.18)',
+          active: 'rgba(255, 255, 255, 0.22)',
+          border: 'rgba(255, 255, 255, 0.18)',
+          'border-subtle': 'rgba(255, 255, 255, 0.10)',
+          'border-strong': 'rgba(255, 255, 255, 0.25)',
         },
 
         // Estado (semántico)
@@ -77,12 +77,12 @@ module.exports = {
           700: '#0891b2',
         },
 
-        // Texto
+        // Texto (BLANCO PURO - máximo contraste WCAG AAA)
         text: {
-          primary: 'rgba(248, 250, 252, 0.92)',
-          secondary: 'rgba(148, 163, 184, 0.85)',
-          tertiary: 'rgba(100, 116, 139, 0.90)',
-          muted: 'rgba(148, 163, 184, 0.50)',
+          primary: '#ffffff',
+          secondary: 'rgba(248, 250, 252, 0.90)',
+          tertiary: 'rgba(248, 250, 252, 0.75)',
+          muted: 'rgba(248, 250, 252, 0.60)',
           inverse: '#070c18',
         },
 
