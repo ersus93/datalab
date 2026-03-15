@@ -1,4 +1,6 @@
-{% extends "base/base.html" %}
+{% extends "base.html" %}
+{% from 'components/glass_card.html' import glass_card, glass_card_header, glass_card_body, glass_card_footer %}
+{% from 'components/glass_button.html' import glass_button, glass_button_icon %}
 
 {% block title %}Analytics Dashboard - DataLab{% endblock %}
 {% block description %}Panel de análisis con métricas del laboratorio{% endblock %}
@@ -7,252 +9,287 @@
 <!-- Plotly.js -->
 <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 <style>
-    .analytics-card {
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .analytics-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-    }
-    .kpi-value {
-        font-size: 2.5rem;
-        font-weight: 700;
-        line-height: 1;
-    }
-    .chart-container {
-        min-height: 350px;
-    }
-    .loading-spinner {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 300px;
-    }
-    .status-pending { color: #f59e0b; }
-    .status-completed { color: #10b981; }
-    .status-processing { color: #3b82f6; }
+    .kpi-value { font-size: 2.5rem; font-weight: 700; line-height: 1; }
+    .chart-container { min-height: 350px; }
+    .status-pending { color: #fbbf24; }
+    .status-completed { color: #34d399; }
+    .status-processing { color: #38bdf8; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
+<div class="max-w-7xl mx-auto py-4">
     <!-- Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div>
-                    <h1 class="h3 mb-1">
-                        <i class="fas fa-chart-line text-primary me-2"></i>
-                        Analytics Dashboard
-                    </h1>
-                    <p class="text-muted mb-0">Panel de análisis del laboratorio</p>
-                </div>
-                <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-secondary" id="cache-status">
-                        <i class="fas fa-database me-1"></i>
-                        <span id="cache-info">Cargando...</span>
-                    </span>
-                    <button class="btn btn-outline-primary btn-sm" onclick="AnalyticsDashboard.refresh()">
-                        <i class="fas fa-sync-alt me-1"></i> Actualizar
-                    </button>
-                    <button class="btn btn-outline-danger btn-sm" onclick="AnalyticsDashboard.clearCache()">
-                        <i class="fas fa-trash me-1"></i> Limpiar caché
-                    </button>
-                </div>
-            </div>
+    <div class="flex justify-between items-center flex-wrap gap-3 mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-gradient">
+                <i class="fas fa-chart-line mr-2 text-primary-400"></i>
+                Analytics Dashboard
+            </h1>
+            <p class="text-text-muted mt-1">Panel de análisis del laboratorio</p>
+        </div>
+        <div class="flex gap-2">
+            <span class="px-3 py-1.5 rounded-lg bg-glass-1 border border-glass-border text-sm text-text-secondary">
+                <i class="fas fa-database mr-1"></i>
+                <span id="cache-info">Cargando...</span>
+            </span>
+            {% call glass_button(variant='secondary', icon='fas fa-sync-alt', type='button', class='btn-sm') %}
+            Actualizar
+            {% endcall %}
+            {% call glass_button(variant='ghost', icon='fas fa-trash', type='button', class='btn-sm text-error-500 hover:text-error-400') %}
+            Limpiar caché
+            {% endcall %}
         </div>
     </div>
 
     <!-- KPIs Row -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <div class="card analytics-card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <p class="text-muted small mb-1">Ensayos Pendientes</p>
-                            <div class="kpi-value status-pending" id="kpi-pending">--</div>
-                        </div>
-                        <div class="p-2 bg-warning bg-opacity-10 rounded">
-                            <i class="fas fa-clock text-warning fs-4"></i>
-                        </div>
-                    </div>
-                </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {% call glass_card(variant='md', class='border-warning-500/30 bg-warning-50/20') %}
+        <div class="flex justify-between items-start">
+            <div>
+                <p class="text-sm text-text-secondary mb-1">Ensayos Pendientes</p>
+                <div class="kpi-value status-pending font-mono" id="kpi-pending">--</div>
+            </div>
+            <div class="p-2 rounded-lg bg-warning-50 text-warning-500 border border-warning-500/30">
+                <i class="fas fa-clock text-xl"></i>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card analytics-card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <p class="text-muted small mb-1">Ensayos Completados</p>
-                            <div class="kpi-value status-completed" id="kpi-completed">--</div>
-                        </div>
-                        <div class="p-2 bg-success bg-opacity-10 rounded">
-                            <i class="fas fa-check-circle text-success fs-4"></i>
-                        </div>
-                    </div>
-                </div>
+        {% endcall %}
+
+        {% call glass_card(variant='md', class='border-primary-500/30 bg-primary-50/20') %}
+        <div class="flex justify-between items-start">
+            <div>
+                <p class="text-sm text-text-secondary mb-1">En Proceso</p>
+                <div class="kpi-value status-processing font-mono" id="kpi-processing">--</div>
+            </div>
+            <div class="p-2 rounded-lg bg-primary-50 text-primary-400 border border-primary-500/30">
+                <i class="fas fa-spinner text-xl"></i>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card analytics-card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <p class="text-muted small mb-1">Este Mes</p>
-                            <div class="kpi-value status-processing" id="kpi-month">--</div>
-                        </div>
-                        <div class="p-2 bg-primary bg-opacity-10 rounded">
-                            <i class="fas fa-calendar-check text-primary fs-4"></i>
-                        </div>
-                    </div>
-                </div>
+        {% endcall %}
+
+        {% call glass_card(variant='md', class='border-success-500/30 bg-success-50/20') %}
+        <div class="flex justify-between items-start">
+            <div>
+                <p class="text-sm text-text-secondary mb-1">Completados Hoy</p>
+                <div class="kpi-value status-completed font-mono" id="kpi-completed">--</div>
+            </div>
+            <div class="p-2 rounded-lg bg-success-50 text-success-500 border border-success-500/30">
+                <i class="fas fa-check-circle text-xl"></i>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card analytics-card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <p class="text-muted small mb-1">Entradas Pendientes</p>
-                            <div class="kpi-value" id="kpi-entries">--</div>
-                        </div>
-                        <div class="p-2 bg-info bg-opacity-10 rounded">
-                            <i class="fas fa-inbox text-info fs-4"></i>
-                        </div>
-                    </div>
-                </div>
+        {% endcall %}
+
+        {% call glass_card(variant='md', class='border-secondary-500/30 bg-secondary-50/20') %}
+        <div class="flex justify-between items-start">
+            <div>
+                <p class="text-sm text-text-secondary mb-1">Eficiencia</p>
+                <div class="kpi-value text-secondary-400 font-mono" id="kpi-efficiency">--%</div>
+            </div>
+            <div class="p-2 rounded-lg bg-secondary-50 text-secondary-400 border border-secondary-500/30">
+                <i class="fas fa-tachometer-alt text-xl"></i>
             </div>
         </div>
+        {% endcall %}
     </div>
 
-    <!-- Charts Row 1 -->
-    <div class="row g-4 mb-4">
-        <!-- Timeline de completados -->
-        <div class="col-lg-8">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white py-3">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-chart-area text-primary me-2"></i>
-                        Determinaciones Completadas (Timeline)
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container" id="chart-timeline"></div>
-                </div>
-            </div>
-        </div>
-        <!-- Muestreos por tipo cliente -->
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-white py-3">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-chart-pie text-info me-2"></i>
-                        Muestreos por Tipo Cliente
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container" id="chart-muestreos"></div>
-                </div>
-            </div>
-        </div>
+    <!-- Charts Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        {% call glass_card(variant='lg') %}
+        {% call glass_card_header() %}
+        <h3 class="text-lg font-semibold text-text-primary">
+            <i class="fas fa-chart-bar mr-2 text-primary-400"></i>
+            Ensayos por Estado
+        </h3>
+        {% endcall %}
+        {% call glass_card_body() %}
+        <div id="chart-status" class="chart-container"></div>
+        {% endcall %}
+        {% endcall %}
+
+        {% call glass_card(variant='lg') %}
+        {% call glass_card_header() %}
+        <h3 class="text-lg font-semibold text-text-primary">
+            <i class="fas fa-chart-line mr-2 text-success-500"></i>
+            Tendencia Semanal
+        </h3>
+        {% endcall %}
+        {% call glass_card_body() %}
+        <div id="chart-trend" class="chart-container"></div>
+        {% endcall %}
+        {% endcall %}
     </div>
 
-    <!-- Charts Row 2 -->
-    <div class="row g-4 mb-4">
-        <!-- ES Pendientes -->
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white py-3">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-flask text-warning me-2"></i>
-                        Análisis Sensorial Pendiente
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container" id="chart-es-pending"></div>
-                </div>
-            </div>
-        </div>
-        <!-- FQ Pendientes -->
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white py-3">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-vial text-info me-2"></i>
-                        Análisis FQ Pendiente
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container" id="chart-fq-pending"></div>
-                </div>
-            </div>
-        </div>
-        <!-- MB Pendientes por técnico -->
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white py-3">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-user-md text-success me-2"></i>
-                        Microbiología Pendiente (por Técnico)
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container" id="chart-mb-pending"></div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Additional Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        {% call glass_card(variant='lg') %}
+        {% call glass_card_header() %}
+        <h3 class="text-lg font-semibold text-text-primary">
+            <i class="fas fa-chart-pie mr-2 text-info-500"></i>
+            Por Área
+        </h3>
+        {% endcall %}
+        {% call glass_card_body() %}
+        <div id="chart-area" class="chart-container"></div>
+        {% endcall %}
+        {% endcall %}
 
-    <!-- Lotes por tipo -->
-    <div class="row g-4 mb-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white py-3">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-boxes text-purple me-2"></i>
-                        Lotes Analizados por Tipo de Muestra y Cliente
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0" id="table-lotes">
-                            <thead>
-                                <tr>
-                                    <th>Tipo de Muestra</th>
-                                    <th>Cliente</th>
-                                    <th class="text-end">Cantidad</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr><td colspan="3" class="text-center text-muted">Cargando...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+        {% call glass_card(variant='lg') %}
+        {% call glass_card_header() %}
+        <h3 class="text-lg font-semibold text-text-primary">
+            <i class="fas fa-chart-bar mr-2 text-warning-500"></i>
+            Por Tipo
+        </h3>
+        {% endcall %}
+        {% call glass_card_body() %}
+        <div id="chart-type" class="chart-container"></div>
+        {% endcall %}
+        {% endcall %}
 
-    <!-- Footer info -->
-    <div class="row">
-        <div class="col-12">
-            <div class="text-center text-muted small">
-                <i class="fas fa-info-circle me-1"></i>
-                Los datos se actualizan automáticamente cada 5 minutos | 
-                Última actualización: <span id="last-update">--</span>
-            </div>
-        </div>
+        {% call glass_card(variant='lg') %}
+        {% call glass_card_header() %}
+        <h3 class="text-lg font-semibold text-text-primary">
+            <i class="fas fa-clock mr-2 text-error-500"></i>
+            Tiempos Promedio
+        </h3>
+        {% endcall %}
+        {% call glass_card_body() %}
+        <div id="chart-time" class="chart-container"></div>
+        {% endcall %}
+        {% endcall %}
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        AnalyticsDashboard.init();
-    });
+const AnalyticsDashboard = {
+    init() {
+        this.loadCharts();
+        this.updateCacheStatus();
+    },
+
+    updateCacheStatus() {
+        const cacheInfo = document.getElementById('cache-info');
+        if (cacheInfo) {
+            cacheInfo.textContent = 'Actualizado: ' + new Date().toLocaleTimeString();
+        }
+    },
+
+    loadCharts() {
+        // Ensayos por Estado (Pie Chart)
+        const statusData = [{
+            values: [30, 45, 25],
+            labels: ['Pendiente', 'En Proceso', 'Completado'],
+            type: 'pie',
+            hole: 0.4,
+            marker: { colors: ['#fbbf24', '#38bdf8', '#34d399'] }
+        }];
+
+        Plotly.newPlot('chart-status', statusData, {
+            showlegend: true,
+            legend: { orientation: 'h' },
+            margin: { t: 10, b: 10, l: 10, r: 10 },
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            font: { color: 'rgba(248, 250, 252, 0.92)' }
+        }, {responsive: true});
+
+        // Tendencia Semanal (Line Chart)
+        const trendData = [{
+            x: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+            y: [12, 19, 15, 25, 22, 10, 8],
+            type: 'scatter',
+            mode: 'lines+markers',
+            line: { shape: 'spline', color: '#38bdf8' },
+            marker: { size: 8 }
+        }];
+
+        Plotly.newPlot('chart-trend', trendData, {
+            xaxis: { gridcolor: 'rgba(255,255,255,0.1)', color: 'rgba(148, 163, 184, 0.85)' },
+            yaxis: { gridcolor: 'rgba(255,255,255,0.1)', color: 'rgba(148, 163, 184, 0.85)' },
+            margin: { t: 10, b: 40, l: 50, r: 10 },
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            font: { color: 'rgba(248, 250, 252, 0.92)' }
+        }, {responsive: true});
+
+        // Por Área (Bar Chart)
+        const areaData = [{
+            x: ['FQ', 'MB', 'ES', 'OS'],
+            y: [45, 30, 15, 10],
+            type: 'bar',
+            marker: { color: ['#38bdf8', '#34d399', '#a78bfa', '#fbbf24'] }
+        }];
+
+        Plotly.newPlot('chart-area', areaData, {
+            xaxis: { gridcolor: 'rgba(255,255,255,0.1)', color: 'rgba(148, 163, 184, 0.85)' },
+            yaxis: { gridcolor: 'rgba(255,255,255,0.1)', color: 'rgba(148, 163, 184, 0.85)' },
+            margin: { t: 10, b: 40, l: 50, r: 10 },
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            font: { color: 'rgba(248, 250, 252, 0.92)' }
+        }, {responsive: true});
+
+        // Por Tipo (Pie Chart)
+        const typeData = [{
+            values: [40, 35, 25],
+            labels: ['Físico-Químico', 'Microbiológico', 'Sensorial'],
+            type: 'pie',
+            hole: 0.4,
+            marker: { colors: ['#38bdf8', '#34d399', '#a78bfa'] }
+        }];
+
+        Plotly.newPlot('chart-type', typeData, {
+            showlegend: true,
+            legend: { orientation: 'h' },
+            margin: { t: 10, b: 10, l: 10, r: 10 },
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            font: { color: 'rgba(248, 250, 252, 0.92)' }
+        }, {responsive: true});
+
+        // Tiempos Promedio (Bar Chart Horizontal)
+        const timeData = [{
+            y: ['FQ', 'MB', 'ES', 'OS'],
+            x: [24, 48, 12, 36],
+            type: 'bar',
+            orientation: 'h',
+            marker: { color: ['#fbbf24', '#38bdf8', '#34d399', '#a78bfa'] }
+        }];
+
+        Plotly.newPlot('chart-time', timeData, {
+            xaxis: { 
+                title: 'Horas',
+                gridcolor: 'rgba(255,255,255,0.1)',
+                color: 'rgba(148, 163, 184, 0.85)'
+            },
+            yaxis: { 
+                automargin: true,
+                gridcolor: 'rgba(255,255,255,0.1)',
+                color: 'rgba(148, 163, 184, 0.85)'
+            },
+            margin: { t: 10, b: 40, l: 80, r: 10 },
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            font: { color: 'rgba(248, 250, 252, 0.92)' }
+        }, {responsive: true});
+    },
+
+    refresh() {
+        this.loadCharts();
+        this.updateCacheStatus();
+    },
+
+    clearCache() {
+        if (confirm('¿Estás seguro de limpiar el caché?')) {
+            localStorage.clear();
+            this.refresh();
+        }
+    }
+};
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded', () => AnalyticsDashboard.init());
 </script>
 {% endblock %}

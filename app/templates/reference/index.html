@@ -1,26 +1,31 @@
 {% extends 'base.html' %}
+{% from 'components/glass_card.html' import glass_card, glass_card_header, glass_card_body %}
 
 {% block title %}{{ _('Datos de Referencia') }} - DataLab{% endblock %}
 
 {% block content %}
-<div class="bg-white rounded-lg shadow p-6">
-    <h1 class="text-2xl font-bold mb-6">{{ _('Datos de Referencia') }}</h1>
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+<div class="max-w-7xl mx-auto">
+    <h1 class="text-3xl font-bold text-gradient mb-8">
+        <i class="fas fa-database mr-2 text-primary-400"></i>
+        {{ _('Datos de Referencia') }}
+    </h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for key, config in models.items() %}
-        <a href="{{ url_for('reference.list_items', model_name=key) }}"
-           class="block p-6 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+        <a href="{{ url_for('reference.list_items', model_name=key) }}" class="block group">
+            {% call glass_card(variant='md', class='hover:shadow-glass-glow transition-all group-hover:-translate-y-1') %}
             <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-{{ config.icon }} text-3xl text-blue-600"></i>
+                <div class="flex-shrink-0 w-16 h-16 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-glass-md group-hover:shadow-glass-glow transition-all">
+                    <i class="fas fa-{{ config.icon }} text-2xl text-white"></i>
                 </div>
                 <div class="ml-4">
-                    <h3 class="text-lg font-medium">{{ config.title }}</h3>
-                    <p class="text-sm text-gray-500">
+                    <h3 class="text-lg font-semibold text-text-primary group-hover:text-primary-400 transition-colors">{{ config.title }}</h3>
+                    <p class="text-sm text-text-muted mt-1">
                         {{ _('Gestionar') }} {{ config.title.lower() }}
                     </p>
                 </div>
             </div>
+            {% endcall %}
         </a>
         {% endfor %}
     </div>
