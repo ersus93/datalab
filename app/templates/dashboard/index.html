@@ -7,108 +7,80 @@
 {% block content %}
 <!-- Header del Dashboard -->
 <div class="mb-8">
-    <h1 class="text-3xl font-bold text-gradient mb-2">
+    <h1 class="text-3xl font-bold text-white mb-2">
         {{ _('Dashboard de Datos Maestros') }}
     </h1>
-    <p class="text-text-muted">
+    <p class="text-slate-300">
         {{ _('Resumen de clientes, fábricas y productos') }}
     </p>
 </div>
-
-<!-- Filtros de Búsqueda (igual que Clientes) -->
-{% call glass_card(variant='sm', class='mb-8') %}
-{% call glass_card_body() %}
-<form method="GET" class="flex flex-wrap gap-4">
-    <div class="flex-1 min-w-[200px]">
-        <input type="text" name="q" value="{{ request.args.get('q', '') }}" placeholder="{{ _('Buscar...') }}"
-               class="glass-input w-full">
-    </div>
-    <div>
-        <select name="periodo" class="glass-input">
-            <option value="hoy">{{ _('Hoy') }}</option>
-            <option value="semana" selected>{{ _('Esta Semana') }}</option>
-            <option value="mes">{{ _('Este Mes') }}</option>
-        </select>
-    </div>
-    {% call glass_button(variant='secondary', icon='fas fa-filter', type='submit') %}
-    {{ _('Filtrar') }}
-    {% endcall %}
-    {% if request.args.get('q') or request.args.get('periodo') %}
-    <a href="{{ url_for('dashboard.index') }}" class="btn btn-ghost">
-        <i class="fas fa-times mr-1"></i>
-        {{ _('Limpiar') }}
-    </a>
-    {% endif %}
-</form>
-{% endcall %}
-{% endcall %}
 
 <!-- Stats Grid -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
     <!-- Clientes Card -->
     <a href="{{ url_for('clientes.listar') }}" class="block group">
-        {% call glass_card(variant='md', hover=True) %}
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-sm text-text-secondary mb-1">{{ _('Clientes') }}</p>
-                <p class="text-3xl font-bold text-text-primary font-mono">{{ stats.total_clientes }}</p>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-primary-50 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <i class="fas fa-users text-primary-400 text-xl"></i>
+        <div class="glass-card p-6 group-hover:shadow-glass-glow group-hover:-translate-y-1 transition-all duration-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-slate-300 mb-1">{{ _('Clientes') }}</p>
+                    <p class="text-3xl font-bold text-white font-mono">{{ stats.total_clientes }}</p>
+                </div>
+                <div class="w-14 h-14 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="fas fa-users text-sky-400 text-xl"></i>
+                </div>
             </div>
         </div>
-        {% endcall %}
     </a>
 
     <!-- Fábricas Card -->
     <a href="{{ url_for('fabricas.listar') }}" class="block group">
-        {% call glass_card(variant='md', hover=True) %}
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-sm text-text-secondary mb-1">{{ _('Fábricas') }}</p>
-                <p class="text-3xl font-bold text-text-primary font-mono">{{ stats.total_fabricas }}</p>
-                {% if stats.total_clientes > 0 %}
-                <p class="text-xs text-text-muted mt-1">
-                    ~{{ (stats.total_fabricas / stats.total_clientes)|round(1) }} {{ _('por cliente') }}
-                </p>
-                {% endif %}
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-success-50 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <i class="fas fa-industry text-success-500 text-xl"></i>
+        <div class="glass-card p-6 group-hover:shadow-glass-glow group-hover:-translate-y-1 transition-all duration-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-slate-300 mb-1">{{ _('Fábricas') }}</p>
+                    <p class="text-3xl font-bold text-white font-mono">{{ stats.total_fabricas }}</p>
+                    {% if stats.total_clientes > 0 %}
+                    <p class="text-xs text-slate-400 mt-1">
+                        ~{{ (stats.total_fabricas / stats.total_clientes)|round(1) }} {{ _('por cliente') }}
+                    </p>
+                    {% endif %}
+                </div>
+                <div class="w-14 h-14 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="fas fa-industry text-emerald-500 text-xl"></i>
+                </div>
             </div>
         </div>
-        {% endcall %}
     </a>
 
     <!-- Productos Card -->
     <a href="{{ url_for('productos.listar') }}" class="block group">
-        {% call glass_card(variant='md', hover=True) %}
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-sm text-text-secondary mb-1">{{ _('Productos') }}</p>
-                <p class="text-3xl font-bold text-text-primary font-mono">{{ stats.total_productos }}</p>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-secondary-50 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <i class="fas fa-box text-secondary-400 text-xl"></i>
+        <div class="glass-card p-6 group-hover:shadow-glass-glow group-hover:-translate-y-1 transition-all duration-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-slate-300 mb-1">{{ _('Productos') }}</p>
+                    <p class="text-3xl font-bold text-white font-mono">{{ stats.total_productos }}</p>
+                </div>
+                <div class="w-14 h-14 rounded-xl bg-violet-500/10 border border-violet-500/30 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="fas fa-box text-violet-400 text-xl"></i>
+                </div>
             </div>
         </div>
-        {% endcall %}
     </a>
 
     <!-- Provincias Card -->
     <div>
-        {% call glass_card(variant='md') %}
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-sm text-text-secondary mb-1">{{ _('Provincias') }}</p>
-                <p class="text-3xl font-bold text-text-primary font-mono">{{ stats.total_provincias }}</p>
-                <p class="text-xs text-text-muted mt-1">{{ _('Cobertura total') }}</p>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-warning-50 flex items-center justify-center">
-                <i class="fas fa-map-marker-alt text-warning-500 text-xl"></i>
+        <div class="glass-card p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-slate-300 mb-1">{{ _('Provincias') }}</p>
+                    <p class="text-3xl font-bold text-white font-mono">{{ stats.total_provincias }}</p>
+                    <p class="text-xs text-slate-400 mt-1">{{ _('Cobertura total') }}</p>
+                </div>
+                <div class="w-14 h-14 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center">
+                    <i class="fas fa-map-marker-alt text-amber-500 text-xl"></i>
+                </div>
             </div>
         </div>
-        {% endcall %}
     </div>
 </div>
 
@@ -130,135 +102,131 @@
 <!-- Gráficos -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
     <!-- Distribución por Provincia -->
-    {% call glass_card(variant='lg') %}
-    {% call glass_card_header() %}
-    <div class="flex items-center justify-between">
-        <h3 class="text-lg font-semibold text-text-primary">
-            <i class="fas fa-chart-pie mr-2 text-primary-400"></i>
-            {{ _('Distribución por Provincia') }}
-        </h3>
+    <div class="glass-card">
+        <div class="border-b border-white/10 p-6">
+            <h3 class="text-lg font-semibold text-white flex items-center">
+                <i class="fas fa-chart-pie mr-2 text-sky-400"></i>
+                {{ _('Distribución por Provincia') }}
+            </h3>
+        </div>
+        <div class="p-6">
+            <div id="provincia-chart" style="height: 300px;"></div>
+        </div>
     </div>
-    {% endcall %}
-    {% call glass_card_body() %}
-    <div id="provincia-chart" style="height: 300px;"></div>
-    {% endcall %}
-    {% endcall %}
 
     <!-- Top Clientes -->
-    {% call glass_card(variant='lg') %}
-    {% call glass_card_header() %}
-    <div class="flex items-center justify-between">
-        <h3 class="text-lg font-semibold text-text-primary">
-            <i class="fas fa-chart-bar mr-2 text-success-500"></i>
-            {{ _('Top 10 Clientes por Fábricas') }}
-        </h3>
+    <div class="glass-card">
+        <div class="border-b border-white/10 p-6">
+            <h3 class="text-lg font-semibold text-white flex items-center">
+                <i class="fas fa-chart-bar mr-2 text-emerald-500"></i>
+                {{ _('Top 10 Clientes por Fábricas') }}
+            </h3>
+        </div>
+        <div class="p-6">
+            <div id="clientes-chart" style="height: 300px;"></div>
+        </div>
     </div>
-    {% endcall %}
-    {% call glass_card_body() %}
-    <div id="clientes-chart" style="height: 300px;"></div>
-    {% endcall %}
-    {% endcall %}
 </div>
 
 <!-- Segunda fila de gráficos -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
     <!-- Distribución por Sector -->
-    {% call glass_card(variant='lg') %}
-    {% call glass_card_header() %}
-    <div class="flex items-center justify-between">
-        <h3 class="text-lg font-semibold text-text-primary">
-            <i class="fas fa-chart-column mr-2 text-secondary-400"></i>
-            {{ _('Distribución por Sector') }}
-        </h3>
+    <div class="glass-card">
+        <div class="border-b border-white/10 p-6">
+            <h3 class="text-lg font-semibold text-white flex items-center">
+                <i class="fas fa-chart-column mr-2 text-violet-400"></i>
+                {{ _('Distribución por Sector') }}
+            </h3>
+        </div>
+        <div class="p-6">
+            <div id="sector-chart" style="height: 300px;"></div>
+        </div>
     </div>
-    {% endcall %}
-    {% call glass_card_body() %}
-    <div id="sector-chart" style="height: 300px;"></div>
-    {% endcall %}
-    {% endcall %}
 
     <!-- Últimos Registros -->
-    {% call glass_card(variant='lg') %}
-    {% call glass_card_header() %}
-    <div class="flex items-center justify-between">
-        <h3 class="text-lg font-semibold text-text-primary">
-            <i class="fas fa-clock mr-2 text-info-500"></i>
-            {{ _('Registros Recientes') }}
-        </h3>
-        <a href="#" class="text-sm text-primary-400 hover:text-primary-300 transition-colors">
-            {{ _('Ver todos') }} →
-        </a>
+    <div class="glass-card">
+        <div class="border-b border-white/10 p-6 flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-white flex items-center">
+                <i class="fas fa-clock mr-2 text-sky-400"></i>
+                {{ _('Registros Recientes') }}
+            </h3>
+            <a href="#" class="text-sm text-sky-400 hover:text-sky-300 transition-colors">
+                {{ _('Ver todos') }} →
+            </a>
+        </div>
+        <div class="p-6">
+            <div class="space-y-2">
+                {% for cliente in latest_clientes %}
+                <div class="flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-sky-500/10 border border-sky-500/30 flex items-center justify-center">
+                            <i class="fas fa-user text-sky-400 text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-white group-hover:text-sky-400 transition-colors">
+                                {{ cliente.nombre[:35] }}{% if cliente.nombre|length > 35 %}...{% endif %}
+                            </p>
+                            <p class="text-xs text-slate-400">{{ _('Cliente') }}</p>
+                        </div>
+                    </div>
+                    <span class="text-xs text-slate-400">{{ cliente.fecha_creacion | timeago }}</span>
+                </div>
+                {% endfor %}
+                {% for fabrica in latest_fabricas %}
+                <div class="flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
+                            <i class="fas fa-industry text-emerald-500 text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-white group-hover:text-emerald-500 transition-colors">
+                                {{ fabrica.nombre[:35] }}{% if fabrica.nombre|length > 35 %}...{% endif %}
+                            </p>
+                            <p class="text-xs text-slate-400">{{ _('Fábrica') }}</p>
+                        </div>
+                    </div>
+                    <span class="text-xs text-slate-400">{{ fabrica.creado_en | timeago }}</span>
+                </div>
+                {% endfor %}
+                {% for producto in latest_productos %}
+                <div class="flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-violet-500/10 border border-violet-500/30 flex items-center justify-center">
+                            <i class="fas fa-box text-violet-400 text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-white group-hover:text-violet-400 transition-colors">
+                                {{ producto.nombre[:35] }}{% if producto.nombre|length > 35 %}...{% endif %}
+                            </p>
+                            <p class="text-xs text-slate-400">{{ _('Producto') }}</p>
+                        </div>
+                    </div>
+                    <span class="text-xs text-slate-400">{{ producto.creado_en | timeago }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
     </div>
-    {% endcall %}
-    {% call glass_card_body() %}
-    <div class="space-y-2">
-        {% for cliente in latest_clientes %}
-        <div class="flex items-center justify-between p-3 rounded-lg hover:bg-glass-1 transition-colors group">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-primary-50 flex items-center justify-center">
-                    <i class="fas fa-user text-primary-400 text-sm"></i>
-                </div>
-                <div>
-                    <p class="font-medium text-text-primary group-hover:text-primary-400 transition-colors">
-                        {{ cliente.nombre[:35] }}{% if cliente.nombre|length > 35 %}...{% endif %}
-                    </p>
-                    <p class="text-xs text-text-muted">{{ _('Cliente') }}</p>
-                </div>
-            </div>
-            <span class="text-xs text-text-muted">{{ cliente.fecha_creacion | timeago }}</span>
-        </div>
-        {% endfor %}
-        {% for fabrica in latest_fabricas %}
-        <div class="flex items-center justify-between p-3 rounded-lg hover:bg-glass-1 transition-colors group">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-success-50 flex items-center justify-center">
-                    <i class="fas fa-industry text-success-500 text-sm"></i>
-                </div>
-                <div>
-                    <p class="font-medium text-text-primary group-hover:text-success-500 transition-colors">
-                        {{ fabrica.nombre[:35] }}{% if fabrica.nombre|length > 35 %}...{% endif %}
-                    </p>
-                    <p class="text-xs text-text-muted">{{ _('Fábrica') }}</p>
-                </div>
-            </div>
-            <span class="text-xs text-text-muted">{{ fabrica.creado_en | timeago }}</span>
-        </div>
-        {% endfor %}
-        {% for producto in latest_productos %}
-        <div class="flex items-center justify-between p-3 rounded-lg hover:bg-glass-1 transition-colors group">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-secondary-50 flex items-center justify-center">
-                    <i class="fas fa-box text-secondary-400 text-sm"></i>
-                </div>
-                <div>
-                    <p class="font-medium text-text-primary group-hover:text-secondary-400 transition-colors">
-                        {{ producto.nombre[:35] }}{% if producto.nombre|length > 35 %}...{% endif %}
-                    </p>
-                    <p class="text-xs text-text-muted">{{ _('Producto') }}</p>
-                </div>
-            </div>
-            <span class="text-xs text-text-muted">{{ producto.creado_en | timeago }}</span>
-        </div>
-        {% endfor %}
-    </div>
-    {% endcall %}
-    {% endcall %}
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script>
-// Configuración común para todos los gráficos
+// Configuración común para todos los gráficos - TEXTO BLANCO PURO
 const commonLayout = {
     paper_bgcolor: 'rgba(0,0,0,0)',
     plot_bgcolor: 'rgba(0,0,0,0)',
-    font: { color: '#ffffff', family: 'Plus Jakarta Sans' },
+    font: { 
+        color: '#FFFFFF',  // BLANCO PURO - máximo contraste
+        family: 'Plus Jakarta Sans',
+        size: 12
+    },
     margin: { t: 10, b: 40, l: 50, r: 10 },
     showlegend: true,
     legend: { 
         orientation: 'h',
-        font: { color: '#ffffff', size: 11 }
+        font: { color: '#FFFFFF', size: 11 }
     }
 };
 
@@ -270,10 +238,11 @@ var provinciaData = [{
     hole: 0.4,
     marker: {
         colors: ['#34d399', '#38bdf8', '#fbbf24', '#a78bfa', '#f87171', '#22d3ee', '#fb923c', '#f472b6'],
-        line: { color: 'rgba(255,255,255,0.1)', width: 1 }
+        line: { color: 'rgba(255,255,255,0.2)', width: 2 }
     },
     textinfo: 'label+percent',
     textposition: 'outside',
+    textfont: { color: '#FFFFFF', size: 11 },
     hoverinfo: 'label+value+percent'
 }];
 
@@ -290,24 +259,27 @@ var clientesData = [{
     orientation: 'h',
     marker: { 
         color: '#38bdf8',
-        line: { color: 'rgba(255,255,255,0.2)', width: 1 }
+        line: { color: 'rgba(255,255,255,0.3)', width: 1 }
     },
-    hoverinfo: 'x+y'
+    hoverinfo: 'x+y',
+    textfont: { color: '#FFFFFF' }
 }];
 
 Plotly.newPlot('clientes-chart', clientesData, {
     ...commonLayout,
     xaxis: {
-        title: '{{ _("Número de Fábricas") }}',
-        gridcolor: 'rgba(255,255,255,0.05)',
-        linecolor: 'rgba(255,255,255,0.1)',
-        color: '#ffffff'
+        title: 'Número de Fábricas',
+        gridcolor: 'rgba(255,255,255,0.1)',
+        linecolor: 'rgba(255,255,255,0.2)',
+        color: '#FFFFFF',
+        tickfont: { color: '#FFFFFF' }
     },
     yaxis: {
         automargin: true,
-        gridcolor: 'rgba(255,255,255,0.05)',
-        linecolor: 'rgba(255,255,255,0.1)',
-        color: '#ffffff'
+        gridcolor: 'rgba(255,255,255,0.1)',
+        linecolor: 'rgba(255,255,255,0.2)',
+        color: '#FFFFFF',
+        tickfont: { color: '#FFFFFF' }
     },
     margin: { t: 10, b: 40, l: 180, r: 10 }
 }, {responsive: true, displayModeBar: false});
@@ -319,24 +291,27 @@ var sectorData = [{
     type: 'bar',
     marker: { 
         color: '#a78bfa',
-        line: { color: 'rgba(255,255,255,0.2)', width: 1 }
+        line: { color: 'rgba(255,255,255,0.3)', width: 1 }
     },
-    hoverinfo: 'x+y'
+    hoverinfo: 'x+y',
+    textfont: { color: '#FFFFFF' }
 }];
 
 Plotly.newPlot('sector-chart', sectorData, {
     ...commonLayout,
     xaxis: {
         tickangle: -45,
-        gridcolor: 'rgba(255,255,255,0.05)',
-        linecolor: 'rgba(255,255,255,0.1)',
-        color: '#ffffff'
+        gridcolor: 'rgba(255,255,255,0.1)',
+        linecolor: 'rgba(255,255,255,0.2)',
+        color: '#FFFFFF',
+        tickfont: { color: '#FFFFFF' }
     },
     yaxis: {
-        title: '{{ _("Productos") }}',
-        gridcolor: 'rgba(255,255,255,0.05)',
-        linecolor: 'rgba(255,255,255,0.1)',
-        color: '#ffffff'
+        title: 'Productos',
+        gridcolor: 'rgba(255,255,255,0.1)',
+        linecolor: 'rgba(255,255,255,0.2)',
+        color: '#FFFFFF',
+        tickfont: { color: '#FFFFFF' }
     },
     margin: { t: 10, b: 100, l: 50, r: 10 }
 }, {responsive: true, displayModeBar: false});
