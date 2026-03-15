@@ -1,100 +1,107 @@
 {% extends "base.html" %}
+{% from 'components/glass_card.html' import glass_card, glass_card_header, glass_card_body, glass_card_footer %}
+{% from 'components/glass_button.html' import glass_button, glass_button_icon %}
 
 {% block title %}{{ _('Historial de Ensayos') }} - DataLab{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <nav aria-label="breadcrumb" class="mb-3">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('tecnico.dashboard') }}">{{ _('Panel del Técnico') }}</a></li>
-            <li class="breadcrumb-item active">{{ _('Historial') }}</li>
+<div class="max-w-7xl mx-auto">
+    <!-- Breadcrumb -->
+    <nav class="mb-6" aria-label="breadcrumb">
+        <ol class="flex items-center space-x-2 text-sm text-text-muted">
+            <li><a href="{{ url_for('tecnico.dashboard') }}" class="hover:text-primary-400 transition-colors">{{ _('Panel del Técnico') }}</a></li>
+            <li><span class="mx-2 text-text-secondary">/</span></li>
+            <li class="text-text-primary" aria-current="page">{{ _('Historial') }}</li>
         </ol>
     </nav>
 
-    <h1 class="h3 mb-4">
-        <i class="fas fa-history"></i> {{ _('Historial de Ensayos') }}
+    <h1 class="text-3xl font-bold text-gradient mb-6">
+        <i class="fas fa-history mr-2 text-primary-400"></i>
+        {{ _('Historial de Ensayos') }}
     </h1>
 
     {# Filters #}
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="get" class="row g-3">
-                <div class="col-md-3">
-                    <label class="form-label">{{ _('Área') }}</label>
-                    <select name="area" class="form-select">
-                        <option value="">{{ _('Todas') }}</option>
-                        <option value="FQ" {{ 'selected' if request.args.get('area') == 'FQ' }}>FQ</option>
-                        <option value="MB" {{ 'selected' if request.args.get('area') == 'MB' }}>MB</option>
-                        <option value="ES" {{ 'selected' if request.args.get('area') == 'ES' }}>ES</option>
-                        <option value="OS" {{ 'selected' if request.args.get('area') == 'OS' }}>OS</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">{{ _('Estado') }}</label>
-                    <select name="estado" class="form-select">
-                        <option value="">{{ _('Todos') }}</option>
-                        <option value="COMPLETADO" {{ 'selected' if request.args.get('estado') == 'COMPLETADO' }}>{{ _('Completado') }}</option>
-                        <option value="REPORTADO" {{ 'selected' if request.args.get('estado') == 'REPORTADO' }}>{{ _('Reportado') }}</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">{{ _('Búsqueda') }}</label>
-                    <input type="text" name="q" class="form-control" placeholder="{{ _('Nombre del ensayo...') }}" value="{{ request.args.get('q', '') }}">
-                </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-search"></i> {{ _('Buscar') }}
-                    </button>
-                </div>
-            </form>
+    {% call glass_card(variant='sm', class='mb-6') %}
+    {% call glass_card_body() %}
+    <form method="get" class="flex flex-wrap gap-4">
+        <div class="flex-1 min-w-[150px]">
+            <label class="block text-xs font-medium text-text-secondary mb-1">{{ _('Área') }}</label>
+            <select name="area" class="glass-input w-full">
+                <option value="">{{ _('Todas') }}</option>
+                <option value="FQ" {{ 'selected' if request.args.get('area') == 'FQ' }}>FQ</option>
+                <option value="MB" {{ 'selected' if request.args.get('area') == 'MB' }}>MB</option>
+                <option value="ES" {{ 'selected' if request.args.get('area') == 'ES' }}>ES</option>
+                <option value="OS" {{ 'selected' if request.args.get('area') == 'OS' }}>OS</option>
+            </select>
         </div>
-    </div>
+        <div class="flex-1 min-w-[150px]">
+            <label class="block text-xs font-medium text-text-secondary mb-1">{{ _('Estado') }}</label>
+            <select name="estado" class="glass-input w-full">
+                <option value="">{{ _('Todos') }}</option>
+                <option value="COMPLETADO" {{ 'selected' if request.args.get('estado') == 'COMPLETADO' }}>{{ _('Completado') }}</option>
+                <option value="REPORTADO" {{ 'selected' if request.args.get('estado') == 'REPORTADO' }}>{{ _('Reportado') }}</option>
+            </select>
+        </div>
+        <div class="flex-1 min-w-[200px]">
+            <label class="block text-xs font-medium text-text-secondary mb-1">{{ _('Búsqueda') }}</label>
+            <input type="text" name="q" class="glass-input w-full" placeholder="{{ _('Nombre del ensayo...') }}" value="{{ request.args.get('q', '') }}">
+        </div>
+        <div class="flex items-end">
+            {% call glass_button(variant='primary', icon='fas fa-search', type='submit') %}
+            {{ _('Buscar') }}
+            {% endcall %}
+        </div>
+    </form>
+    {% endcall %}
+    {% endcall %}
 
     {# Results Table #}
-    <div class="card">
-        <div class="card-body">
-            {% if ensayos %}
-            <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                    <thead>
-                        <tr>
-                            <th>{{ _('Ensayo') }}</th>
-                            <th>{{ _('Producto') }}</th>
-                            <th>{{ _('Área') }}</th>
-                            <th>{{ _('Estado') }}</th>
-                            <th>{{ _('Resultado') }}</th>
-                            <th>{{ _('Fecha Inicio') }}</th>
-                            <th>{{ _('Fecha Fin') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for d in ensayos %}
-                        <tr>
-                            <td>{{ d.ensayo.nombre_corto if d.ensayo else '-' }}</td>
-                            <td>{{ d.entrada.producto.nombre if d.entrada and d.entrada.producto else '-' }}</td>
-                            <td>{{ d.ensayo.area.siglas if d.ensayo and d.ensayo.area else '-' }}</td>
-                            <td>
-                                <span class="badge {{ 'bg-success' if d.estado == 'COMPLETADO' else 'bg-info' if d.estado == 'REPORTADO' else 'bg-secondary' }}">
-                                    {{ d.estado }}
-                                </span>
-                            </td>
-                            <td>
-                                {% if d.valor_numerico %}{{ d.valor_numerico }}{% endif %}
-                                {% if d.valor_texto %}{{ d.valor_texto }}{% endif %}
-                                {% if d.valor_booleano %}{{ _('Sí') if d.valor_booleano else _('No') }}{% endif %}
-                                {% if d.parametros_json %}<small class="text-muted">JSON</small>{% endif %}
-                            </td>
-                            <td>{{ d.fecha_inicio.strftime('%d/%m/%Y %H:%M') if d.fecha_inicio else '-' }}</td>
-                            <td>{{ d.fecha_fin.strftime('%d/%m/%Y %H:%M') if d.fecha_fin else '-' }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            <p class="text-muted text-center">{{ _('No se encontraron ensayos en el historial.') }}</p>
-            {% endif %}
-        </div>
+    {% call glass_card(variant='lg') %}
+    {% call glass_card_body() %}
+    {% if ensayos %}
+    <div class="overflow-x-auto">
+        <table class="glass-table w-full">
+            <thead>
+                <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">{{ _('Ensayo') }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">{{ _('Producto') }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">{{ _('Cliente') }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">{{ _('Estado') }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">{{ _('Fecha Completado') }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">{{ _('Acciones') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ensayo in ensayos %}
+                <tr class="hover:bg-glass-1 transition-colors">
+                    <td class="px-4 py-3 text-sm text-text-primary font-medium">{{ ensayo.ensayo.nombre_corto if ensayo.ensayo else '-' }}</td>
+                    <td class="px-4 py-3 text-sm text-text-secondary">{{ ensayo.entrada.producto.nombre if ensayo.entrada and ensayo.entrada.producto else '-' }}</td>
+                    <td class="px-4 py-3 text-sm text-text-secondary">{{ ensayo.entrada.cliente.nombre if ensayo.entrada and ensayo.entrada.cliente else '-' }}</td>
+                    <td class="px-4 py-3 text-sm">
+                        {% set status_colors = {'COMPLETADO': 'bg-success-50 text-success-500 border-success-500/30', 'REPORTADO': 'bg-info-50 text-info-500 border-info-500/30'} %}
+                        {% set status_class = status_colors.get(ensayo.estado, 'bg-glass-1 text-text-secondary border-glass-border') %}
+                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border {{ status_class }}">
+                            {{ _(ensayo.estado) }}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-text-secondary font-mono">{{ ensayo.fecha_completado.strftime('%d/%m/%Y %H:%M') if ensayo.fecha_completado else '-' }}</td>
+                    <td class="px-4 py-3 text-sm">
+                        <a href="{{ url_for('tecnico.ver_ensayo', id=ensayo.id) }}" class="btn btn-ghost btn-sm">
+                            <i class="fas fa-eye"></i> {{ _('Ver') }}
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
+    {% else %}
+    <div class="text-center py-12 text-text-muted">
+        <i class="fas fa-history text-5xl mb-4 opacity-50"></i>
+        <p class="text-lg">{{ _('No se encontraron ensayos en el historial') }}</p>
+    </div>
+    {% endif %}
+    {% endcall %}
+    {% endcall %}
 </div>
 {% endblock %}
