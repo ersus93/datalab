@@ -1,296 +1,251 @@
 {% extends "base.html" %}
+{% from 'components/glass_card.html' import glass_card, glass_card_header, glass_card_body, glass_card_footer %}
+{% from 'components/glass_button.html' import glass_button, glass_button_icon %}
 
 {% block title %}{{ _('Panel del Técnico') }} - DataLab{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <h1 class="h3 mb-4">
-        <i class="fas fa-user-hard-hat"></i> {{ _('Panel del Técnico') }}
+<div class="max-w-7xl mx-auto">
+    <h1 class="text-3xl font-bold text-gradient mb-8">
+        <i class="fas fa-user-hard-hat mr-2 text-primary-400"></i>
+        {{ _('Panel del Técnico') }}
     </h1>
 
     {# Stats Cards #}
-    <div class="row mb-4">
-        <div class="col-md-2">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <h5 class="card-title">{{ _('Asignados') }}</h5>
-                    <h2 class="mb-0">{{ stats.asignado }}</h2>
-                </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+        <a href="#" class="block group">
+            {% call glass_card(variant='md', class='bg-primary-50/50 border-primary-500/30') %}
+            <h5 class="text-sm font-medium text-primary-400 mb-2">{{ _('Asignados') }}</h5>
+            <h2 class="text-3xl font-bold text-text-primary font-mono">{{ stats.asignado }}</h2>
+            {% endcall %}
+        </a>
+        
+        <a href="#" class="block group">
+            {% call glass_card(variant='md', class='bg-warning-50/50 border-warning-500/30') %}
+            <h5 class="text-sm font-medium text-warning-500 mb-2">{{ _('En Proceso') }}</h5>
+            <h2 class="text-3xl font-bold text-text-primary font-mono">{{ stats.en_proceso }}</h2>
+            {% endcall %}
+        </a>
+        
+        <a href="#" class="block group">
+            {% call glass_card(variant='md', class='bg-glass-1') %}
+            <h5 class="text-sm font-medium text-text-secondary mb-2">{{ _('Pausados') }}</h5>
+            <h2 class="text-3xl font-bold text-text-primary font-mono">{{ stats.pausado }}</h2>
+            {% endcall %}
+        </a>
+        
+        <a href="#" class="block group">
+            {% call glass_card(variant='md', class='bg-success-50/50 border-success-500/30') %}
+            <h5 class="text-sm font-medium text-success-500 mb-2">{{ _('Completados Hoy') }}</h5>
+            <h2 class="text-3xl font-bold text-text-primary font-mono">{{ stats.completado_hoy }}</h2>
+            {% endcall %}
+        </a>
+        
+        <a href="#" class="block group">
+            {% call glass_card(variant='md', class='bg-info-50/50 border-info-500/30') %}
+            <h5 class="text-sm font-medium text-info-500 mb-2">{{ _('Reportados') }}</h5>
+            <h2 class="text-3xl font-bold text-text-primary font-mono">{{ stats.reportado }}</h2>
+            {% endcall %}
+        </a>
+        
+        <a href="{{ url_for('tecnico.metricas') }}" class="block group">
+            {% call glass_card(variant='md', class='bg-glass-2 hover:bg-glass-3') %}
+            <h5 class="text-sm font-medium text-text-secondary mb-2">{{ _('Métricas') }}</h5>
+            <div class="flex items-center justify-between">
+                <h2 class="text-2xl font-bold text-text-primary">→</h2>
+                <span class="text-xs text-text-muted">{{ _('Ver') }}</span>
             </div>
-        </div>
-        <div class="col-md-2">
-            <div class="card bg-warning text-dark">
-                <div class="card-body">
-                    <h5 class="card-title">{{ _('En Proceso') }}</h5>
-                    <h2 class="mb-0">{{ stats.en_proceso }}</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="card bg-secondary text-white">
-                <div class="card-body">
-                    <h5 class="card-title">{{ _('Pausados') }}</h5>
-                    <h2 class="mb-0">{{ stats.pausado }}</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <h5 class="card-title">{{ _('Completados Hoy') }}</h5>
-                    <h2 class="mb-0">{{ stats.completado_hoy }}</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="card bg-info text-white">
-                <div class="card-body">
-                    <h5 class="card-title">{{ _('Reportados') }}</h5>
-                    <h2 class="mb-0">{{ stats.reportado }}</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="card bg-dark text-white">
-                <div class="card-body">
-                    <h5 class="card-title">{{ _('Métricas') }}</h5>
-                    <a href="{{ url_for('tecnico.metricas') }}" class="btn btn-light btn-sm">
-                        <i class="fas fa-chart-bar"></i> {{ _('Ver') }}
-                    </a>
-                </div>
-            </div>
-        </div>
+            {% endcall %}
+        </a>
     </div>
 
     {# Alerts Section #}
     {% if alertas_vencimiento %}
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <h5 class="alert-heading">
-            <i class="fas fa-exclamation-triangle"></i> {{ _('Alertas de Vencimiento') }}
-        </h5>
-        <p class="mb-2">{{ _('Los siguientes ensayos llevan más de 3 días sin completarse:') }}</p>
-        <ul class="mb-0">
-            {% for alerta in alertas_vencimiento[:5] %}
-            <li>
-                <strong>{{ alerta.ensayo.nombre_corto if alerta.ensayo else _('Sin nombre') }}</strong>
-                - {{ alerta.entrada.producto.nombre if alerta.entrada and alerta.entrada.producto else _('Sin producto') }}
-                ({{ _('Asignado') }}: {{ alerta.fecha_asignacion.strftime('%d/%m/%Y') if alerta.fecha_asignacion else '-' }})
-            </li>
-            {% endfor %}
-        </ul>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    {% call glass_card(variant='md', class='mb-8 border-error-500/30 bg-error-50/20') %}
+    {% call glass_card_body() %}
+    <div class="flex items-start justify-between">
+        <div class="flex-1">
+            <h5 class="text-lg font-semibold text-error-500 mb-2">
+                <i class="fas fa-exclamation-triangle mr-2"></i>
+                {{ _('Alertas de Vencimiento') }}
+            </h5>
+            <p class="text-sm text-text-secondary mb-2">{{ _('Los siguientes ensayos llevan más de 3 días sin completarse:') }}</p>
+            <ul class="text-sm space-y-1">
+                {% for alerta in alertas_vencimiento[:5] %}
+                <li class="text-text-primary">
+                    <strong>{{ alerta.ensayo.nombre_corto if alerta.ensayo else _('Sin nombre') }}</strong>
+                    - {{ alerta.entrada.producto.nombre if alerta.entrada and alerta.entrada.producto else _('Sin producto') }}
+                    <span class="text-text-muted">({{ _('Asignado') }}: {{ alerta.fecha_asignacion.strftime('%d/%m/%Y') if alerta.fecha_asignacion else '-' }})</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <button type="button" class="btn btn-ghost btn-sm text-error-500 hover:bg-error-50/30" onclick="this.closest('.glass-card').remove()">
+            <i class="fas fa-times"></i>
+        </button>
     </div>
+    {% endcall %}
+    {% endcall %}
     {% endif %}
 
-    <div class="row mb-4">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         {# Área de Pendientes #}
-        <div class="col-md-8">
+        <div class="lg:col-span-2">
             {# Area Filter #}
-            <div class="row mb-3">
-                <div class="col-md-12">
-                    <div class="btn-group" role="group">
-                        <a href="{{ url_for('tecnico.dashboard') }}" class="btn btn-outline-primary {{ 'active' if not request.args.get('area') }}">
-                            {{ _('Todas las Áreas') }}
-                        </a>
-                        <a href="{{ url_for('tecnico.dashboard', area='FQ') }}" class="btn btn-outline-primary {{ 'active' if request.args.get('area') == 'FQ' }}">FQ</a>
-                        <a href="{{ url_for('tecnico.dashboard', area='MB') }}" class="btn btn-outline-primary {{ 'active' if request.args.get('area') == 'MB' }}">MB</a>
-                        <a href="{{ url_for('tecnico.dashboard', area='ES') }}" class="btn btn-outline-primary {{ 'active' if request.args.get('area') == 'ES' }}">ES</a>
-                        <a href="{{ url_for('tecnico.dashboard', area='OS') }}" class="btn btn-outline-primary {{ 'active' if request.args.get('area') == 'OS' }}">OS</a>
-                    </div>
+            <div class="mb-4">
+                <div class="flex flex-wrap gap-2">
+                    <a href="{{ url_for('tecnico.dashboard') }}" 
+                       class="btn {{ 'btn-primary' if not request.args.get('area') else 'btn-secondary' }} btn-sm">
+                        {{ _('Todas las Áreas') }}
+                    </a>
+                    <a href="{{ url_for('tecnico.dashboard', area='FQ') }}" 
+                       class="btn {{ 'btn-primary' if request.args.get('area') == 'FQ' else 'btn-secondary' }} btn-sm">
+                        FQ
+                    </a>
+                    <a href="{{ url_for('tecnico.dashboard', area='MB') }}" 
+                       class="btn {{ 'btn-primary' if request.args.get('area') == 'MB' else 'btn-secondary' }} btn-sm">
+                        MB
+                    </a>
+                    <a href="{{ url_for('tecnico.dashboard', area='ES') }}" 
+                       class="btn {{ 'btn-primary' if request.args.get('area') == 'ES' else 'btn-secondary' }} btn-sm">
+                        ES
+                    </a>
+                    <a href="{{ url_for('tecnico.dashboard', area='OS') }}" 
+                       class="btn {{ 'btn-primary' if request.args.get('area') == 'OS' else 'btn-secondary' }} btn-sm">
+                        OS
+                    </a>
                 </div>
             </div>
 
-            {# Pending Tests by Area #}
-            {% for area, detalles in pendientes_por_area.items() %}
-            <div class="card mb-4">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0">
-                        <i class="fas fa-flask"></i> {{ _('Área') }}: {{ area }}
-                        <span class="badge bg-secondary">{{ detalles|length }}</span>
-                    </h5>
-                </div>
-                <div class="card-body">
-                    {% if detalles %}
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th><input type="checkbox" id="select-all-{{ area }}" onclick="toggleAll('{{ area }}')"></th>
-                                    <th>{{ _('Ensayo') }}</th>
-                                    <th>{{ _('Producto') }}</th>
-                                    <th>{{ _('Estado') }}</th>
-                                    <th>{{ _('Acciones') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for d in detalles %}
-                                <tr class="{{ 'table-warning' if d.estado == 'PAUSADO' else '' }}">
-                                    <td><input type="checkbox" name="detalle_ids" value="{{ d.id }}" class="detalle-checkbox"></td>
-                                    <td>{{ d.ensayo.nombre_corto if d.ensayo else _('Sin ensayo') }}</td>
-                                    <td>{{ d.entrada.producto.nombre if d.entrada and d.entrada.producto else _('Sin producto') }}</td>
-                                    <td>
-                                        <span class="badge 
-                                            {{ 'bg-secondary' if d.estado == 'PENDIENTE' else
-                                               'bg-primary' if d.estado == 'ASIGNADO' else
-                                               'bg-warning' if d.estado == 'EN_PROCESO' else
-                                               'bg-info' if d.estado == 'PAUSADO' else
-                                               'bg-success' if d.estado == 'COMPLETADO' else
-                                               'bg-dark' }}">
-                                            {{ d.estado }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        {% if d.estado == 'ASIGNADO' %}
-                                        <button class="btn btn-sm btn-primary" onclick="iniciarEnsayo({{ d.id }})">
-                                            <i class="fas fa-play"></i> {{ _('Iniciar') }}
-                                        </button>
-                                        {% elif d.estado == 'EN_PROCESO' %}
-                                        <a href="{{ url_for('tecnico.ejecutar', detalle_id=d.id) }}" class="btn btn-sm btn-success">
-                                            <i class="fas fa-check"></i> {{ _('Ejecutar') }}
-                                        </a>
-                                        <button class="btn btn-sm btn-outline-warning" onclick="pausarEnsayo({{ d.id }})">
-                                            <i class="fas fa-pause"></i> {{ _('Pausar') }}
-                                        </button>
-                                        {% elif d.estado == 'PAUSADO' %}
-                                        <button class="btn btn-sm btn-outline-success" onclick="reanudarEnsayo({{ d.id }})">
-                                            <i class="fas fa-play"></i> {{ _('Reanudar') }}
-                                        </button>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="mt-2">
-                        <button class="btn btn-primary btn-sm" onclick="batchIniciar('{{ area }}')">
-                            <i class="fas fa-play"></i> {{ _('Iniciar Selección') }}
-                        </button>
-                    </div>
-                    {% else %}
-                    <p class="text-muted mb-0">{{ _('No hay ensayos pendientes en esta área.') }}</p>
-                    {% endif %}
-                </div>
+            {# Pendientes Table #}
+            {% call glass_card(variant='lg') %}
+            {% call glass_card_header() %}
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-semibold text-text-primary">
+                    <i class="fas fa-clipboard-list mr-2 text-primary-400"></i>
+                    {{ _('Ensayos Pendientes') }}
+                </h3>
+                <span class="text-sm text-text-muted">{{ pendientes|length }} {{ _('ensayos') }}</span>
             </div>
-            {% endfor %}
+            {% endcall %}
+            {% call glass_card_body() %}
+            <div class="overflow-x-auto">
+                <table class="glass-table w-full">
+                    <thead>
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">{{ _('Ensayo') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">{{ _('Producto') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">{{ _('Cliente') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">{{ _('Fecha Límite') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">{{ _('Acciones') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ensayo in pendientes %}
+                        <tr class="hover:bg-glass-1 transition-colors {{ 'bg-warning-50/20' if ensayo.vencido else '' }}">
+                            <td class="px-4 py-3 text-sm text-text-primary font-medium">
+                                {{ ensayo.ensayo.nombre_corto if ensayo.ensayo else _('Sin nombre') }}
+                            </td>
+                            <td class="px-4 py-3 text-sm text-text-secondary">
+                                {{ ensayo.entrada.producto.nombre if ensayo.entrada and ensayo.entrada.producto else '-' }}
+                            </td>
+                            <td class="px-4 py-3 text-sm text-text-secondary">
+                                {{ ensayo.entrada.cliente.nombre if ensayo.entrada and ensayo.entrada.cliente else '-' }}
+                            </td>
+                            <td class="px-4 py-3 text-sm font-mono {{ 'text-error-500 font-bold' if ensayo.vencido else 'text-text-secondary' }}">
+                                {{ ensayo.fecha_limite.strftime('%d/%m/%Y') if ensayo.fecha_limite else '-' }}
+                                {% if ensayo.vencido %}
+                                <span class="ml-2 px-2 py-0.5 bg-error-50 text-error-500 rounded text-xs border border-error-500/30">
+                                    {{ _('VENCIDO') }}
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-3 text-sm">
+                                <a href="{{ url_for('tecnico.ejecutar', id=ensayo.id) }}" 
+                                   class="btn btn-primary btn-sm">
+                                    <i class="fas fa-play mr-1"></i>
+                                    {{ _('Ejecutar') }}
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="px-4 py-8 text-center text-text-muted">
+                                <i class="fas fa-check-circle text-4xl mb-3 opacity-50"></i>
+                                <p>{{ _('¡No hay ensayos pendientes!') }}</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endcall %}
+            {% endcall %}
         </div>
 
-        {# Actividad Reciente #}
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0">
-                        <i class="fas fa-history"></i> {{ _('Actividad Reciente') }}
-                    </h5>
-                </div>
-                <div class="card-body p-0">
-                    {% if actividad_reciente %}
-                    <div class="list-group list-group-flush">
-                        {% for item in actividad_reciente %}
-                        <div class="list-group-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <strong>{{ item.ensayo.nombre_corto if item.ensayo else _('Sin nombre') }}</strong>
-                                    <br>
-                                    <small class="text-muted">
-                                        {{ item.entrada.producto.nombre if item.entrada and item.entrada.producto else _('Sin producto') }}
-                                    </small>
-                                </div>
-                                <div class="text-end">
-                                    <span class="badge {{ 'bg-success' if item.estado == 'COMPLETADO' else 'bg-info' if item.estado == 'REPORTADO' else 'bg-secondary' }}">
-                                        {{ item.estado }}
-                                    </span>
-                                    <br>
-                                    <small class="text-muted">
-                                        {{ item.fecha_completado.strftime('%d/%m %H:%M') if item.fecha_completado else '-' }}
-                                    </small>
-                                </div>
-                            </div>
+        {# Sidebar #}
+        <div class="space-y-6">
+            {# Acciones Rápidas #}
+            {% call glass_card(variant='md') %}
+            {% call glass_card_header() %}
+            <h3 class="text-lg font-semibold text-text-primary">
+                <i class="fas fa-bolt mr-2 text-warning-500"></i>
+                {{ _('Acciones Rápidas') }}
+            </h3>
+            {% endcall %}
+            {% call glass_card_body() %}
+            <div class="space-y-3">
+                <a href="{{ url_for('tecnico.historial') }}" class="block p-3 rounded-lg bg-glass-1 hover:bg-glass-2 border border-glass-border transition-all">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-text-primary">{{ _('Mi Historial') }}</p>
+                            <p class="text-xs text-text-muted">{{ _('Ver ensayos completados') }}</p>
                         </div>
-                        {% endfor %}
+                        <i class="fas fa-history text-text-secondary"></i>
                     </div>
-                    {% else %}
-                    <p class="text-muted text-center p-3 mb-0">{{ _('Sin actividad reciente.') }}</p>
-                    {% endif %}
-                </div>
+                </a>
+                <a href="{{ url_for('tecnico.metricas') }}" class="block p-3 rounded-lg bg-glass-1 hover:bg-glass-2 border border-glass-border transition-all">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-text-primary">{{ _('Mis Métricas') }}</p>
+                            <p class="text-xs text-text-muted">{{ _('Rendimiento y productividad') }}</p>
+                        </div>
+                        <i class="fas fa-chart-bar text-text-secondary"></i>
+                    </div>
+                </a>
             </div>
+            {% endcall %}
+            {% endcall %}
+
+            {# Próximos Vencimientos #}
+            {% call glass_card(variant='md') %}
+            {% call glass_card_header() %}
+            <h3 class="text-lg font-semibold text-text-primary">
+                <i class="fas fa-clock mr-2 text-info-500"></i>
+                {{ _('Próximos Vencimientos') }}
+            </h3>
+            {% endcall %}
+            {% call glass_card_body() %}
+            <div class="space-y-3">
+                {% for vencimiento in proximos_vencimientos[:5] %}
+                <div class="flex items-center justify-between p-2 rounded-lg {{ 'bg-warning-50/20 border border-warning-500/30' if vencimiento.proximo else 'bg-glass-1' }}">
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-text-primary">{{ vencimiento.ensayo.nombre_corto if vencimiento.ensayo else '-' }}</p>
+                        <p class="text-xs text-text-muted">{{ vencimiento.entrada.producto.nombre[:30] if vencimiento.entrada and vencimiento.entrada.producto else '-' }}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs font-mono {{ 'text-warning-500 font-bold' if vencimiento.proximo else 'text-text-secondary' }}">
+                            {{ vencimiento.dias_restantes }} {{ _('días') }}
+                        </p>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-sm text-text-muted text-center py-4">{{ _('No hay vencimientos próximos') }}</p>
+                {% endfor %}
+            </div>
+            {% endcall %}
+            {% endcall %}
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-function toggleAll(area) {
-    const checkboxes = document.querySelectorAll('#select-all-' + area);
-    const isChecked = checkboxes.checked;
-    document.querySelectorAll('.detalle-checkbox').forEach(cb => cb.checked = isChecked);
-}
-
-function iniciarEnsayo(detalleId) {
-    fetch(`/tecnico/api/ejecutar/${detalleId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert(data.message || 'Error al iniciar ensayo');
-        }
-    });
-}
-
-function pausarEnsayo(detalleId) {
-    fetch(`/tecnico/api/pausar/${detalleId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert(data.message || 'Error al pausar ensayo');
-        }
-    });
-}
-
-function reanudarEnsayo(detalleId) {
-    fetch(`/tecnico/api/reanudar/${detalleId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert(data.message || 'Error al reanudar ensayo');
-        }
-    });
-}
-
-function batchIniciar(area) {
-    const ids = Array.from(document.querySelectorAll('.detalle-checkbox:checked')).map(cb => cb.value);
-    if (ids.length === 0) {
-        alert('Selecciona al menos un ensayo');
-        return;
-    }
-    fetch('/tecnico/api/batch/iniciar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ detalle_ids: ids })
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert(data.message || 'Error al iniciar ensayos');
-        }
-    });
-}
-</script>
 {% endblock %}
