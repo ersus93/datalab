@@ -1,7 +1,7 @@
 {# app/templates/components/glass_button.html #}
 {# Glass Button Component - Liquid Glass Design System #}
 
-{% macro glass_button(variant='primary', size='md', icon='', loading=False, disabled=False, class='', type='button', **kwargs) %}
+{% macro glass_button(variant='primary', size='md', icon='', loading=False, disabled=False, class='', type='button') %}
 {% set variants = {
     'primary': 'btn-primary',
     'secondary': 'btn-secondary',
@@ -19,12 +19,11 @@
     'lg': 'btn-lg px-6 py-3 text-base',
     'xl': 'btn-xl px-8 py-4 text-lg',
 } %}
-<button 
+<button
     type="{{ type }}"
     class="btn {{ variants.get(variant, 'btn-primary') }} {{ sizes.get(size, 'btn') }} {{ 'opacity-40 cursor-not-allowed' if disabled else '' }} {{ class }}"
     {% if disabled %}disabled{% endif %}
     {% if loading %}aria-busy="true"{% endif %}
-    {% for key, value in kwargs.items() %}{{ key }}="{{ value }}"{% endfor %}
 >
     {% if loading %}
     <span class="spinner"></span>
@@ -35,10 +34,9 @@
 </button>
 {% endmacro %}
 
-{% macro glass_button_icon(icon, variant='ghost', size='sm', class='', **kwargs) %}
-<button 
+{% macro glass_button_icon(icon, variant='ghost', size='sm', class='') %}
+<button
     class="btn {{ 'btn-' + variant if variant else 'btn-ghost' }} btn-square {{ 'btn-' + size if size else 'btn-sm' }} {{ class }}"
-    {% for key, value in kwargs.items() %}{{ key }}="{{ value }}"{% endfor %}
 >
     <i class="{{ icon }}"></i>
 </button>
