@@ -1,0 +1,66 @@
+{# app/templates/components/dashboard/status_count_glass.html #}
+{# Widget de Estados de Entradas - Estilo Glass Design System #}
+
+{% macro status_count_glass(status_counts) %}
+<div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+    {# Recibido #}
+    <div class="p-4 rounded-xl bg-glass-1 border border-glass-border hover:border-gray-500/30 transition-all cursor-pointer"
+         onclick="window.location.href='{{ url_for('entradas.listar') }}?estado=RECIBIDO'">
+        <div class="flex items-center gap-3 mb-2">
+            <div class="w-10 h-10 rounded-lg bg-gray-500/20 flex items-center justify-center">
+                <i class="fas fa-inbox text-gray-400"></i>
+            </div>
+            <span class="text-xs text-text-muted uppercase">Recibido</span>
+        </div>
+        <div class="text-2xl font-bold text-text-primary font-mono">{{ status_counts.RECIBIDO|default(0) }}</div>
+    </div>
+    
+    {# En Proceso #}
+    <div class="p-4 rounded-xl bg-primary-50/20 border border-primary-500/30 hover:border-primary-400/50 transition-all cursor-pointer"
+         onclick="window.location.href='{{ url_for('entradas.listar') }}?estado=EN_PROCESO'">
+        <div class="flex items-center gap-3 mb-2">
+            <div class="w-10 h-10 rounded-lg bg-primary-500/20 flex items-center justify-center">
+                <i class="fas fa-spinner text-primary-400"></i>
+            </div>
+            <span class="text-xs text-text-muted uppercase">En Proceso</span>
+        </div>
+        <div class="text-2xl font-bold text-text-primary font-mono">{{ status_counts.EN_PROCESO|default(0) }}</div>
+    </div>
+    
+    {# Completado #}
+    <div class="p-4 rounded-xl bg-success-50/20 border border-success-500/30 hover:border-success-400/50 transition-all cursor-pointer"
+         onclick="window.location.href='{{ url_for('entradas.listar') }}?estado=COMPLETADO'">
+        <div class="flex items-center gap-3 mb-2">
+            <div class="w-10 h-10 rounded-lg bg-success-500/20 flex items-center justify-center">
+                <i class="fas fa-check-circle text-success-400"></i>
+            </div>
+            <span class="text-xs text-text-muted uppercase">Completado</span>
+        </div>
+        <div class="text-2xl font-bold text-text-primary font-mono">{{ status_counts.COMPLETADO|default(0) }}</div>
+    </div>
+    
+    {# Entregado #}
+    <div class="p-4 rounded-xl bg-info-50/20 border border-info-500/30 hover:border-info-400/50 transition-all cursor-pointer"
+         onclick="window.location.href='{{ url_for('entradas.listar') }}?estado=ENTREGADO'">
+        <div class="flex items-center gap-3 mb-2">
+            <div class="w-10 h-10 rounded-lg bg-info-500/20 flex items-center justify-center">
+                <i class="fas fa-truck text-info-400"></i>
+            </div>
+            <span class="text-xs text-text-muted uppercase">Entregado</span>
+        </div>
+        <div class="text-2xl font-bold text-text-primary font-mono">{{ status_counts.ENTREGADO|default(0) }}</div>
+    </div>
+    
+    {# Anulado #}
+    <div class="p-4 rounded-xl bg-error-50/20 border border-error-500/30 hover:border-error-400/50 transition-all cursor-pointer"
+         onclick="window.location.href='{{ url_for('entradas.listar') }}?estado=ANULADO'">
+        <div class="flex items-center gap-3 mb-2">
+            <div class="w-10 h-10 rounded-lg bg-error-500/20 flex items-center justify-center">
+                <i class="fas fa-times-circle text-error-400"></i>
+            </div>
+            <span class="text-xs text-text-muted uppercase">Anulado</span>
+        </div>
+        <div class="text-2xl font-bold text-text-primary font-mono">{{ status_counts.ANULADO|default(0) }}</div>
+    </div>
+</div>
+{% endmacro %}
