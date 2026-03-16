@@ -96,3 +96,6 @@ utiles/
 # Tailwind CSS
 tailwindcss.exe              # TailwindCSS CLI Standalone
 app/static/css/output.css    # TailwindCSS compiled output
+
+.qwen/
+gha-creds-*.json
