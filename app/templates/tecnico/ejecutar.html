@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Ejecutar Ensayo') }} - DataLab{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('tecnico.dashboard') }}">{{ _('Panel del Técnico') }}</a></li>
+            <li class="breadcrumb-item active">{{ _('Ejecutar Ensayo') }}</li>
+        </ol>
+    </nav>
+
+    <h1 class="h3 mb-4">
+        <i class="fas fa-play-circle"></i> {{ _('Ejecutar Ensayo') }}
+    </h1>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ detalle.ensayo.nombre_corto if detalle.ensayo else _('Ensayo') }}</h5>
+                    <span class="badge bg-warning">{{ detalle.estado }}</span>
+                </div>
+                <div class="card-body">
+                    <form id="resultadoForm">
+                        <input type="hidden" name="detalle_id" value="{{ detalle.id }}">
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">{{ _('Fecha Inicio') }}</label>
+                                <input type="datetime-local" class="form-control" name="fecha_inicio" id="fechaInicio" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{{ _('Fecha Fin') }}</label>
+                                <input type="datetime-local" class="form-control" name="fecha_fin" id="fechaFin" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">{{ _('Tipo de Resultado') }}</label>
+                            <select class="form-select" name="tipo_resultado" id="tipoResultado" onchange="mostrarCampos()">
+                                <option value="numerico">{{ _('Numérico') }}</option>
+                                <option value="texto">{{ _('Texto') }}</option>
+                                <option value="booleano">{{ _('Booleano (Sí/No)') }}</option>
+                                <option value="json">{{ _('JSON (Múltiples parámetros)') }}</option>
+                            </select>
+                        </div>
+
+                        {# Campo numérico con validación de rango #}
+                        <div id="campoNumerico" class="mb-3">
+                            <label class="form-label">{{ _('Valor Numérico') }}</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" class="form-control" name="valor_numerico" 
+                                       id="valorNumerico" placeholder="0.00"
+                                       onchange="validarRango()">
+                                <span class="input-group-text" id="indicadorRango">
+                                    <i class="fas fa-question-circle text-muted"></i>
+                                </span>
+                            </div>
+                            <div class="form-text" id="rangoEspecificacion">
+                                {{ _('Rango de especificación:') }} <span id="rangoMin">-</span> - <span id="rangoMax">-</span>
+                            </div>
+                            <div class="invalid-feedback" id="rangoError" style="display: none;">
+                                {{ _('El valor está fuera del rango de especificación') }}
+                            </div>
+                        </div>
+
+                        {# Campo texto #}
+                        <div id="campoTexto" class="mb-3" style="display:none">
+                            <label class="form-label">{{ _('Valor Texto') }}</label>
+                            <textarea class="form-control" name="valor_texto" rows="3"></textarea>
+                        </div>
+
+                        {# Campo booleano #}
+                        <div id="campoBooleano" class="mb-3" style="display:none">
+                            <label class="form-label">{{ _('Resultado') }}</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="valor_booleano" id="valorTrue" value="true">
+                                <label class="form-check-label" for="valorTrue">{{ _('Positivo / Cumple') }}</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="valor_booleano" id="valorFalse" value="false">
+                                <label class="form-check-label" for="valorFalse">{{ _('Negativo / No Cumple') }}</label>
+                            </div>
+                        </div>
+
+                        {# Campo JSON #}
+                        <div id="campoJson" class="mb-3" style="display:none">
+                            <label class="form-label">{{ _('Parámetros (JSON)') }}</label>
+                            <textarea class="form-control" name="parametros_json" id="parametrosJson" rows="5" placeholder='{"param1": 1.5, "param2": "ok"}'></textarea>
+                            <small class="text-muted" id="jsonError" style="color: red; display: none;">{{ _('JSON inválido') }}</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">{{ _('Observaciones') }}</label>
+                            <textarea class="form-control" name="observaciones" id="observaciones" rows="3" placeholder="{{ _('Observaciones opcionales del ensayo') }}"></textarea>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-success" id="btnCompletar">
+                                <i class="fas fa-check"></i> {{ _('Completar Ensayo') }}
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="btnBorrador" onclick="guardarBorrador()">
+                                <i class="fas fa-save"></i> {{ _('Guardar Borrador') }}
+                            </button>
+                            <a href="{{ url_for('tecnico.dashboard') }}" class="btn btn-secondary">
+                                {{ _('Cancelar') }}
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h6 class="mb-0">{{ _('Información del Ensayo') }}</h6>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">{{ _('Producto') }}</dt>
+                        <dd class="col-sm-8">{{ detalle.entrada.producto.nombre if detalle.entrada and detalle.entrada.producto else '-' }}</dd>
+                        
+                        <dt class="col-sm-4">{{ _('Lote') }}</dt>
+                        <dd class="col-sm-8">{{ detalle.entrada.lote if detalle.entrada else '-' }}</dd>
+                        
+                        <dt class="col-sm-4">{{ _('Estado') }}</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge bg-warning">{{ detalle.estado }}</span>
+                        </dd>
+
+                        {% if detalle.ensayo and detalle.ensayo.especificacion_min is not none %}
+                        <dt class="col-sm-4">{{ _('Spec Min') }}</dt>
+                        <dd class="col-sm-8">{{ detalle.ensayo.especificacion_min }}</dd>
+                        {% endif %}
+
+                        {% if detalle.ensayo and detalle.ensayo.especificacion_max is not none %}
+                        <dt class="col-sm-4">{{ _('Spec Max') }}</dt>
+                        <dd class="col-sm-8">{{ detalle.ensayo.especificacion_max }}</dd>
+                        {% endif %}
+                    </dl>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">{{ _('Estado del Borrador') }}</h6>
+                </div>
+                <div class="card-body">
+                    <div id="estadoBorrador">
+                        <span class="text-muted">{{ _('Sin borrador guardado') }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Inicializar fechas con hora actual
+const now = new Date();
+now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+const datetimeNow = now.toISOString().slice(0, 16);
+document.getElementById('fechaInicio').value = datetimeNow;
+document.getElementById('fechaFin').value = datetimeNow;
+
+// Cargar especificaciones del ensayo si existen
+const specMin = {{ detalle.ensayo.especificacion_min if detalle.ensayo and detalle.ensayo.especificacion_min is not none else 'null' }};
+const specMax = {{ detalle.ensayo.especificacion_max if detalle.ensayo and detalle.ensayo.especificacion_max is not none else 'null' }};
+
+if (specMin !== null) {
+    document.getElementById('rangoMin').textContent = specMin;
+}
+if (specMax !== null) {
+    document.getElementById('rangoMax').textContent = specMax;
+}
+
+function mostrarCampos() {
+    const tipo = document.getElementById('tipoResultado').value;
+    document.getElementById('campoNumerico').style.display = tipo === 'numerico' ? 'block' : 'none';
+    document.getElementById('campoTexto').style.display = tipo === 'texto' ? 'block' : 'none';
+    document.getElementById('campoBooleano').style.display = tipo === 'booleano' ? 'block' : 'none';
+    document.getElementById('campoJson').style.display = tipo === 'json' ? 'block' : 'none';
+}
+
+function validateJson(str) {
+    try {
+        JSON.parse(str);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+function validarRango() {
+    const valor = parseFloat(document.getElementById('valorNumerico').value);
+    const indicador = document.getElementById('indicadorRango');
+    const errorDiv = document.getElementById('rangoError');
+    const input = document.getElementById('valorNumerico');
+    
+    if (isNaN(valor)) {
+        indicador.innerHTML = '<i class="fas fa-question-circle text-muted"></i>';
+        input.classList.remove('is-valid', 'is-invalid');
+        errorDiv.style.display = 'none';
+        return true;
+    }
+
+    let enRango = true;
+    if (specMin !== null && valor < specMin) {
+        enRango = false;
+    }
+    if (specMax !== null && valor > specMax) {
+        enRango = false;
+    }
+
+    if (enRango) {
+        indicador.innerHTML = '<i class="fas fa-check-circle text-success"></i>';
+        input.classList.remove('is-invalid');
+        input.classList.add('is-valid');
+        errorDiv.style.display = 'none';
+    } else {
+        indicador.innerHTML = '<i class="fas fa-exclamation-circle text-danger"></i>';
+        input.classList.remove('is-valid');
+        input.classList.add('is-invalid');
+        errorDiv.style.display = 'block';
+    }
+    
+    return enRango;
+}
+
+function guardarBorrador() {
+    const formData = new FormData(document.getElementById('resultadoForm'));
+    const data = Object.fromEntries(formData.entries());
+    
+    // Guardar en localStorage
+    const borrador = {
+        detalle_id: data.detalle_id,
+        fecha_inicio: data.fecha_inicio,
+        fecha_fin: data.fecha_fin,
+        tipo_resultado: data.tipo_resultado,
+        valor_numerico: data.valor_numerico,
+        valor_texto: data.valor_texto,
+        valor_booleano: data.valor_booleano,
+        parametros_json: data.parametros_json,
+        observaciones: data.observaciones,
+        guardado_en: new Date().toISOString()
+    };
+    
+    localStorage.setItem('borrador_ensayo_' + data.detalle_id, JSON.stringify(borrador));
+    
+    const estadoDiv = document.getElementById('estadoBorrador');
+    estadoDiv.innerHTML = '<span class="text-success"><i class="fas fa-check"></i> {{ _("Borrador guardado") }} - ' + 
+        new Date().toLocaleTimeString() + '</span>';
+    
+    // Mostrar toast
+    alert('{{ _("Borrador guardado correctamente") }}');
+}
+
+function cargarBorrador() {
+    const detalleId = {{ detalle.id }};
+    const borradorStr = localStorage.getItem('borrador_ensayo_' + detalleId);
+    
+    if (borradorStr) {
+        try {
+            const borrador = JSON.parse(borradorStr);
+            
+            document.getElementById('fechaInicio').value = borrador.fecha_inicio || '';
+            document.getElementById('fechaFin').value = borrador.fecha_fin || '';
+            document.getElementById('tipoResultado').value = borrador.tipo_resultado || 'numerico';
+            document.getElementById('valorNumerico').value = borrador.valor_numerico || '';
+            document.getElementById('parametrosJson').value = borrador.parametros_json || '';
+            document.getElementById('observaciones').value = borrador.observaciones || '';
+            
+            if (borrador.valor_booleano) {
+                const radio = document.querySelector(`input[name="valor_booleano"][value="${borrador.valor_booleano}"]`);
+                if (radio) radio.checked = true;
+            }
+            
+            const estadoDiv = document.getElementById('estadoBorrador');
+            const fecha = new Date(borrador.guardado_en);
+            estadoDiv.innerHTML = '<span class="text-info"><i class="fas fa-file-alt"></i> {{ _("Borrador cargado") }} - ' + 
+                fecha.toLocaleString() + '</span>';
+            
+            mostrarCampos();
+            if (borrador.valor_numerico) validarRango();
+            
+        } catch (e) {
+            console.error('Error al cargar borrador:', e);
+        }
+    }
+}
+
+// Cargar borrador al iniciar
+document.addEventListener('DOMContentLoaded', cargarBorrador);
+
+document.getElementById('resultadoForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const tipo = document.getElementById('tipoResultado').value;
+    if (tipo === 'json') {
+        const jsonField = document.getElementById('parametrosJson');
+        if (jsonField.value && !validateJson(jsonField.value)) {
+            document.getElementById('jsonError').style.display = 'block';
+            jsonField.focus();
+            return;
+        }
+    }
+    
+    // Validar rango si es numérico
+    if (tipo === 'numerico') {
+        const valor = parseFloat(document.getElementById('valorNumerico').value);
+        if (!isNaN(valor) && !validarRango()) {
+            if (!confirm('{{ _("El valor está fuera del rango de especificación. ¿Desea continuar de todas formas?") }}')) {
+                return;
+            }
+        }
+    }
+    
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData.entries());
+    
+    fetch(`/tecnico/api/resultado/${data.detalle_id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            // Limpiar borrador guardado
+            localStorage.removeItem('borrador_ensayo_' + data.data.id);
+            window.location.href = '{{ url_for("tecnico.dashboard") }}';
+        } else {
+            alert(data.error || '{{ _("Error al registrar resultado") }}');
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('{{ _("Error de conexión") }}');
+    });
+});
+</script>
+{% endblock %}

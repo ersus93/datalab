@@ -1,0 +1,23 @@
+{% extends 'crud/base_form.html' %}
+{% from 'macros/forms.html' import render_field %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block form_title %}{{ titulo }}{% endblock %}
+
+{% block cancel_url %}{{ url_for('ordenes_trabajo.listar') }}{% endblock %}
+
+{% block form_fields %}
+<div class="space-y-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {{ render_field(form.nro_ofic) }}
+        {{ render_field(form.codigo, placeholder=_('Auto-generado si se deja vacío')) }}
+    </div>
+    
+    {{ render_field(form.cliente_id) }}
+    
+    {{ render_field(form.descripcion) }}
+    
+    {{ render_field(form.observaciones) }}
+</div>
+{% endblock %}

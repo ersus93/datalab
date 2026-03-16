@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% from 'components/glass_card.html' import glass_card, glass_card_header, glass_card_body, glass_card_footer %}
+
+{% block title %}{{ _('Laboratorio') }} — {{ _('Vistas por Área') }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    {# ─── HEADER ───────────────────────────────────────────────────────────── #}
+    <div class="mb-8">
+        <h1 class="text-2xl font-bold text-gradient">
+            <i class="fas fa-flask mr-2 text-primary-400"></i>
+            {{ _('Laboratorio') }}
+        </h1>
+        <p class="text-text-muted mt-1">
+            {{ _('Vistas especializadas por área de laboratorio') }}
+        </p>
+    </div>
+
+    {# ─── TABS DE ÁREAS ────────────────────────────────────────────────────── #}
+    {% call glass_card(variant='lg') %}
+    {% call glass_card_body() %}
+    
+    {# Navegación de tabs #}
+    <div class="flex overflow-x-auto border-b border-glass-border-subtle mb-6" role="tablist">
+        {% set areas_config = [
+            {'sigla': 'FQ', 'nombre': 'Físico-Químico', 'icon': 'fa-flask', 'color': 'primary'},
+            {'sigla': 'MB', 'nombre': 'Microbiología', 'icon': 'fa-bacteria', 'color': 'success'},
+            {'sigla': 'ES', 'nombre': 'Evaluación Sensorial', 'icon': 'fa-wine-glass', 'color': 'secondary'},
+            {'sigla': 'OS', 'nombre': 'Otros Servicios', 'icon': 'fa-tools', 'color': 'warning'}
+        ] %}
+
+        {% for area in areas_config %}
+        <a href="{{ url_for('lab.area_view', area_sigla=area.sigla) }}"
+           class="flex items-center gap-2 px-4 py-3 border-b-2 border-transparent hover:bg-glass-1 transition-all duration-200 whitespace-nowrap {{ 'border-' + area.color + '-500 text-' + area.color + '-400 bg-' + area.color + '-50/20' if loop.first else 'text-text-secondary' }}">
+            <i class="fas {{ area.icon }} text-{{ area.color }}-500"></i>
+            <span class="font-medium">{{ area.nombre }}</span>
+            <span class="text-xs bg-glass-1 text-text-muted px-2 py-0.5 rounded-full">
+                {{ area.sigla }}
+            </span>
+        </a>
+        {% endfor %}
+    </div>
+
+    {# Contenido de cada área #}
+    <div class="tab-content">
+        {% for area_sigla, area_data in areas.items() %}
+        <div class="tab-pane {% if loop.first %}active{% endif %}" id="{{ area_sigla }}">
+            {# Stats del Área #}
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="p-4 rounded-lg bg-glass-1 border border-glass-border">
+                    <div class="text-sm text-text-secondary mb-1">{{ _('Muestras') }}</div>
+                    <div class="text-2xl font-bold text-text-primary font-mono">{{ area_data.muestras }}</div>
+                </div>
+                <div class="p-4 rounded-lg bg-glass-1 border border-glass-border">
+                    <div class="text-sm text-text-secondary mb-1">{{ _('Pendientes') }}</div>
+                    <div class="text-2xl font-bold text-warning-500 font-mono">{{ area_data.pendientes }}</div>
+                </div>
+                <div class="p-4 rounded-lg bg-glass-1 border border-glass-border">
+                    <div class="text-sm text-text-secondary mb-1">{{ _('En Proceso') }}</div>
+                    <div class="text-2xl font-bold text-primary-400 font-mono">{{ area_data.en_proceso }}</div>
+                </div>
+                <div class="p-4 rounded-lg bg-glass-1 border border-glass-border">
+                    <div class="text-sm text-text-secondary mb-1">{{ _('Completados') }}</div>
+                    <div class="text-2xl font-bold text-success-500 font-mono">{{ area_data.completados }}</div>
+                </div>
+            </div>
+
+            {# Tabla de Muestras #}
+            <div class="overflow-x-auto">
+                <table class="glass-table w-full">
+                    <thead>
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">{{ _('Código') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">{{ _('Producto') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">{{ _('Cliente') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">{{ _('Estado') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">{{ _('Fecha') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">{{ _('Acciones') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for muestra in area_data.muestras_list[:10] %}
+                        <tr class="hover:bg-glass-1 transition-colors">
+                            <td class="px-4 py-3 text-sm text-text-primary font-mono">{{ muestra.codigo }}</td>
+                            <td class="px-4 py-3 text-sm text-text-secondary">{{ muestra.producto }}</td>
+                            <td class="px-4 py-3 text-sm text-text-secondary">{{ muestra.cliente }}</td>
+                            <td class="px-4 py-3 text-sm">
+                                {% set status_colors = {'PENDIENTE': 'bg-warning-50 text-warning-500', 'EN_PROCESO': 'bg-primary-50 text-primary-400', 'COMPLETADO': 'bg-success-50 text-success-500'} %}
+                                {% set status_class = status_colors.get(muestra.estado, 'bg-glass-1 text-text-secondary') %}
+                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ status_class }}">
+                                    {{ _(muestra.estado) }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-sm text-text-secondary font-mono">{{ muestra.fecha.strftime('%d/%m/%Y') if muestra.fecha else '-' }}</td>
+                            <td class="px-4 py-3 text-sm">
+                                <a href="#" class="btn btn-ghost btn-sm">
+                                    <i class="fas fa-eye"></i> {{ _('Ver') }}
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="px-4 py-8 text-center text-text-muted">
+                                <i class="fas fa-flask text-4xl mb-3 opacity-50"></i>
+                                <p>{{ _('No hay muestras en esta área') }}</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% endcall %}
+    {% endcall %}
+</div>
+{% endblock %}

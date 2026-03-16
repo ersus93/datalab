@@ -1,0 +1,87 @@
+{# Componente de badge de estado reusable #}
+{# Uso: {% from 'components/status_badge.html' import status_badge %} #}
+{#        {{ status_badge('EN_PROCESO', size='md') }} #}
+
+{% macro status_badge(status, size='md', icon=true, tooltip=true) %}
+{#
+    Renderiza un badge de Bootstrap para estados de entrada.
+
+    Args:
+        status: String del estado (RECIBIDO, EN_PROCESO, COMPLETADO, ENTREGADO, ANULADO)
+        size: Tamaño del badge - 'sm', 'md', 'lg' (default: 'md')
+        icon: Mostrar icono prefix (default: true)
+        tooltip: Mostrar tooltip con descripción (default: true)
+
+    Returns:
+        HTML del badge con clases de Bootstrap 5
+#}
+
+{# Mapeo de estados a colores Bootstrap #}
+{% set status_colors = {
+    'RECIBIDO': 'secondary',
+    'EN_PROCESO': 'primary',
+    'COMPLETADO': 'success',
+    'ENTREGADO': 'info',
+    'ANULADO': 'danger'
+} %}
+
+{# Mapeo de estados a iconos Font Awesome #}
+{% set status_icons = {
+    'RECIBIDO': 'fa-inbox',
+    'EN_PROCESO': 'fa-spinner',
+    'COMPLETADO': 'fa-check-circle',
+    'ENTREGADO': 'fa-box-open',
+    'ANULADO': 'fa-ban'
+} %}
+
+{# Descripciones para tooltips #}
+{% set status_descriptions = {
+    'RECIBIDO': _('Muestra recibida en laboratorio'),
+    'EN_PROCESO': _('Muestra en análisis o procesamiento'),
+    'COMPLETADO': _('Análisis completado, pendiente de entrega'),
+    'ENTREGADO': _('Muestra entregada al cliente'),
+    'ANULADO': _('Entrada anulada o cancelada')
+} %}
+
+{# Labels por defecto (fallback) #}
+{% set default_labels = {
+    'RECIBIDO': _('Recibido'),
+    'EN_PROCESO': _('En Proceso'),
+    'COMPLETADO': _('Completado'),
+    'ENTREGADO': _('Entregado'),
+    'ANULADO': _('Anulado')
+} %}
+
+{# Obtener color (default: secondary) #}
+{% set badge_color = status_colors.get(status, 'secondary') %}
+
+{# Obtener label - intentar usar StatusWorkflow si está disponible, sino fallback #}
+{% if StatusWorkflow is defined %}
+    {% set badge_label = StatusWorkflow.STATUS_LABELS.get(status, status|replace('_', ' ')|title) %}
+{% else %}
+    {% set badge_label = default_labels.get(status, status|replace('_', ' ')|title) %}
+{% endif %}
+
+{# Obtener icono #}
+{% set badge_icon = status_icons.get(status, 'fa-circle') %}
+
+{# Obtener descripción para tooltip #}
+{% set badge_description = status_descriptions.get(status, status|replace('_', ' ')|title) %}
+
+{# Clases de tamaño #}
+{% if size == 'sm' %}
+    {% set size_class = 'badge-sm' %}
+{% elif size == 'lg' %}
+    {% set size_class = 'badge-lg' %}
+{% else %}
+    {% set size_class = '' %}
+{% endif %}
+
+{# Clase de animación pulse para EN_PROCESO #}
+{% set pulse_class = 'status-pulse' if status == 'EN_PROCESO' else '' %}
+
+<span class="badge bg-{{ badge_color }} {{ size_class }} {{ pulse_class }}"
+      {% if tooltip %}title="{{ badge_description }}" data-bs-toggle="tooltip"{% endif %}>
+    {% if icon %}<i class="fas {{ badge_icon }} me-1"></i>{% endif %}{{ badge_label }}
+</span>
+{% endmacro %}

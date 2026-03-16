@@ -1,0 +1,73 @@
+{% macro action_buttons(edit_url, delete_url, delete_confirm_message=None) %}
+<div class="flex space-x-2">
+    <a href="{{ edit_url }}" class="text-blue-600 hover:text-blue-800" title="{{ _('Editar') }}">
+        <i class="fas fa-edit"></i>
+    </a>
+    <form method="POST" action="{{ delete_url }}" class="inline" 
+          onsubmit="return confirm('{{ delete_confirm_message or _('¿Estás seguro de que deseas eliminar este elemento?') }}')">
+        <button type="submit" class="text-red-600 hover:text-red-800" title="{{ _('Eliminar') }}">
+            <i class="fas fa-trash-alt"></i>
+        </button>
+    </form>
+</div>
+{% endmacro %}
+
+{% macro sortable_header(field_name, label, current_sort, current_order) %}
+{% set new_order = 'desc' if current_sort == field_name and current_order == 'asc' else 'asc' %}
+<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" 
+    onclick="window.location.href='?sort={{ field_name }}&order={{ new_order }}'">
+    {{ label }}
+    {% if current_sort == field_name %}
+        <i class="fas fa-sort-{{ 'up' if current_order == 'asc' else 'down' }} ml-1"></i>
+    {% else %}
+        <i class="fas fa-sort ml-1 text-gray-300"></i>
+    {% endif %}
+</th>
+{% endmacro %}
+
+{% macro pagination(pagination_obj, endpoint) %}
+{% if pagination_obj.pages > 1 %}
+<div class="flex justify-between items-center mt-4">
+    <div class="text-sm text-gray-600">
+        {{ _('Mostrando') }} {{ (pagination_obj.page - 1) * pagination_obj.per_page + 1 }} - 
+        {{ [pagination_obj.page * pagination_obj.per_page, pagination_obj.total]|min }} {{ _('de') }} 
+        {{ pagination_obj.total }} {{ _('registros') }}
+    </div>
+    <div class="flex space-x-1">
+        {% if pagination_obj.has_prev %}
+            <a href="{{ url_for(endpoint, page=pagination_obj.prev_num, **kwargs) }}" 
+               class="px-3 py-1 border rounded hover:bg-gray-100">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        {% endif %}
+        
+        {% for page_num in pagination_obj.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if page_num %}
+                {% if page_num == pagination_obj.page %}
+                    <span class="px-3 py-1 border rounded bg-blue-600 text-white">{{ page_num }}</span>
+                {% else %}
+                    <a href="{{ url_for(endpoint, page=page_num, **kwargs) }}" 
+                       class="px-3 py-1 border rounded hover:bg-gray-100">{{ page_num }}</a>
+                {% endif %}
+            {% else %}
+                <span class="px-3 py-1">...</span>
+            {% endif %}
+        {% endfor %}
+        
+        {% if pagination_obj.has_next %}
+            <a href="{{ url_for(endpoint, page=pagination_obj.next_num, **kwargs) }}" 
+               class="px-3 py-1 border rounded hover:bg-gray-100">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endmacro %}
+
+{% macro empty_state(message=None, icon='inbox') %}
+<div class="text-center py-12">
+    <i class="fas fa-{{ icon }} text-6xl text-gray-300 mb-4"></i>
+    <p class="text-gray-500">{{ message or _('No hay registros para mostrar') }}</p>
+</div>
+{% endmacro %}

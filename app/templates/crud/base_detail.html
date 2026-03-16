@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% from 'macros/actions.html' import edit_button, delete_button, back_button %}
+{% from 'macros/flash_messages.html' import render_flash_messages %}
+
+{% block content %}
+{{ render_flash_messages() }}
+<div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center bg-light">
+        <h5 class="mb-0">{% block detail_title %}{% endblock %}</h5>
+        <div>{% block detail_actions %}{% endblock %}</div>
+    </div>
+    <div class="card-body">
+        <dl class="row mb-0">
+            {% block detail_fields %}{% endblock %}
+        </dl>
+    </div>
+    {% block detail_footer %}
+    <div class="card-footer bg-light">
+        {% block detail_back %}
+        <a href="{% block detail_back_url %}{{ url_for('dashboard.index') }}{% endblock %}" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+        {% endblock %}
+    </div>
+    {% endblock %}
+</div>
+{% endblock %}
+
+{# Macros para usar en las vistas que extienden este template #}
+
+{% macro detail_row(label, value, class='') %}
+<dt class="col-sm-3 text-muted {% if class %}{{ class }}{% endif %}">{{ label }}</dt>
+<dd class="col-sm-9 {% if class %}{{ class }}{% endif %}">
+    {% if caller %}
+        {{ caller() }}
+    {% else %}
+        {{ value or '—' }}
+    {% endif %}
+</dd>
+{% endmacro %}
+
+{% macro detail_row_html(label, html, class='') %}
+<dt class="col-sm-3 text-muted {% if class %}{{ class }}{% endif %}">{{ label }}</dt>
+<dd class="col-sm-9 {% if class %}{{ class }}{% endif %}">{{ html }}</dd>
+{% endmacro %}
+
+{% macro detail_row_badge(label, value, badge_class='bg-secondary') %}
+<dt class="col-sm-3 text-muted">{{ label }}</dt>
+<dd class="col-sm-9">
+    <span class="badge {{ badge_class }}">{{ value or '—' }}</span>
+</dd>
+{% endmacro %}
+
+{% macro detail_row_boolean(label, value, true_text='Sí', false_text='No') %}
+<dt class="col-sm-3 text-muted">{{ label }}</dt>
+<dd class="col-sm-9">
+    {% if value %}
+    <span class="badge bg-success">{{ true_text }}</span>
+    {% else %}
+    <span class="badge bg-danger">{{ false_text }}</span>
+    {% endif %}
+</dd>
+{% endmacro %}
+
+{% macro detail_row_actions(edit_url, delete_url, item_name, back_url) %}
+<dd class="col-sm-9">
+    <div class="btn-group" role="group">
+        {{ edit_button(edit_url, 'Editar') }}
+        {{ delete_button(delete_url, item_name, 'Eliminar') }}
+        {{ back_button(back_url, 'Volver') }}
+    </div>
+</dd>
+{% endmacro %}

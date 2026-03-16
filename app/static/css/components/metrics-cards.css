@@ -26,48 +26,56 @@
 
 /* Tarjeta métrica base */
 .metric-card {
-    background-color: var(--white);
-    padding: var(--spacing-4);
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-sm);
-    border: var(--border-width) solid var(--gray-200);
-    transition: var(--transition-all);
+    background: var(--glass-2);
+    backdrop-filter: var(--glass-blur-md);
+    -webkit-backdrop-filter: var(--glass-blur-md);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--glass-shadow-md);
+    padding: var(--spacing-5);
     position: relative;
     overflow: hidden;
     min-height: 120px;
+    transition: all var(--duration-200) var(--ease-spring);
 }
 
 .metric-card::before {
     content: '';
     position: absolute;
-    top: 0;
     left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--primary-500), var(--primary-600));
+    top: 15%;
+    bottom: 15%;
+    width: 3px;
+    background: var(--metric-accent, var(--primary-400));
+    border-radius: 0 2px 2px 0;
+    box-shadow: 0 0 12px var(--metric-accent, var(--primary-400));
 }
 
 .metric-card:hover {
-    box-shadow: var(--shadow-lg);
     transform: translateY(-4px);
-    border-color: var(--primary-200);
+    box-shadow: 0 0 30px rgba(56,189,248,0.15), var(--glass-shadow-lg);
+    border-color: var(--glass-border-strong);
 }
 
 /* Variantes de color para metric-card */
-.metric-card-primary::before {
-    background: linear-gradient(90deg, var(--primary-500), var(--primary-600));
+.metric-card-primary {
+    --metric-accent: #38bdf8;
+    border-color: rgba(56,189,248,0.20);
 }
 
-.metric-card-success::before {
-    background: linear-gradient(90deg, var(--success-500), var(--success-600));
+.metric-card-success {
+    --metric-accent: #34d399;
+    border-color: rgba(52,211,153,0.20);
 }
 
-.metric-card-warning::before {
-    background: linear-gradient(90deg, var(--warning-500), var(--warning-600));
+.metric-card-warning {
+    --metric-accent: #fbbf24;
+    border-color: rgba(251,191,36,0.20);
 }
 
-.metric-card-info::before {
-    background: linear-gradient(90deg, var(--info-500), var(--info-600));
+.metric-card-info {
+    --metric-accent: #22d3ee;
+    border-color: rgba(34,211,238,0.20);
 }
 
 /* Header de la métrica */
@@ -96,23 +104,23 @@
 
 /* Variantes de iconos por tipo */
 .metric-icon-users {
-    background-color: var(--primary-50);
-    color: var(--primary-600);
+    background: rgba(56,189,248,0.12);
+    color: #38bdf8;
 }
 
 .metric-icon-revenue {
-    background-color: var(--success-50);
-    color: var(--success-600);
+    background: rgba(52,211,153,0.12);
+    color: #34d399;
 }
 
 .metric-icon-sessions {
-    background-color: var(--warning-50);
-    color: var(--warning-600);
+    background: rgba(251,191,36,0.12);
+    color: #fbbf24;
 }
 
 .metric-icon-conversion {
-    background-color: var(--info-50);
-    color: var(--info-600);
+    background: rgba(34,211,238,0.12);
+    color: #22d3ee;
 }
 
 /* Información de la métrica */
@@ -124,13 +132,13 @@
 .metric-title {
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-medium);
-    color: var(--gray-700);
+    color: var(--text-muted);
     margin: 0 0 var(--spacing-1) 0;
 }
 
 .metric-description {
     font-size: var(--font-size-xs);
-    color: var(--gray-500);
+    color: var(--text-muted);
     margin: 0;
 }
 
@@ -145,8 +153,9 @@
 .metric-value {
     font-size: var(--font-size-2xl);
     font-weight: var(--font-weight-bold);
-    color: var(--gray-900);
+    color: var(--text-primary);
     line-height: var(--line-height-tight);
+    font-family: var(--font-family-mono);
 }
 
 /* Cambio/tendencia de la métrica */
@@ -162,18 +171,18 @@
 }
 
 .metric-change-positive {
-    color: var(--success-700);
-    background-color: var(--success-50);
+    color: var(--success-500);
+    background: var(--success-50);
 }
 
 .metric-change-negative {
-    color: var(--error-700);
-    background-color: var(--error-50);
+    color: var(--error-500);
+    background: var(--error-50);
 }
 
 .metric-change-neutral {
-    color: var(--gray-600);
-    background-color: var(--gray-50);
+    color: var(--text-muted);
+    background: var(--glass-1);
 }
 
 .metric-change-icon {
@@ -195,17 +204,17 @@
         grid-template-columns: 1fr;
         gap: var(--spacing-4);
     }
-    
+
     .metric-card {
         padding: var(--spacing-4);
     }
-    
+
     .metric-content {
         flex-direction: column;
         align-items: flex-start;
         gap: var(--spacing-2);
     }
-    
+
     .metric-value {
         font-size: var(--font-size-2xl);
     }
@@ -215,26 +224,26 @@
     .metrics-grid {
         gap: var(--spacing-3);
     }
-    
+
     .metric-card {
         padding: var(--spacing-3);
     }
-    
+
     .metric-header {
         gap: var(--spacing-2);
         margin-bottom: var(--spacing-3);
     }
-    
+
     .metric-icon {
         width: var(--spacing-8);
         height: var(--spacing-8);
     }
-    
+
     .metric-icon svg {
         width: var(--spacing-4);
         height: var(--spacing-4);
     }
-    
+
     .metric-value {
         font-size: var(--font-size-xl);
     }

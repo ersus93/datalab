@@ -1,0 +1,72 @@
+{# Macros de paginación para DataLab #}
+
+{% macro render_pagination(pagination, endpoint, **kwargs) %}
+{% if pagination.pages > 1 %}
+<nav aria-label="Paginación" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {# Previous #}
+        <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for(endpoint, page=pagination.prev_num if pagination.has_prev else 1, **kwargs) }}" tabindex="-1">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        </li>
+        
+        {# Page Numbers #}
+        {% for page_num in pagination.iter_pages(left_edge=2, left_current=2, right_current=3, right_edge=2) %}
+            {% if page_num %}
+                <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for(endpoint, page=page_num, **kwargs) }}">{{ page_num }}</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+            {% endif %}
+        {% endfor %}
+        
+        {# Next #}
+        <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for(endpoint, page=pagination.next_num if pagination.has_next else pagination.pages, **kwargs) }}">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </li>
+    </ul>
+</nav>
+{% endif %}
+{% endmacro %}
+
+{% macro render_pagination_simple(pagination, endpoint, **kwargs) %}
+{% if pagination.pages > 1 %}
+<nav aria-label="Paginación simple">
+    <ul class="pagination pagination-sm mb-0">
+        {% if pagination.has_prev %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for(endpoint, page=pagination.prev_num, **kwargs) }}">
+                <i class="fas fa-angle-left"></i>
+            </a>
+        </li>
+        {% endif %}
+        
+        <li class="page-item disabled">
+            <span class="page-link">{{ pagination.page }} / {{ pagination.pages }}</span>
+        </li>
+        
+        {% if pagination.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for(endpoint, page=pagination.next_num, **kwargs) }}">
+                <i class="fas fa-angle-right"></i>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endmacro %}
+
+{% macro pagination_info(pagination) %}
+{% if pagination %}
+<div class="text-muted small">
+    {{ _('Mostrando') }} {{ pagination.first }} - {{ pagination.last }} {{ _('de') }} {{ pagination.total }}
+</div>
+{% endif %}
+{% endmacro %}

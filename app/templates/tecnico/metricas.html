@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% from 'components/glass_card.html' import glass_card, glass_card_header, glass_card_body, glass_card_footer %}
+
+{% block title %}{{ _('Métricas del Técnico') }} - DataLab{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Breadcrumb -->
+    <nav class="mb-6" aria-label="breadcrumb">
+        <ol class="flex items-center space-x-2 text-sm text-text-muted">
+            <li><a href="{{ url_for('tecnico.dashboard') }}" class="hover:text-primary-400 transition-colors">{{ _('Panel del Técnico') }}</a></li>
+            <li><span class="mx-2 text-text-secondary">/</span></li>
+            <li class="text-text-primary" aria-current="page">{{ _('Métricas') }}</li>
+        </ol>
+    </nav>
+
+    <h1 class="text-3xl font-bold text-gradient mb-8">
+        <i class="fas fa-chart-bar mr-2 text-primary-400"></i>
+        {{ _('Métricas del Técnico') }}
+    </h1>
+
+    {# Stats Cards #}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {% call glass_card(variant='md', class='border-primary-500/30 bg-primary-50/20') %}
+        <h5 class="text-sm font-medium text-primary-400 mb-2">{{ _('Completados Hoy') }}</h5>
+        <h2 class="text-4xl font-bold text-text-primary font-mono">{{ stats.completados_hoy }}</h2>
+        {% endcall %}
+        
+        {% call glass_card(variant='md', class='border-success-500/30 bg-success-50/20') %}
+        <h5 class="text-sm font-medium text-success-500 mb-2">{{ _('Esta Semana') }}</h5>
+        <h2 class="text-4xl font-bold text-text-primary font-mono">{{ stats.completados_semana }}</h2>
+        {% endcall %}
+        
+        {% call glass_card(variant='md', class='border-info-500/30 bg-info-50/20') %}
+        <h5 class="text-sm font-medium text-info-500 mb-2">{{ _('Este Mes') }}</h5>
+        <h2 class="text-4xl font-bold text-text-primary font-mono">{{ stats.completados_mes }}</h2>
+        {% endcall %}
+        
+        {% call glass_card(variant='md', class='border-warning-500/30 bg-warning-50/20') %}
+        <h5 class="text-sm font-medium text-warning-500 mb-2">{{ _('Eficiencia') }}</h5>
+        <h2 class="text-4xl font-bold text-text-primary font-mono">{{ stats.eficiencia }}%</h2>
+        <small class="text-text-muted">{{ _('En menos de 48h') }}</small>
+        {% endcall %}
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {# Tests por Tipo - Gráfico #}
+        {% call glass_card(variant='lg') %}
+        {% call glass_card_header() %}
+        <h5 class="text-lg font-semibold text-text-primary">
+            <i class="fas fa-chart-pie mr-2 text-primary-400"></i>
+            {{ _('Tests Completados por Tipo') }}
+        </h5>
+        {% endcall %}
+        {% call glass_card_body() %}
+        <div id="tests-por-tipo-chart" style="height: 300px;"></div>
+        {% endcall %}
+        {% endcall %}
+
+        {# Evolución Temporal #}
+        {% call glass_card(variant='lg') %}
+        {% call glass_card_header() %}
+        <h5 class="text-lg font-semibold text-text-primary">
+            <i class="fas fa-chart-line mr-2 text-success-500"></i>
+            {{ _('Evolución Temporal') }}
+        </h5>
+        {% endcall %}
+        {% call glass_card_body() %}
+        <div id="evolucion-chart" style="height: 300px;"></div>
+        {% endcall %}
+        {% endcall %}
+    </div>
+
+    {# Rendimiento por Área #}
+    {% call glass_card(variant='lg') %}
+    {% call glass_card_header() %}
+    <h5 class="text-lg font-semibold text-text-primary">
+        <i class="fas fa-tachometer-alt mr-2 text-info-500"></i>
+        {{ _('Rendimiento por Área') }}
+    </h5>
+    {% endcall %}
+    {% call glass_card_body() %}
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {% for area, datos in rendimiento_por_area.items() %}
+        <div class="p-4 rounded-lg bg-glass-1 border border-glass-border hover:border-primary-500/30 transition-all">
+            <div class="flex items-center justify-between mb-2">
+                <h6 class="text-sm font-semibold text-text-primary">{{ area }}</h6>
+                <span class="text-xs text-text-muted">{{ datos.total }} {{ _('ensayos') }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="text-2xl font-bold text-primary-400">{{ datos.tiempo_promedio }}h</span>
+                <span class="text-xs {{ 'text-success-500' if datos.tiempo_promedio < 24 else 'text-warning-500' if datos.tiempo_promedio < 48 else 'text-error-500' }}">
+                    {{ _('promedio') }}
+                </span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endcall %}
+    {% endcall %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+// Tests por Tipo (Pie Chart)
+var testsTipoData = [{
+    values: {{ stats_por_tipo | map(attribute='count') | list | tojson }},
+    labels: {{ stats_por_tipo | map(attribute='nombre') | list | tojson }},
+    type: 'pie',
+    hole: 0.4,
+    marker: {
+        colors: ['#38bdf8', '#34d399', '#fbbf24', '#a78bfa', '#f87171']
+    }
+}];
+
+Plotly.newPlot('tests-por-tipo-chart', testsTipoData, {
+    showlegend: true,
+    legend: { orientation: 'h' },
+    margin: { t: 10, b: 10, l: 10, r: 10 },
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    font: { color: 'rgba(248, 250, 252, 0.92)' }
+}, {responsive: true});
+
+// Evolución Temporal (Line Chart)
+var evolucionData = [{
+    x: {{ evolucion | map(attribute='fecha') | list | tojson }},
+    y: {{ evolucion | map(attribute='cantidad') | list | tojson }},
+    type: 'scatter',
+    mode: 'lines+markers',
+    line: { shape: 'spline', color: '#38bdf8' },
+    marker: { size: 8, color: '#38bdf8' }
+}];
+
+Plotly.newPlot('evolucion-chart', evolucionData, {
+    xaxis: { 
+        gridcolor: 'rgba(255,255,255,0.1)',
+        color: 'rgba(148, 163, 184, 0.85)'
+    },
+    yaxis: { 
+        gridcolor: 'rgba(255,255,255,0.1)',
+        color: 'rgba(148, 163, 184, 0.85)',
+        title: '{{ _("Ensayos") }}'
+    },
+    margin: { t: 10, b: 40, l: 50, r: 10 },
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    font: { color: 'rgba(248, 250, 252, 0.92)' }
+}, {responsive: true});
+</script>
+{% endblock %}

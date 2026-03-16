@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Informe DataLab{% endblock %}</title>
+    <style>
+        {% include "styles.css" %}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <strong>LABORATORIO DATALAB</strong>
+                <br>
+                <small>Tucumán, Argentina</small>
+                <br>
+                <small>informes@datalab.com.ar</small>
+            </div>
+            <div class="certifications">
+                <small>CERT. ISO 9001</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+
+    <div class="footer">
+        <div class="disclaimer">
+            Este informe no debe ser reproducido parcialmente sin autorización escrita del laboratorio.
+            Los resultados se refieren exclusivamente a la muestra analizada.
+        </div>
+        <div class="page-number"></div>
+    </div>
+</body>
+</html>

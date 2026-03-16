@@ -31,13 +31,16 @@
 }
 
 .nav-link:hover {
-    background-color: var(--gray-100);
+    background: var(--glass-1);
+    border: 1px solid var(--glass-border-subtle);
     color: var(--text-primary);
 }
 
 .nav-link-active {
-    background-color: var(--primary-100);
-    color: var(--primary-600);
+    background: var(--primary-50);
+    color: var(--primary-400);
+    border: 1px solid rgba(56,189,248,0.22);
+    box-shadow: 0 0 12px rgba(56,189,248,0.08);
 }
 
 .nav-icon {
@@ -79,7 +82,7 @@
 
 .breadcrumb-item:not(:last-child)::after {
     content: '/';
-    color: var(--text-tertiary);
+    color: var(--glass-border-strong);
     font-weight: var(--font-weight-normal);
 }
 
@@ -90,7 +93,7 @@
 }
 
 .breadcrumb-link:hover {
-    color: var(--primary-600);
+    color: var(--primary-400);
 }
 
 .breadcrumb-current {
@@ -100,7 +103,7 @@
 
 /* Navegación de tabs */
 .nav-tabs {
-    border-bottom: var(--border-width) solid var(--gray-100);
+    border-bottom: 1px solid var(--glass-border-subtle);
 }
 
 .nav-tabs .nav-list {
@@ -114,14 +117,14 @@
 }
 
 .nav-tabs .nav-link:hover {
-    background-color: var(--gray-50);
-    border-bottom-color: var(--gray-100);
+    background: var(--glass-1);
+    border-bottom-color: var(--glass-border-subtle);
 }
 
 .nav-tabs .nav-link-active {
-    background-color: var(--background-primary);
-    border-bottom-color: var(--primary-600);
-    color: var(--primary-600);
+    background: transparent;
+    border-bottom-color: var(--primary-400);
+    color: var(--primary-400);
 }
 
 /* Navegación de pills */
@@ -130,8 +133,10 @@
 }
 
 .nav-pills .nav-link-active {
-    background-color: var(--primary-600);
-    color: var(--text-on-primary);
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 14px rgba(14,165,233,0.30);
 }
 
 /* Responsive */
@@ -139,12 +144,12 @@
     .nav {
         gap: var(--spacing-2);
     }
-    
+
     .nav-link {
         padding: var(--spacing-2);
         font-size: var(--font-size-xs);
     }
-    
+
     .breadcrumb {
         font-size: var(--font-size-xs);
         gap: var(--spacing-1);

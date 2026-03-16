@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ _('Centro de Notificaciones') }} - DataLab{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    {# Header #}
+    <div class="mb-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">{{ _('Centro de Notificaciones') }}</h1>
+                <p class="text-gray-600 mt-1">{{ _('Gestiona tus notificaciones y mantente al día') }}</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <a href="#" id="preferences-link" class="text-sm text-gray-600 hover:text-gray-800 flex items-center">
+                    <i class="fas fa-cog mr-1"></i>
+                    {{ _('Preferencias') }}
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {# Tabs #}
+    <div class="bg-white rounded-lg shadow mb-6">
+        <div class="border-b border-gray-200">
+            <nav class="flex -mb-px" aria-label="Tabs">
+                <button type="button"
+                        class="tab-btn w-1/3 py-4 px-1 text-center border-b-2 border-blue-500 text-blue-600 font-medium text-sm"
+                        data-tab="all"
+                        data-filter="all">
+                    {{ _('Todas') }}
+                    <span id="count-all" class="ml-2 bg-gray-100 text-gray-600 py-0.5 px-2 rounded-full text-xs">0</span>
+                </button>
+                <button type="button"
+                        class="tab-btn w-1/3 py-4 px-1 text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium text-sm"
+                        data-tab="unread"
+                        data-filter="unread">
+                    {{ _('No Leídas') }}
+                    <span id="count-unread" class="ml-2 bg-red-100 text-red-600 py-0.5 px-2 rounded-full text-xs">0</span>
+                </button>
+                <button type="button"
+                        class="tab-btn w-1/3 py-4 px-1 text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium text-sm"
+                        data-tab="read"
+                        data-filter="read">
+                    {{ _('Leídas') }}
+                    <span id="count-read" class="ml-2 bg-green-100 text-green-600 py-0.5 px-2 rounded-full text-xs">0</span>
+                </button>
+            </nav>
+        </div>
+
+        {# Toolbar con acciones masivas #}
+        <div class="p-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <input type="checkbox" 
+                       id="select-all" 
+                       class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                <label for="select-all" class="text-sm text-gray-600">{{ _('Seleccionar todo') }}</label>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button id="bulk-mark-read" 
+                        class="text-sm text-gray-600 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled>
+                    <i class="fas fa-check-double mr-1"></i>
+                    {{ _('Marcar como leídas') }}
+                </button>
+                <button id="bulk-delete" 
+                        class="text-sm text-gray-600 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled>
+                    <i class="fas fa-trash mr-1"></i>
+                    {{ _('Eliminar') }}
+                </button>
+            </div>
+        </div>
+
+        {# Lista de notificaciones #}
+        <div id="notifications-container" class="divide-y divide-gray-200 min-h-[300px]">
+            {# Estado de carga #}
+            <div id="center-loading" class="p-12 text-center">
+                <i class="fas fa-spinner fa-spin text-4xl text-gray-300"></i>
+                <p class="text-gray-500 mt-4">{{ _('Cargando notificaciones...') }}</p>
+            </div>
+
+            {# Estado vacío - Todas #}
+            <div id="empty-all" class="hidden p-12 text-center">
+                <div class="text-gray-300 mb-4">
+                    <i class="fas fa-bell-slash text-5xl"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-1">{{ _('No tienes notificaciones') }}</h3>
+                <p class="text-gray-500">{{ _('Las notificaciones aparecerán aquí cuando haya novedades') }}</p>
+            </div>
+
+            {# Estado vacío - No leídas #}
+            <div id="empty-unread" class="hidden p-12 text-center">
+                <div class="text-gray-300 mb-4">
+                    <i class="fas fa-check-circle text-5xl"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-1">{{ _('¡Estás al día!') }}</h3>
+                <p class="text-gray-500">{{ _('No tienes notificaciones sin leer') }}</p>
+            </div>
+
+            {# Estado vacío - Leídas #}
+            <div id="empty-read" class="hidden p-12 text-center">
+                <div class="text-gray-300 mb-4">
+                    <i class="fas fa-inbox text-5xl"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-1">{{ _('No hay notificaciones leídas') }}</h3>
+                <p class="text-gray-500">{{ _('Las notificaciones leídas aparecerán aquí') }}</p>
+            </div>
+
+            {# Contenedor para items #}
+            <div id="notification-list-items" class="hidden">
+                {# Los items se cargarán dinámicamente #}
+            </div>
+        </div>
+
+        {# Paginación #}
+        <div id="pagination-container" class="p-4 border-t border-gray-200 bg-gray-50 rounded-b-lg hidden">
+            <div class="flex items-center justify-between">
+                <div class="text-sm text-gray-600">
+                    {{ _('Mostrando') }} <span id="pagination-start">0</span> - <span id="pagination-end">0</span> {{ _('de') }} <span id="pagination-total">0</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button id="prev-page" class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <span id="pagination-info" class="text-sm text-gray-600">{{ _('Página') }} <span id="current-page">1</span> {{ _('de') }} <span id="total-pages">1</span></span>
+                    <button id="next-page" class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Plantilla para items de notificación (usada por JS) #}
+<template id="notification-item-template">
+    <div class="notification-item p-4 hover:bg-gray-50 transition-colors" data-notification-id="">
+        <div class="flex items-start space-x-3">
+            {# Checkbox #}
+            <div class="flex-shrink-0 pt-1">
+                <input type="checkbox" class="notification-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+            </div>
+            
+            {# Icono según tipo #}
+            <div class="notification-icon flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center">
+                <i class="fas"></i>
+            </div>
+            
+            {# Contenido #}
+            <div class="flex-grow min-w-0">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <p class="notification-title text-sm font-medium text-gray-900"></p>
+                        <p class="notification-message text-sm text-gray-600 mt-1 line-clamp-2"></p>
+                        <div class="flex items-center mt-2 space-x-3">
+                            <span class="notification-time text-xs text-gray-400"></span>
+                            <a href="#" class="notification-link text-xs text-blue-600 hover:text-blue-800 flex items-center">
+                                <i class="fas fa-external-link-alt mr-1"></i>
+                                {{ _('Ver detalles') }}
+                            </a>
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0 ml-4 flex items-center space-x-2">
+                        <span class="notification-unread-indicator w-2 h-2 bg-blue-500 rounded-full hidden"></span>
+                        <button class="notification-mark-read text-gray-400 hover:text-blue-600 focus:outline-none" title="{{ _('Marcar como leída') }}">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <button class="notification-mark-unread text-gray-400 hover:text-blue-600 focus:outline-none hidden" title="{{ _('Marcar como no leída') }}">
+                            <i class="fas fa-envelope"></i>
+                        </button>
+                        <button class="notification-delete text-gray-400 hover:text-red-600 focus:outline-none" title="{{ _('Eliminar') }}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
+<script>
+    // Inicializar el centro de notificaciones
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.NotificationCenter) {
+            window.NotificationCenter.init();
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,373 @@
+/* ============================================================
+   DATALAB — TailwindCSS Input File
+   Liquid Glass + Glassmorphism Design System
+   ============================================================ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   BASE STYLES
+   ============================================================ */
+
+@layer base {
+  /* Background gradient de página */
+  body {
+    @apply bg-bg-page;
+    background: var(--bg-gradient) fixed;
+    background-attachment: fixed;
+    min-height: 100dvh;
+    position: relative;
+  }
+
+  /* Background gradient (variable CSS) */
+  :root {
+    --bg-gradient: linear-gradient(
+      135deg,
+      #070c18 0%,
+      #0c1330 30%,
+      #10103a 60%,
+      #080e20 100%
+    );
+  }
+
+  /* Focus visible global */
+  :focus-visible {
+    @apply outline-2 outline-primary-500/70 outline-offset-2 rounded-sm;
+  }
+
+  /* Selection */
+  ::selection {
+    @apply bg-primary-500/30 text-text-primary;
+  }
+
+  /* Scrollbar glass (Webkit) */
+  ::-webkit-scrollbar {
+    @apply w-2 h-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-white/15 rounded;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-white/25;
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* ============================================================
+   COMPONENT STYLES (Liquid Glass)
+   ============================================================ */
+
+@layer components {
+  /* Glass Card Base */
+  .glass-card {
+    @apply bg-glass-2 backdrop-blur-md;
+    @apply border border-glass-border;
+    @apply rounded-xl shadow-glass-md;
+    @apply transition-all duration-200 ease-out;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Top highlight sheen */
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    top: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.18) 40%,
+      rgba(255, 255, 255, 0.22) 50%,
+      rgba(255, 255, 255, 0.18) 60%,
+      transparent 100%
+    );
+    pointer-events: none;
+    border-radius: inherit;
+    z-index: 1;
+  }
+
+  .glass-card:hover {
+    @apply bg-glass-hover border-glass-border-strong shadow-glass-glow;
+    transform: translateY(-3px);
+  }
+
+  /* Glass Button */
+  .btn {
+    @apply relative inline-flex items-center justify-center gap-2;
+    @apply px-4 py-2;
+    @apply rounded-lg;
+    @apply text-sm font-medium;
+    @apply transition-all duration-200 ease-out;
+    @apply cursor-pointer select-none;
+    @apply backdrop-blur-sm;
+  }
+
+  .btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.06) 0%,
+      transparent 55%
+    );
+    pointer-events: none;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 150ms ease;
+  }
+
+  .btn:hover:not(:disabled)::after {
+    opacity: 1;
+  }
+
+  .btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+  }
+
+  .btn:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
+  }
+
+  .btn:disabled {
+    @apply opacity-40 cursor-not-allowed;
+  }
+
+  /* Primary Button */
+  .btn-primary {
+    @apply bg-gradient-to-br from-primary-500 to-primary-600;
+    @apply text-white;
+    @apply border-transparent;
+    @apply shadow-[0_4px_16px_rgba(14,165,233,0.30),inset_0_1px_0_rgba(255,255,255,0.20)];
+    @apply font-semibold;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    @apply bg-gradient-to-br from-primary-400 to-primary-500;
+    @apply shadow-[0_6px_24px_rgba(56,189,248,0.40),inset_0_1px_0_rgba(255,255,255,0.25)];
+  }
+
+  /* Secondary Button */
+  .btn-secondary {
+    @apply bg-glass-2 text-text-primary;
+    @apply border border-glass-border;
+    @apply shadow-glass-sm;
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    @apply bg-glass-hover border-glass-border-strong shadow-glass-md;
+  }
+
+  /* Ghost Button */
+  .btn-ghost {
+    @apply bg-transparent text-text-secondary border-transparent;
+  }
+
+  .btn-ghost:hover:not(:disabled) {
+    @apply bg-glass-1 border-glass-border-subtle text-text-primary;
+  }
+
+  /* Glass Input */
+  .glass-input {
+    @apply bg-white/5 backdrop-blur-sm;
+    @apply border border-glass-border;
+    @apply rounded-lg;
+    @apply px-4 py-3;
+    @apply text-text-primary;
+    @apply transition-all duration-200 ease-out;
+  }
+
+  .glass-input::placeholder {
+    @apply text-text-muted;
+  }
+
+  .glass-input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(56, 189, 248, 0.50);
+    box-shadow:
+      0 0 0 3px rgba(56, 189, 248, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+
+  .glass-input:hover:not(:disabled) {
+    @apply border-glass-border-strong;
+  }
+
+  .glass-input:disabled {
+    background: rgba(255, 255, 255, 0.02);
+    @apply border-glass-border text-text-muted cursor-not-allowed;
+    opacity: 0.38;
+  }
+
+  /* Glass Input Error State */
+  .glass-input--error {
+    @apply border-error-500/50 bg-error-50;
+  }
+
+  .glass-input--error:focus {
+    box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.12);
+  }
+
+  /* Glass Table */
+  .glass-table {
+    @apply w-full border-collapse;
+  }
+
+  .glass-table thead tr {
+    @apply bg-glass-3 border-b border-glass-border-strong;
+  }
+
+  .glass-table thead th {
+    @apply px-6 py-4 text-left;
+    @apply font-semibold text-text-primary text-sm;
+    @apply tracking-wide;
+  }
+
+  .glass-table tbody tr {
+    @apply border-b border-glass-border-subtle;
+    @apply transition-colors duration-150;
+  }
+
+  .glass-table tbody tr:last-child {
+    @apply border-b-0;
+  }
+
+  .glass-table tbody tr:hover {
+    @apply bg-glass-1;
+  }
+
+  .glass-table tbody td {
+    @apply px-6 py-4;
+    @apply text-text-secondary text-sm;
+  }
+
+  /* Status Dot */
+  .status-dot {
+    @apply w-2 h-2 rounded-full inline-block flex-shrink-0;
+  }
+
+  .status-dot--active {
+    @apply bg-success-500;
+    box-shadow: 0 0 6px rgba(52, 211, 153, 1);
+  }
+
+  .status-dot--warning {
+    @apply bg-warning-500;
+    box-shadow: 0 0 6px rgba(251, 191, 36, 1);
+  }
+
+  .status-dot--error {
+    @apply bg-error-500;
+    box-shadow: 0 0 6px rgba(248, 113, 113, 1);
+  }
+
+  .status-dot--inactive {
+    @apply bg-gray-500/50;
+  }
+}
+
+/* ============================================================
+   UTILITY STYLES
+   ============================================================ */
+
+@layer utilities {
+  /* Glass variants */
+  .glass-sm {
+    @apply bg-glass-1 backdrop-blur-sm border-glass-border-subtle shadow-glass-sm rounded-lg;
+  }
+
+  .glass-md {
+    @apply bg-glass-2 backdrop-blur-md border-glass-border shadow-glass-md rounded-xl;
+  }
+
+  .glass-lg {
+    @apply bg-glass-3 backdrop-blur-lg border-glass-border-strong shadow-glass-lg rounded-2xl;
+  }
+
+  /* Glow effects */
+  .glow-primary {
+    box-shadow: 0 0 30px rgba(56, 189, 248, 0.18);
+  }
+
+  .glow-success {
+    box-shadow: 0 0 30px rgba(52, 211, 153, 0.18);
+  }
+
+  .glow-warning {
+    box-shadow: 0 0 30px rgba(251, 191, 36, 0.18);
+  }
+
+  .glow-error {
+    box-shadow: 0 0 30px rgba(248, 113, 113, 0.18);
+  }
+
+  /* Text gradient */
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #f8fafc 30%, #38bdf8 100%);
+  }
+
+  /* Background orbs */
+  .orb {
+    @apply fixed rounded-full pointer-events-none -z-10;
+    filter: blur(90px);
+  }
+
+  .orb--blue {
+    @apply orb;
+    @apply w-[700px] h-[700px] -top-[200px] -left-[100px];
+    @apply bg-orb-blue animate-orb-float;
+  }
+
+  .orb--violet {
+    @apply orb;
+    @apply w-[600px] h-[600px] -bottom-[100px] -right-[80px];
+    @apply bg-orb-violet animate-orb-float;
+    animation-direction: reverse;
+  }
+
+  /* Loading spinner */
+  .spinner {
+    @apply w-4 h-4 border-2 border-white/25 rounded-full;
+    border-top-color: white;
+    animation: spin 0.7s linear infinite;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* Skeleton loading */
+  .skeleton {
+    @apply bg-glass-2 animate-shimmer;
+    background-image: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.04) 0%,
+      rgba(255, 255, 255, 0.08) 50%,
+      rgba(255, 255, 255, 0.04) 100%
+    );
+    background-size: 1000px 100%;
+  }
+}

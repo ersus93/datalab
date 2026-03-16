@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% from 'components/glass_card.html' import glass_card, glass_card_body %}
+{% from 'components/glass_button.html' import glass_button %}
+
+{% block title %}403 — {{ _('Prohibido') }}{% endblock %}
+
+{% block content %}
+<div class="min-h-[60vh] flex items-center justify-center">
+    <div class="max-w-md w-full">
+        {% call glass_card(variant='lg') %}
+        {% call glass_card_body() %}
+        <div class="text-center py-8">
+            <!-- Icono 403 -->
+            <div class="mb-6">
+                <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-error-50/50 border-2 border-error-500/30 mb-4">
+                    <i class="fas fa-lock text-5xl text-error-500"></i>
+                </div>
+            </div>
+
+            <!-- Título -->
+            <h1 class="text-2xl font-bold text-text-primary mb-2">
+                <i class="fas fa-ban mr-2 text-error-500"></i>
+                {{ _('Acceso Denegado') }}
+            </h1>
+
+            <!-- Descripción -->
+            <p class="text-text-muted mb-6">
+                {{ message or 'No tienes permisos para acceder a esta página.' }}
+            </p>
+
+            <!-- Acciones -->
+            <div class="flex gap-3 justify-center">
+                {% call glass_button(variant='primary', icon='fas fa-home', href=url_for('dashboard.index')) %}
+                {{ _('Volver al Inicio') }}
+                {% endcall %}
+                <a href="javascript:history.back()" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left mr-1"></i> {{ _('Atrás') }}
+                </a>
+            </div>
+
+            <!-- Ayuda -->
+            <div class="mt-8 pt-6 border-t border-glass-border-subtle">
+                <p class="text-sm text-text-muted mb-3">{{ _('¿Problemas de acceso?') }}</p>
+                <div class="flex gap-4 justify-center text-sm">
+                    <a href="#" class="text-primary-400 hover:text-primary-300 transition-colors">
+                        <i class="fas fa-key mr-1"></i> {{ _('Solicitar Acceso') }}
+                    </a>
+                    <a href="#" class="text-primary-400 hover:text-primary-300 transition-colors">
+                        <i class="fas fa-question-circle mr-1"></i> {{ _('Ayuda') }}
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endcall %}
+        {% endcall %}
+    </div>
+</div>
+{% endblock %}

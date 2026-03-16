@@ -1,16 +1,21 @@
-/* Importación de estilos base */
-/* Base styles */
+/* ============================================================
+   DATALAB — Main Stylesheet
+   Liquid Glass Design System
+   ============================================================ */
+
+/* ─── BASE ─── */
 @import 'base/variables.css';
 @import 'base/reset.css';
+@import 'base/glass.css';
 @import 'base/typography.css';
 
-/* Importación de layouts */
+/* ─── LAYOUTS ─── */
 @import 'layouts/layout.css';
 @import 'layouts/header.css';
 @import 'layouts/footer.css';
 @import 'layouts/sidebar.css';
 
-/* Importación de componentes */
+/* ─── COMPONENTS ─── */
 @import 'components/buttons.css';
 @import 'components/forms.css';
 @import 'components/search-modal.css';
@@ -21,17 +26,16 @@
 @import 'components/modals.css';
 @import 'components/metrics-cards.css';
 
-/* Importar estilos responsivos */
+/* ─── RESPONSIVE ─── */
 @import 'base/responsive.css';
 
-/* Importación de utilidades */
+/* ─── UTILITIES ─── */
 @import 'utilities/spacing.css';
 @import 'utilities/animations.css';
 @import 'utilities/colors.css';
 @import 'utilities/helpers.css';
 
-
-/* Importación de páginas específicas */
+/* ─── PAGES ─── */
 @import 'pages/base.css';
 @import 'pages/dashboard.css';
 @import 'pages/pedidos.css';

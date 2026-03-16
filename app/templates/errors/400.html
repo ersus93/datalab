@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% from 'components/glass_card.html' import glass_card, glass_card_body %}
+{% from 'components/glass_button.html' import glass_button %}
+
+{% block title %}400 — {{ _('Solicitud Incorrecta') }}{% endblock %}
+
+{% block content %}
+<div class="min-h-[60vh] flex items-center justify-center">
+    <div class="max-w-md w-full">
+        {% call glass_card(variant='lg') %}
+        {% call glass_card_body() %}
+        <div class="text-center py-8">
+            <!-- Icono 400 -->
+            <div class="mb-6">
+                <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-warning-50/50 border-2 border-warning-500/30 mb-4">
+                    <i class="fas fa-exclamation-circle text-5xl text-warning-500"></i>
+                </div>
+            </div>
+
+            <!-- Título -->
+            <h1 class="text-2xl font-bold text-text-primary mb-2">
+                <i class="fas fa-triangle-exclamation mr-2 text-warning-500"></i>
+                {{ _('Solicitud Incorrecta') }}
+            </h1>
+
+            <!-- Descripción -->
+            <p class="text-text-muted mb-6">
+                {{ message or 'La solicitud no pudo ser procesada debido a un error en los datos.' }}
+            </p>
+
+            <!-- Acciones -->
+            <div class="flex gap-3 justify-center">
+                {% call glass_button(variant='primary', icon='fas fa-arrow-left', href="javascript:history.back()") %}
+                {{ _('Volver Atrás') }}
+                {% endcall %}
+                <a href="{{ url_for('dashboard.index') }}" class="btn btn-secondary">
+                    <i class="fas fa-home mr-1"></i> {{ _('Inicio') }}
+                </a>
+            </div>
+        </div>
+        {% endcall %}
+        {% endcall %}
+    </div>
+</div>
+{% endblock %}

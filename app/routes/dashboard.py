@@ -1,122 +1,156 @@
-#!/usr/bin/env python3
-"""Rutas del dashboard de DataLab."""
+"""Rutas para dashboard principal."""
+from datetime import datetime, timedelta, date
 
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template
+from flask_login import login_required
 
-# Crear blueprint
+from app import db
+from app.database.models import Cliente, Fabrica, Producto, Provincia, Rama
+from app.database.models.entrada import Entrada, EntradaStatus
+from app.services.dashboard_service import DashboardService
+
 dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 
+
 @dashboard_bp.route('/')
-@dashboard_bp.route('/index')
+@login_required
 def index():
-    """Página principal del dashboard."""
-    # Datos de ejemplo para el dashboard
-    dashboard_data = {
-        'total_users': 1234,
-        'active_sessions': 89,
-        'total_reports': 456,
-        'system_health': 'good',
-        'metrics': {
-            'total_clients': {
-                'value': '1,247',
-                'change': '+12.5%',
-                'period': 'vs mes anterior'
-            },
-            'total_orders': {
-                'value': '3,456',
-                'change': '+8.2%',
-                'period': 'vs mes anterior'
-            },
-            'total_tests': {
-                'value': '892',
-                'change': '+15.3%',
-                'period': 'vs mes anterior'
-            },
-            'work_orders': {
-                'value': '156',
-                'change': '-2.1%',
-                'period': 'vs semana anterior'
-            }
-        },
-        'recent_activities': [
-            {
-                'type': 'user_registered',
-                'description': 'Nuevo usuario registrado: María González',
-                'time': 'Hace 5 minutos',
-                'icon': 'user-plus'
-            },
-            {
-                'type': 'report_generated',
-                'description': 'Reporte mensual de ventas completado',
-                'time': 'Hace 1 hora',
-                'icon': 'file-text'
-            },
-            {
-                'type': 'task_completed',
-                'description': 'Backup automático de base de datos completado',
-                'time': 'Hace 2 horas',
-                'icon': 'clock'
-            },
-            {
-                'type': 'system_update',
-                'description': 'Sistema actualizado a la versión 2.1.4',
-                'time': 'Hace 4 horas',
-                'icon': 'check-circle'
-            }
-        ],
-        'countries_stats': [
-            {'name': 'España', 'flag': '🇪🇸', 'percentage': 45.2},
-            {'name': 'México', 'flag': '🇲🇽', 'percentage': 23.1},
-            {'name': 'Argentina', 'flag': '🇦🇷', 'percentage': 18.7},
-            {'name': 'Colombia', 'flag': '🇨🇴', 'percentage': 13.0}
-        ]
-    }
-    
-    return render_template('pages/dashboard/dashboard.html', **dashboard_data)
+    """Dashboard principal con resumen de datos maestros."""
 
-@dashboard_bp.route('/api/stats')
-def api_stats():
-    """API endpoint para obtener estadísticas del dashboard."""
+    # Estadísticas principales
     stats = {
-        'users': {
-            'total': 1234,
-            'active': 89,
-            'new_today': 12
-        },
-        'reports': {
-            'total': 456,
-            'generated_today': 8,
-            'pending': 3
-        },
-        'system': {
-            'health': 'good',
-            'uptime': '99.9%',
-            'last_backup': '2 horas'
-        }
+        'total_clientes': Cliente.query.filter_by(activo=True).count(),
+        'total_fabricas': Fabrica.query.filter_by(activo=True).count(),
+        'total_productos': Producto.query.filter_by(activo=True).count(),
+        'total_provincias': Provincia.query.count(),
     }
-    
-    return jsonify(stats)
 
-@dashboard_bp.route('/api/activities')
-def api_activities():
-    """API endpoint para obtener actividades recientes."""
-    activities = [
-        {
-            'id': 1,
-            'type': 'user_registered',
-            'title': 'Nuevo usuario registrado',
-            'description': 'María González se ha registrado en la plataforma',
-            'time': 'Hace 5 minutos',
-            'icon': 'user-plus'
-        },
-        {
-            'id': 2,
-            'type': 'report_generated',
-            'title': 'Reporte generado',
-            'description': 'Reporte mensual de ventas completado',
-            'time': 'Hace 1 hora',
-            'icon': 'file-text'
+    # Distribución por provincia (para gráfico)
+    provincia_data = db.session.query(
+        Provincia.nombre,
+        Provincia.sigla,
+        db.func.count(Fabrica.id).label('count')
+    ).outerjoin(Fabrica).group_by(Provincia.id).all()
+
+    # Top 10 clientes por cantidad de fábricas
+    top_clientes = db.session.query(
+        Cliente.id,
+        Cliente.nombre,
+        db.func.count(Fabrica.id).label('factory_count')
+    ).join(Fabrica).group_by(Cliente.id).order_by(
+        db.desc('factory_count')
+    ).limit(10).all()
+
+    # Distribución por sector (rama)
+    sector_data = db.session.query(
+        Rama.nombre,
+        db.func.count(Producto.id).label('count')
+    ).outerjoin(Producto).group_by(Rama.id).all()
+
+    # Últimos registros agregados
+    latest_clientes = Cliente.query.order_by(
+        Cliente.fecha_creacion.desc()
+    ).limit(5).all()
+
+    latest_fabricas = Fabrica.query.order_by(
+        Fabrica.creado_en.desc()
+    ).limit(5).all()
+
+    latest_productos = Producto.query.order_by(
+        Producto.creado_en.desc()
+    ).limit(5).all()
+
+    # --- Widgets de Entradas (Phase 3) ---
+    today = date.today()
+    entrada_stats = {
+        'hoy': Entrada.query.filter(
+            db.func.date(Entrada.fech_entrada) == today,
+            Entrada.anulado == False,
+        ).count(),
+        'en_proceso': Entrada.query.filter_by(
+            status=EntradaStatus.EN_PROCESO, anulado=False
+        ).count(),
+        'pendiente_entrega': Entrada.query.filter_by(
+            status=EntradaStatus.COMPLETADO, anulado=False
+        ).count(),
+        'anuladas': Entrada.query.filter_by(anulado=True).count(),
+    }
+    recientes = (
+        Entrada.query
+        .filter_by(anulado=False)
+        .order_by(Entrada.fech_entrada.desc())
+        .limit(5)
+        .all()
+    )
+
+    # Obtener datos del DashboardService para widgets de Phase 3
+    try:
+        dashboard_data = DashboardService.get_full_dashboard_data()
+    except Exception as e:
+        # Fallback si el servicio falla
+        import logging
+        logging.getLogger(__name__).error(f"Error loading dashboard data: {e}")
+        dashboard_data = {
+            'status_counts': {},
+            'status_trends': [],
+            'recent_activity': [],
+            'pending_deliveries': []
         }
-    ]
-    
-    return jsonify(activities)
+
+    # Objeto metrics que espera el template dashboard.html
+    from app.database.models.pedido import Pedido
+    from app.database.models import OrdenTrabajo
+    from app.database.models.detalle_ensayo import DetalleEnsayo
+
+    try:
+        total_pedidos = Pedido.query.count()
+    except Exception:
+        total_pedidos = 0
+    try:
+        total_ensayos = DetalleEnsayo.query.count()
+    except Exception:
+        total_ensayos = 0
+    try:
+        total_ordenes = OrdenTrabajo.query.count()
+    except Exception:
+        total_ordenes = 0
+
+    metrics = {
+        'total_clients': {
+            'value': str(stats['total_clientes']),
+            'change': '+0%',
+            'period': 'registrados',
+        },
+        'total_orders': {
+            'value': str(total_pedidos),
+            'change': '+0%',
+            'period': 'registrados',
+        },
+        'total_tests': {
+            'value': str(total_ensayos),
+            'change': '+0%',
+            'period': 'completados',
+        },
+        'work_orders': {
+            'value': str(total_ordenes),
+            'change': '+0%',
+            'period': 'activas',
+        },
+    }
+
+    return render_template('pages/dashboard/dashboard.html',
+                           stats=stats,
+                           metrics=metrics,
+                           provincia_data=provincia_data,
+                           top_clientes=top_clientes,
+                           sector_data=sector_data,
+                           latest_clientes=latest_clientes,
+                           latest_fabricas=latest_fabricas,
+                           latest_productos=latest_productos,
+                           entrada_stats=entrada_stats,
+                           entradas_recientes=recientes,
+                           # Datos del DashboardService para widgets
+                           status_counts=dashboard_data['status_counts'],
+                           trends=dashboard_data['status_trends'],
+                           recent_activity=dashboard_data['recent_activity'],
+                           pending_deliveries=dashboard_data['pending_deliveries'])

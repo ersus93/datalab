@@ -1,0 +1,35 @@
+{# Macros de breadcrumb para DataLab #}
+
+{% macro render_breadcrumb(items, home_url=None) %}
+{% if home_url is none %}
+{% set home_url = url_for('dashboard.index') %}
+{% endif %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{{ home_url }}"><i class="fas fa-home"></i></a>
+        </li>
+        {% for item in items %}
+            {% if loop.last %}
+                <li class="breadcrumb-item active" aria-current="page">{{ item.title }}</li>
+            {% else %}
+                <li class="breadcrumb-item">
+                    {% if item.url %}
+                    <a href="{{ item.url }}">{{ item.title }}</a>
+                    {% else %}
+                    {{ item.title }}
+                    {% endif %}
+                </li>
+            {% endif %}
+        {% endfor %}
+    </ol>
+</nav>
+{% endmacro %}
+
+{% macro breadcrumb_item(title, url=none) %}
+{% if url %}
+<li class="breadcrumb-item"><a href="{{ url }}">{{ title }}</a></li>
+{% else %}
+<li class="breadcrumb-item active">{{ title }}</li>
+{% endif %}
+{% endmacro %}

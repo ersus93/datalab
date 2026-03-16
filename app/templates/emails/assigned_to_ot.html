@@ -1,0 +1,90 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Muestra Asignada a OT - {{ sample_code }}{% endblock %}
+
+{% block content %}
+<table role="presentation" style="width: 100%; border-collapse: collapse;">
+    <tr>
+        <td>
+            <h2 style="margin: 0 0 20px 0; font-size: 22px; font-weight: 600; color: #1e293b;">Muestra Asignada a Orden de Trabajo</h2>
+
+            <p style="margin: 0 0 20px 0; font-size: 16px; color: #334155; line-height: 1.6;">
+                Hola <strong style="color: #1e293b;">{{ user_name }}</strong>,
+            </p>
+
+            <p style="margin: 0 0 25px 0; font-size: 15px; color: #475569; line-height: 1.6;">
+                Le informamos que una muestra ha sido asignada a una orden de trabajo en el sistema.
+            </p>
+
+            <!-- Assignment Details Box -->
+            <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 25px 0; background-color: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <tr>
+                    <td style="padding: 25px;">
+                        <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                            <!-- Sample Code -->
+                            <tr>
+                                <td style="padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
+                                    <span style="font-size: 13px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Codigo de Muestra</span>
+                                </td>
+                                <td style="padding: 8px 0; border-bottom: 1px solid #e2e8f0; text-align: right;">
+                                    <span style="font-size: 16px; font-weight: 600; color: #1e293b; font-family: 'Courier New', monospace;">{{ sample_code }}</span>
+                                </td>
+                            </tr>
+                            <!-- Product -->
+                            <tr>
+                                <td style="padding: 12px 0 8px 0;">
+                                    <span style="font-size: 13px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Producto</span>
+                                </td>
+                                <td style="padding: 12px 0 8px 0; text-align: right;">
+                                    <span style="font-size: 15px; color: #334155;">{{ producto }}</span>
+                                </td>
+                            </tr>
+                            <!-- Factory -->
+                            <tr>
+                                <td style="padding: 8px 0;">
+                                    <span style="font-size: 13px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Fabrica</span>
+                                </td>
+                                <td style="padding: 8px 0; text-align: right;">
+                                    <span style="font-size: 15px; color: #334155;">{{ fabrica }}</span>
+                                </td>
+                            </tr>
+                            <!-- OT Info -->
+                            <tr>
+                                <td style="padding: 12px 0 0 0; border-top: 1px solid #e2e8f0;">
+                                    <span style="font-size: 13px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Orden de Trabajo</span>
+                                </td>
+                                <td style="padding: 12px 0 0 0; border-top: 1px solid #e2e8f0; text-align: right;">
+                                    <span style="display: inline-block; padding: 6px 14px; background-color: #dcfce7; color: #166534; font-size: 14px; font-weight: 600; border-radius: 20px;">{{ ot_info }}</span>
+                                </td>
+                            </tr>
+                            <!-- Assignment Date -->
+                            <tr>
+                                <td style="padding: 12px 0 0 0; border-top: 1px solid #e2e8f0;">
+                                    <span style="font-size: 13px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Fecha de Asignacion</span>
+                                </td>
+                                <td style="padding: 12px 0 0 0; border-top: 1px solid #e2e8f0; text-align: right;">
+                                    <span style="font-size: 14px; color: #334155;">{{ assignment_date }}</span>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Action Button -->
+            <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 30px 0;">
+                <tr>
+                    <td style="text-align: center;">
+                        <a href="{{ sample_url }}" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 600; border-radius: 6px; box-shadow: 0 2px 4px rgba(22, 163, 74, 0.3);">Ver Detalles de la Muestra</a>
+                    </td>
+                </tr>
+            </table>
+
+            <p style="margin: 20px 0 0 0; font-size: 13px; color: #94a3b8; text-align: center;">
+                Si el boton no funciona, copie y pegue este enlace:<br>
+                <a href="{{ sample_url }}" style="color: #2563eb; text-decoration: underline; word-break: break-all;">{{ sample_url }}</a>
+            </p>
+        </td>
+    </tr>
+</table>
+{% endblock %}

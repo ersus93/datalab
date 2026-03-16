@@ -1,0 +1,26 @@
+<!-- Template para mostrar timeline de estados -->
+{% macro status_timeline(history) %}
+<div class="status-timeline">
+    {% for change in history %}
+    <div class="timeline-item">
+        <div class="timeline-marker bg-{{ status_colors[change.to_status] }}"></div>
+        <div class="timeline-content">
+            <p class="mb-1">
+                <strong>{{ status_labels[change.from_status] }}</strong>
+                <i class="fas fa-arrow-right mx-2"></i>
+                <strong>{{ status_labels[change.to_status] }}</strong>
+            </p>
+            <p class="text-muted small mb-1">
+                {{ _('Por:') }} {{ change.changed_by.nombre_completo }}
+                · {{ change.changed_at | timeago }}
+            </p>
+            {% if change.reason %}
+            <p class="text-muted small fst-italic">
+                "{{ change.reason }}"
+            </p>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endmacro %}

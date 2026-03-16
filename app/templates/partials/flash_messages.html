@@ -1,0 +1,48 @@
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="fixed top-20 right-4 z-50 space-y-2 max-w-sm" aria-live="polite">
+    {% for category, message in messages %}
+    {% set alert_styles = {
+        'success': 'bg-success-50/90 border-success-500/30 text-success-500',
+        'error': 'bg-error-50/90 border-error-500/30 text-error-500',
+        'warning': 'bg-warning-50/90 border-warning-500/30 text-warning-500',
+        'info': 'bg-info-50/90 border-info-500/30 text-info-500'
+    } %}
+    {% set icons = {
+        'success': 'fa-check-circle',
+        'error': 'fa-exclamation-circle',
+        'warning': 'fa-exclamation-triangle',
+        'info': 'fa-info-circle'
+    } %}
+    {% set style = alert_styles.get(category, 'bg-glass-1 border-glass-border text-text-primary') %}
+    {% set icon = icons.get(category, 'fa-info-circle') %}
+    
+    <div class="glass-card {{ style }} backdrop-blur-xl animate-slide-in-right" role="alert">
+        <div class="flex items-start gap-3 p-4">
+            <i class="fas {{ icon }} text-lg mt-0.5" aria-hidden="true"></i>
+            <div class="flex-1 text-sm">{{ message }}</div>
+            <button onclick="this.closest('.glass-card').remove()" class="btn btn-ghost btn-sm p-1" aria-label="Cerrar">
+                <i class="fas fa-times text-sm" aria-hidden="true"></i>
+            </button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+@keyframes slide-in-right {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+.animate-slide-in-right {
+    animation: slide-in-right 0.3s ease-out;
+}
+</style>
+{% endif %}
+{% endwith %}

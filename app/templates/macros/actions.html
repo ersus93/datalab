@@ -1,0 +1,100 @@
+{# Macros de acciones para DataLab #}
+
+{% macro view_button(url, title='Ver', size='sm') %}
+<a href="{{ url }}" class="btn btn-outline-primary btn-{{ size }}" title="{{ title }}">
+    <i class="fas fa-eye"></i>
+</a>
+{% endmacro %}
+
+{% macro edit_button(url, title='Editar', size='sm') %}
+<a href="{{ url }}" class="btn btn-outline-warning btn-{{ size }}" title="{{ title }}">
+    <i class="fas fa-edit"></i>
+</a>
+{% endmacro %}
+
+{% macro delete_button(url, item_name, title='Eliminar', size='sm') %}
+<form action="{{ url }}" method="POST" class="d-inline">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit" class="btn btn-outline-danger btn-{{ size }}" 
+            title="{{ title }}" onclick="return confirm('¿Eliminar {{ item_name }}?')">
+        <i class="fas fa-trash"></i>
+    </button>
+</form>
+{% endmacro %}
+
+{% macro create_button(url, text='Nuevo', size='sm') %}
+<a href="{{ url }}" class="btn btn-primary btn-{{ size }}">
+    <i class="fas fa-plus"></i> {{ text }}
+</a>
+{% endmacro %}
+
+{% macro back_button(url, text='Volver', size='sm') %}
+<a href="{{ url }}" class="btn btn-outline-secondary btn-{{ size }}">
+    <i class="fas fa-arrow-left"></i> {{ text }}
+</a>
+{% endmacro %}
+
+{% macro save_button(text='Guardar', size='sm') %}
+<button type="submit" class="btn btn-primary btn-{{ size }}">
+    <i class="fas fa-save"></i> {{ text }}
+</button>
+{% endmacro %}
+
+{% macro cancel_button(url, text='Cancelar', size='sm') %}
+<a href="{{ url }}" class="btn btn-outline-secondary btn-{{ size }}">
+    <i class="fas fa-times"></i> {{ text }}
+</a>
+{% endmacro %}
+
+{% macro action_dropdown(actions, divider_after=[]) %}
+<div class="dropdown">
+    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+            type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fas fa-cog"></i>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end">
+        {% for action in actions %}
+            {% if action.divider %}
+            <li><hr class="dropdown-divider"></li>
+            {% elif action.url %}
+            <li>
+                {% if action.confirm %}
+                <form action="{{ action.url }}" method="POST" class="d-inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="dropdown-item text-{{ action.color or 'dark' }}"
+                            onclick="return confirm('{{ action.confirm }}')">
+                        <i class="fas fa-{{ action.icon }}"></i> {{ action.label }}
+                    </button>
+                </form>
+                {% else %}
+                <a class="dropdown-item text-{{ action.color or 'dark' }}" href="{{ action.url }}">
+                    <i class="fas fa-{{ action.icon }}"></i> {{ action.label }}
+                </a>
+                {% endif %}
+            </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</div>
+{% endmacro %}
+
+{% macro button_group(buttons, vertical=false) %}
+<div class="btn-group{% if vertical %} btn-group-vertical{% endif %}" role="group">
+    {% for btn in buttons %}
+        {% if btn.type == 'link' %}
+            <a href="{{ btn.url }}" class="btn btn-{{ btn.color or 'outline-secondary' }} btn-{{ btn.size or 'sm' }}">
+                <i class="fas fa-{{ btn.icon }}"></i> {{ btn.text }}
+            </a>
+        {% elif btn.type == 'submit' %}
+            <button type="submit" class="btn btn-{{ btn.color or 'primary' }} btn-{{ btn.size or 'sm' }}">
+                <i class="fas fa-{{ btn.icon }}"></i> {{ btn.text }}
+            </button>
+        {% elif btn.type == 'button' %}
+            <button type="button" class="btn btn-{{ btn.color or 'outline-secondary' }} btn-{{ btn.size or 'sm' }}"
+                    onclick="{{ btn.onclick }}">
+                <i class="fas fa-{{ btn.icon }}"></i> {{ btn.text }}
+            </button>
+        {% endif %}
+    {% endfor %}
+</div>
+{% endmacro %}

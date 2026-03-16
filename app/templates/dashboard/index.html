@@ -1,0 +1,319 @@
+{% extends 'base.html' %}
+{% from 'components/glass_card.html' import glass_card, glass_card_header, glass_card_body, glass_card_footer %}
+{% from 'components/glass_button.html' import glass_button, glass_button_icon %}
+
+{% block title %}{{ _('Dashboard') }} - DataLab{% endblock %}
+
+{% block content %}
+<!-- Header del Dashboard -->
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-white mb-2">
+        {{ _('Dashboard de Datos Maestros') }}
+    </h1>
+    <p class="text-slate-300">
+        {{ _('Resumen de clientes, fábricas y productos') }}
+    </p>
+</div>
+
+<!-- Stats Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Clientes Card -->
+    <a href="{{ url_for('clientes.listar') }}" class="block group">
+        <div class="glass-card p-6 group-hover:shadow-glass-glow group-hover:-translate-y-1 transition-all duration-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-slate-300 mb-1">{{ _('Clientes') }}</p>
+                    <p class="text-3xl font-bold text-white font-mono">{{ stats.total_clientes }}</p>
+                </div>
+                <div class="w-14 h-14 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="fas fa-users text-sky-400 text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </a>
+
+    <!-- Fábricas Card -->
+    <a href="{{ url_for('fabricas.listar') }}" class="block group">
+        <div class="glass-card p-6 group-hover:shadow-glass-glow group-hover:-translate-y-1 transition-all duration-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-slate-300 mb-1">{{ _('Fábricas') }}</p>
+                    <p class="text-3xl font-bold text-white font-mono">{{ stats.total_fabricas }}</p>
+                    {% if stats.total_clientes > 0 %}
+                    <p class="text-xs text-slate-400 mt-1">
+                        ~{{ (stats.total_fabricas / stats.total_clientes)|round(1) }} {{ _('por cliente') }}
+                    </p>
+                    {% endif %}
+                </div>
+                <div class="w-14 h-14 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="fas fa-industry text-emerald-500 text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </a>
+
+    <!-- Productos Card -->
+    <a href="{{ url_for('productos.listar') }}" class="block group">
+        <div class="glass-card p-6 group-hover:shadow-glass-glow group-hover:-translate-y-1 transition-all duration-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-slate-300 mb-1">{{ _('Productos') }}</p>
+                    <p class="text-3xl font-bold text-white font-mono">{{ stats.total_productos }}</p>
+                </div>
+                <div class="w-14 h-14 rounded-xl bg-violet-500/10 border border-violet-500/30 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="fas fa-box text-violet-400 text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </a>
+
+    <!-- Provincias Card -->
+    <div>
+        <div class="glass-card p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-slate-300 mb-1">{{ _('Provincias') }}</p>
+                    <p class="text-3xl font-bold text-white font-mono">{{ stats.total_provincias }}</p>
+                    <p class="text-xs text-slate-400 mt-1">{{ _('Cobertura total') }}</p>
+                </div>
+                <div class="w-14 h-14 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center">
+                    <i class="fas fa-map-marker-alt text-amber-500 text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Botones de Acción Rápida -->
+<div class="flex flex-wrap gap-3 mb-8">
+    {% call glass_button(variant='primary', icon='fas fa-user-plus') %}
+    {{ _('Nuevo Cliente') }}
+    {% endcall %}
+
+    {% call glass_button(variant='success', icon='fas fa-industry') %}
+    {{ _('Nueva Fábrica') }}
+    {% endcall %}
+
+    {% call glass_button(variant='secondary', icon='fas fa-box') %}
+    {{ _('Nuevo Producto') }}
+    {% endcall %}
+</div>
+
+<!-- Gráficos -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- Distribución por Provincia -->
+    <div class="glass-card">
+        <div class="border-b border-white/10 p-6">
+            <h3 class="text-lg font-semibold text-white flex items-center">
+                <i class="fas fa-chart-pie mr-2 text-sky-400"></i>
+                {{ _('Distribución por Provincia') }}
+            </h3>
+        </div>
+        <div class="p-6">
+            <div id="provincia-chart" style="height: 300px;"></div>
+        </div>
+    </div>
+
+    <!-- Top Clientes -->
+    <div class="glass-card">
+        <div class="border-b border-white/10 p-6">
+            <h3 class="text-lg font-semibold text-white flex items-center">
+                <i class="fas fa-chart-bar mr-2 text-emerald-500"></i>
+                {{ _('Top 10 Clientes por Fábricas') }}
+            </h3>
+        </div>
+        <div class="p-6">
+            <div id="clientes-chart" style="height: 300px;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Segunda fila de gráficos -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- Distribución por Sector -->
+    <div class="glass-card">
+        <div class="border-b border-white/10 p-6">
+            <h3 class="text-lg font-semibold text-white flex items-center">
+                <i class="fas fa-chart-column mr-2 text-violet-400"></i>
+                {{ _('Distribución por Sector') }}
+            </h3>
+        </div>
+        <div class="p-6">
+            <div id="sector-chart" style="height: 300px;"></div>
+        </div>
+    </div>
+
+    <!-- Últimos Registros -->
+    <div class="glass-card">
+        <div class="border-b border-white/10 p-6 flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-white flex items-center">
+                <i class="fas fa-clock mr-2 text-sky-400"></i>
+                {{ _('Registros Recientes') }}
+            </h3>
+            <a href="#" class="text-sm text-sky-400 hover:text-sky-300 transition-colors">
+                {{ _('Ver todos') }} →
+            </a>
+        </div>
+        <div class="p-6">
+            <div class="space-y-2">
+                {% for cliente in latest_clientes %}
+                <div class="flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-sky-500/10 border border-sky-500/30 flex items-center justify-center">
+                            <i class="fas fa-user text-sky-400 text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-white group-hover:text-sky-400 transition-colors">
+                                {{ cliente.nombre[:35] }}{% if cliente.nombre|length > 35 %}...{% endif %}
+                            </p>
+                            <p class="text-xs text-slate-400">{{ _('Cliente') }}</p>
+                        </div>
+                    </div>
+                    <span class="text-xs text-slate-400">{{ cliente.fecha_creacion | timeago }}</span>
+                </div>
+                {% endfor %}
+                {% for fabrica in latest_fabricas %}
+                <div class="flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
+                            <i class="fas fa-industry text-emerald-500 text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-white group-hover:text-emerald-500 transition-colors">
+                                {{ fabrica.nombre[:35] }}{% if fabrica.nombre|length > 35 %}...{% endif %}
+                            </p>
+                            <p class="text-xs text-slate-400">{{ _('Fábrica') }}</p>
+                        </div>
+                    </div>
+                    <span class="text-xs text-slate-400">{{ fabrica.creado_en | timeago }}</span>
+                </div>
+                {% endfor %}
+                {% for producto in latest_productos %}
+                <div class="flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-violet-500/10 border border-violet-500/30 flex items-center justify-center">
+                            <i class="fas fa-box text-violet-400 text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-white group-hover:text-violet-400 transition-colors">
+                                {{ producto.nombre[:35] }}{% if producto.nombre|length > 35 %}...{% endif %}
+                            </p>
+                            <p class="text-xs text-slate-400">{{ _('Producto') }}</p>
+                        </div>
+                    </div>
+                    <span class="text-xs text-slate-400">{{ producto.creado_en | timeago }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+// Configuración común para todos los gráficos - TEXTO BLANCO PURO
+const commonLayout = {
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    font: { 
+        color: '#FFFFFF',  // BLANCO PURO - máximo contraste
+        family: 'Plus Jakarta Sans',
+        size: 12
+    },
+    margin: { t: 10, b: 40, l: 50, r: 10 },
+    showlegend: true,
+    legend: { 
+        orientation: 'h',
+        font: { color: '#FFFFFF', size: 11 }
+    }
+};
+
+// Gráfico de Provincias (Pie Chart)
+var provinciaData = [{
+    values: {{ provincia_data | map(attribute='count') | list | tojson }},
+    labels: {{ provincia_data | map(attribute='nombre') | list | tojson }},
+    type: 'pie',
+    hole: 0.4,
+    marker: {
+        colors: ['#34d399', '#38bdf8', '#fbbf24', '#a78bfa', '#f87171', '#22d3ee', '#fb923c', '#f472b6'],
+        line: { color: 'rgba(255,255,255,0.2)', width: 2 }
+    },
+    textinfo: 'label+percent',
+    textposition: 'outside',
+    textfont: { color: '#FFFFFF', size: 11 },
+    hoverinfo: 'label+value+percent'
+}];
+
+Plotly.newPlot('provincia-chart', provinciaData, {
+    ...commonLayout,
+    margin: { t: 10, b: 10, l: 10, r: 10 }
+}, {responsive: true, displayModeBar: false});
+
+// Gráfico de Top Clientes (Bar Chart Horizontal)
+var clientesData = [{
+    y: {{ top_clientes | map(attribute='nombre') | list | tojson }},
+    x: {{ top_clientes | map(attribute='factory_count') | list | tojson }},
+    type: 'bar',
+    orientation: 'h',
+    marker: { 
+        color: '#38bdf8',
+        line: { color: 'rgba(255,255,255,0.3)', width: 1 }
+    },
+    hoverinfo: 'x+y',
+    textfont: { color: '#FFFFFF' }
+}];
+
+Plotly.newPlot('clientes-chart', clientesData, {
+    ...commonLayout,
+    xaxis: {
+        title: 'Número de Fábricas',
+        gridcolor: 'rgba(255,255,255,0.1)',
+        linecolor: 'rgba(255,255,255,0.2)',
+        color: '#FFFFFF',
+        tickfont: { color: '#FFFFFF' }
+    },
+    yaxis: {
+        automargin: true,
+        gridcolor: 'rgba(255,255,255,0.1)',
+        linecolor: 'rgba(255,255,255,0.2)',
+        color: '#FFFFFF',
+        tickfont: { color: '#FFFFFF' }
+    },
+    margin: { t: 10, b: 40, l: 180, r: 10 }
+}, {responsive: true, displayModeBar: false});
+
+// Gráfico de Sectores (Bar Chart Vertical)
+var sectorData = [{
+    x: {{ sector_data | map(attribute='nombre') | list | tojson }},
+    y: {{ sector_data | map(attribute='count') | list | tojson }},
+    type: 'bar',
+    marker: { 
+        color: '#a78bfa',
+        line: { color: 'rgba(255,255,255,0.3)', width: 1 }
+    },
+    hoverinfo: 'x+y',
+    textfont: { color: '#FFFFFF' }
+}];
+
+Plotly.newPlot('sector-chart', sectorData, {
+    ...commonLayout,
+    xaxis: {
+        tickangle: -45,
+        gridcolor: 'rgba(255,255,255,0.1)',
+        linecolor: 'rgba(255,255,255,0.2)',
+        color: '#FFFFFF',
+        tickfont: { color: '#FFFFFF' }
+    },
+    yaxis: {
+        title: 'Productos',
+        gridcolor: 'rgba(255,255,255,0.1)',
+        linecolor: 'rgba(255,255,255,0.2)',
+        color: '#FFFFFF',
+        tickfont: { color: '#FFFFFF' }
+    },
+    margin: { t: 10, b: 100, l: 50, r: 10 }
+}, {responsive: true, displayModeBar: false});
+</script>
+{% endblock %}

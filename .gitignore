@@ -69,6 +69,7 @@ Thumbs.db
 
 # Migrations (optional - uncomment if you want to exclude)
 # migrations/
+data/migrations/
 
 # Testing
 .coverage
@@ -83,3 +84,18 @@ coverage.xml
 
 # Documentation
 docs/_build/
+
+# Worktrees for isolated development
+.worktrees/
+worktrees/
+
+# Access database files and sensitive data
+utiles/
+.opencode/
+
+# Tailwind CSS
+tailwindcss.exe              # TailwindCSS CLI Standalone
+app/static/css/output.css    # TailwindCSS compiled output
+
+.qwen/
+gha-creds-*.json

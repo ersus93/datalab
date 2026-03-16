@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% from 'components/glass_card.html' import glass_card, glass_card_header, glass_card_body, glass_card_footer %}
+{% from 'components/glass_button.html' import glass_button, glass_button_icon %}
+
+{% block title %}{{ _('Iniciar Sesión') }} - DataLab{% endblock %}
+
+{% block content %}
+<div class="min-h-[80vh] flex items-center justify-center py-8">
+    <div class="max-w-md w-full">
+        {% call glass_card(variant='lg') %}
+        
+        <!-- Logo y título -->
+        <div class="text-center mb-8">
+            <div class="mx-auto h-20 w-20 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center mb-4 shadow-glass-md">
+                <i class="fas fa-flask text-4xl text-white"></i>
+            </div>
+            <h2 class="text-3xl font-extrabold text-gradient">
+                DataLab
+            </h2>
+            <p class="mt-2 text-sm text-text-muted">
+                {{ _('Sistema de Gestión para Laboratorio') }}
+            </p>
+        </div>
+
+        <!-- Formulario de login -->
+        <form class="space-y-6" method="POST" action="{{ url_for('auth.login') }}">
+            {{ form.hidden_tag() }}
+
+            <div class="space-y-6">
+                <!-- Campo Usuario -->
+                <div>
+                    <label for="username" class="block text-sm font-medium text-text-secondary mb-2">
+                        <i class="fas fa-user mr-2 text-primary-400"></i>
+                        {{ _('Usuario') }}
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-user text-text-muted"></i>
+                        </div>
+                        {{ form.username(class="glass-input w-full pl-10" + (" glass-input--error" if form.username.errors else ""), placeholder=_("Nombre de usuario"), id="username", autocomplete="username") }}
+                    </div>
+                    {% if form.username.errors %}
+                        <p class="mt-2 text-sm text-error-500 flex items-center gap-1">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {% for error in form.username.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </p>
+                    {% endif %}
+                </div>
+
+                <!-- Campo Contraseña -->
+                <div>
+                    <label for="password" class="block text-sm font-medium text-text-secondary mb-2">
+                        <i class="fas fa-lock mr-2 text-primary-400"></i>
+                        {{ _('Contraseña') }}
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-lock text-text-muted"></i>
+                        </div>
+                        {{ form.password(class="glass-input w-full pl-10" + (" glass-input--error" if form.password.errors else ""), placeholder=_("Contraseña"), id="password", autocomplete="current-password") }}
+                    </div>
+                    {% if form.password.errors %}
+                        <p class="mt-2 text-sm text-error-500 flex items-center gap-1">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {% for error in form.password.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recordarme -->
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    {{ form.remember_me(class="w-4 h-4 rounded border-glass-border text-primary-500 focus:ring-primary-500 focus:ring-offset-0 bg-glass-1 cursor-pointer", id="remember_me") }}
+                    <label for="remember_me" class="ml-2 block text-sm text-text-secondary cursor-pointer">
+                        {{ _('Recordarme') }}
+                    </label>
+                </div>
+                <a href="#" class="text-sm text-primary-400 hover:text-primary-300 transition-colors">
+                    {{ _('¿Olvidaste tu contraseña?') }}
+                </a>
+            </div>
+
+            <!-- Botón submit -->
+            {% call glass_card_footer() %}
+            <div class="space-y-4">
+                {% call glass_button(variant='primary', icon='fas fa-sign-in-alt', type='submit', class='w-full justify-center') %}
+                {{ _('Iniciar Sesión') }}
+                {% endcall %}
+                
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-glass-border-subtle"></div>
+                    </div>
+                    <div class="relative flex justify-center text-xs uppercase">
+                        <span class="px-2 bg-glass-2 text-text-muted">{{ _('¿Problemas para ingresar?') }}</span>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <a href="#" class="text-center text-xs text-text-muted hover:text-text-primary transition-colors">
+                        <i class="fas fa-life-ring mr-1"></i>
+                        {{ _('Soporte') }}
+                    </a>
+                    <a href="#" class="text-center text-xs text-text-muted hover:text-text-primary transition-colors">
+                        <i class="fas fa-book mr-1"></i>
+                        {{ _('Ayuda') }}
+                    </a>
+                </div>
+            </div>
+            {% endcall %}
+        </form>
+
+        {% endcall %}
+        
+        <!-- Footer info -->
+        <p class="mt-6 text-center text-xs text-text-muted">
+            {{ _('© 2026 DataLab - ONIE. Todos los derechos reservados.') }}
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-focus en el campo de usuario
+    document.addEventListener('DOMContentLoaded', function() {
+        const usernameField = document.getElementById('username');
+        if (usernameField && !usernameField.value) {
+            usernameField.focus();
+        }
+    });
+</script>
+{% endblock %}

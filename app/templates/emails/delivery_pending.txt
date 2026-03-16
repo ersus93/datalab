@@ -1,0 +1,31 @@
+DataLab - Alerta de Saldo Bajo - Accion Requerida
+==================================================
+
+*** ALERTA URGENTE ***
+
+Hola {{ user_name }},
+
+Una muestra completada tiene saldo remanente pendiente de entrega.
+Se requiere atencion para programar la entrega al cliente.
+
+DETALLES DE LA ALERTA
+---------------------
+Codigo de Muestra: {{ sample_code }}
+Saldo Remanente:   {{ saldo }}
+Dias en Espera:    {{ days_pending }} dias
+
+NOTA IMPORTANTE
+---------------
+La muestra ha estado completada por {{ days_pending }} dias.
+Por favor coordine la entrega del saldo remanente lo antes posible.
+
+ACCION REQUERIDA
+----------------
+Para gestionar la entrega, visite:
+{{ sample_url }}
+
+---
+Este es un correo automatico del sistema DataLab.
+Por favor no responda a este mensaje.
+
+DataLab - Sistema de Gestion de Laboratorio

@@ -1,0 +1,169 @@
+{# Widget de Conteo por Estado - Muestra tarjetas para cada estado con conteo y porcentaje #}
+{# Uso: {% from 'components/dashboard/status_count_widget.html' import status_count_widget %}
+        {{ status_count_widget(status_counts) }} #}
+
+{% macro status_count_widget(status_counts) %}
+<div class="status-count-widget">
+    <div class="row g-3">
+        {# Recibido - Gris #}
+        <div class="col">
+            <div class="card status-card status-recibido h-100" data-status="RECIBIDO" onclick="filterByStatus('RECIBIDO')">
+                <div class="card-body d-flex align-items-center p-3">
+                    <div class="status-icon-wrapper bg-secondary bg-opacity-10 text-secondary rounded-circle me-3">
+                        <i class="fas fa-inbox"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="card-title text-muted mb-1 text-uppercase small">Recibido</h6>
+                        <h3 class="mb-0 fw-bold status-count" data-status="RECIBIDO">{{ status_counts.RECIBIDO|default(0) }}</h3>
+                        <small class="text-muted status-percent" data-status="RECIBIDO">0%</small>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0 pt-0 pb-3 px-3">
+                    <div class="progress" style="height: 4px;">
+                        <div class="progress-bar bg-secondary" data-status="RECIBIDO" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# En Proceso - Azul #}
+        <div class="col">
+            <div class="card status-card status-en-proceso h-100" data-status="EN_PROCESO" onclick="filterByStatus('EN_PROCESO')">
+                <div class="card-body d-flex align-items-center p-3">
+                    <div class="status-icon-wrapper bg-primary bg-opacity-10 text-primary rounded-circle me-3">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="card-title text-muted mb-1 text-uppercase small">En Proceso</h6>
+                        <h3 class="mb-0 fw-bold status-count" data-status="EN_PROCESO">{{ status_counts.EN_PROCESO|default(0) }}</h3>
+                        <small class="text-muted status-percent" data-status="EN_PROCESO">0%</small>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0 pt-0 pb-3 px-3">
+                    <div class="progress" style="height: 4px;">
+                        <div class="progress-bar bg-primary" data-status="EN_PROCESO" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Completado - Verde #}
+        <div class="col">
+            <div class="card status-card status-completado h-100" data-status="COMPLETADO" onclick="filterByStatus('COMPLETADO')">
+                <div class="card-body d-flex align-items-center p-3">
+                    <div class="status-icon-wrapper bg-success bg-opacity-10 text-success rounded-circle me-3">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="card-title text-muted mb-1 text-uppercase small">Completado</h6>
+                        <h3 class="mb-0 fw-bold status-count" data-status="COMPLETADO">{{ status_counts.COMPLETADO|default(0) }}</h3>
+                        <small class="text-muted status-percent" data-status="COMPLETADO">0%</small>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0 pt-0 pb-3 px-3">
+                    <div class="progress" style="height: 4px;">
+                        <div class="progress-bar bg-success" data-status="COMPLETADO" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Entregado - Cyan #}
+        <div class="col">
+            <div class="card status-card status-entregado h-100" data-status="ENTREGADO" onclick="filterByStatus('ENTREGADO')">
+                <div class="card-body d-flex align-items-center p-3">
+                    <div class="status-icon-wrapper bg-info bg-opacity-10 text-info rounded-circle me-3">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="card-title text-muted mb-1 text-uppercase small">Entregado</h6>
+                        <h3 class="mb-0 fw-bold status-count" data-status="ENTREGADO">{{ status_counts.ENTREGADO|default(0) }}</h3>
+                        <small class="text-muted status-percent" data-status="ENTREGADO">0%</small>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0 pt-0 pb-3 px-3">
+                    <div class="progress" style="height: 4px;">
+                        <div class="progress-bar bg-info" data-status="ENTREGADO" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Anulado - Rojo #}
+        <div class="col">
+            <div class="card status-card status-anulado h-100" data-status="ANULADO" onclick="filterByStatus('ANULADO')">
+                <div class="card-body d-flex align-items-center p-3">
+                    <div class="status-icon-wrapper bg-danger bg-opacity-10 text-danger rounded-circle me-3">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="card-title text-muted mb-1 text-uppercase small">Anulado</h6>
+                        <h3 class="mb-0 fw-bold status-count" data-status="ANULADO">{{ status_counts.ANULADO|default(0) }}</h3>
+                        <small class="text-muted status-percent" data-status="ANULADO">0%</small>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0 pt-0 pb-3 px-3">
+                    <div class="progress" style="height: 4px;">
+                        <div class="progress-bar bg-danger" data-status="ANULADO" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.status-count-widget .status-card {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(0,0,0,0.08);
+}
+
+.status-count-widget .status-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.status-count-widget .status-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.status-count-widget .card-title {
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+}
+
+.status-count-widget .status-count {
+    font-size: 1.75rem;
+    line-height: 1.2;
+}
+
+.status-count-widget .progress {
+    background-color: rgba(0,0,0,0.05);
+}
+
+@media (max-width: 1200px) {
+    .status-count-widget .row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .status-count-widget .row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .status-count-widget .row {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endmacro %}

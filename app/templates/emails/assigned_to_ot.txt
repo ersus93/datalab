@@ -1,0 +1,25 @@
+DataLab - Muestra Asignada a Orden de Trabajo
+==============================================
+
+Hola {{ user_name }},
+
+Le informamos que una muestra ha sido asignada a una orden de trabajo en el sistema.
+
+DETALLES DE LA ASIGNACION
+-------------------------
+Codigo de Muestra: {{ sample_code }}
+Producto:          {{ producto }}
+Fabrica:           {{ fabrica }}
+Orden de Trabajo:  {{ ot_info }}
+Fecha de Asignacion: {{ assignment_date }}
+
+ACCION REQUERIDA
+----------------
+Para ver los detalles completos de la muestra, visite:
+{{ sample_url }}
+
+---
+Este es un correo automatico del sistema DataLab.
+Por favor no responda a este mensaje.
+
+DataLab - Sistema de Gestion de Laboratorio

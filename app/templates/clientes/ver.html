@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ cliente.nombre }} - {{ _('Cliente') }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="flex justify-between items-start mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">{{ cliente.nombre }}</h1>
+            <p class="text-gray-600 mt-1">
+                {{ _('Código') }}: {{ cliente.codigo or '-' }}
+            </p>
+        </div>
+        <div class="flex space-x-2">
+            <a href="{{ url_for('clientes.editar', id=cliente.id) }}" 
+               class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                <i class="fas fa-edit mr-1"></i>
+                {{ _('Editar') }}
+            </a>
+            <form method="POST" action="{{ url_for('clientes.desactivar', id=cliente.id) }}" class="inline"
+                  onsubmit="return confirm('{{ _('¿Estás seguro de que deseas desactivar este cliente?') }}')">
+                <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                    <i class="fas fa-ban mr-1"></i>
+                    {{ _('Desactivar') }}
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Estado -->
+    <div class="mb-6">
+        {% if cliente.activo %}
+        <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+            {{ _('Activo') }}
+        </span>
+        {% else %}
+        <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+            {{ _('Inactivo') }}
+        </span>
+        {% endif %}
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                    <i class="fas fa-industry text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">{{ _('Total Fábricas') }}</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ stats.total_fabricas }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-green-100 text-green-600">
+                    <i class="fas fa-check-circle text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">{{ _('Fábricas Activas') }}</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ stats.fabricas_activas }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información General -->
+    <div class="bg-white rounded-lg shadow mb-6">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">{{ _('Información General') }}</h2>
+        </div>
+        <div class="px-6 py-4">
+            <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <dt class="text-sm font-medium text-gray-600">{{ _('Organismo') }}</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ cliente.organismo.nombre if cliente.organismo else '-' }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-600">{{ _('Tipo de Cliente') }}</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ _('Tipo') }} {{ cliente.tipo_cliente }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-600">{{ _('Email') }}</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ cliente.email or '-' }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-600">{{ _('Teléfono') }}</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ cliente.telefono or '-' }}</dd>
+                </div>
+                <div class="md:col-span-2">
+                    <dt class="text-sm font-medium text-gray-600">{{ _('Dirección') }}</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ cliente.direccion or '-' }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-600">{{ _('Fecha de Creación') }}</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ cliente.fecha_creacion.strftime('%d/%m/%Y') if cliente.fecha_creacion else '-' }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-600">{{ _('Última Actualización') }}</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ cliente.fecha_actualizacion.strftime('%d/%m/%Y') if cliente.fecha_actualizacion else '-' }}</dd>
+                </div>
+            </dl>
+        </div>
+    </div>
+
+    <!-- Fábricas -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <h2 class="text-lg font-semibold text-gray-900">{{ _('Fábricas') }}</h2>
+            <span class="text-sm text-gray-600">{{ stats.total_fabricas }} {{ _('registros') }}</span>
+        </div>
+        <div class="px-6 py-4">
+            {% if cliente.fabricas %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ _('Nombre') }}</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ _('Provincia') }}</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ _('Estado') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        {% for fabrica in cliente.fabricas %}
+                        <tr>
+                            <td class="px-4 py-2 text-sm text-gray-900">{{ fabrica.nombre }}</td>
+                            <td class="px-4 py-2 text-sm text-gray-900">{{ fabrica.provincia.nombre if fabrica.provincia else '-' }}</td>
+                            <td class="px-4 py-2">
+                                {% if fabrica.activo %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    {{ _('Activo') }}
+                                </span>
+                                {% else %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                    {{ _('Inactivo') }}
+                                </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-gray-500 text-center py-4">{{ _('No hay fábricas registradas') }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Historial de Auditoría -->
+    <div class="bg-white rounded-lg shadow mt-6">
+        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <h2 class="text-lg font-semibold text-gray-900">{{ _('Historial de Auditoria') }}</h2>
+            <a href="{{ url_for('clientes.exportar_audit', id=cliente.id) }}" class="px-3 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 text-sm">
+                <i class="fas fa-download mr-1"></i>
+                {{ _('Exportar CSV') }}
+            </a>
+        </div>
+        <div class="px-6 py-4">
+            {% if audit_entries %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ _('Fecha') }}</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ _('Usuario') }}</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ _('Accion') }}</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ _('IP') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        {% for entry in audit_entries %}
+                        <tr>
+                            <td class="px-4 py-2 text-sm text-gray-900">{{ entry.created_at.strftime('%d/%m/%Y %H:%M') if entry.created_at else '-' }}</td>
+                            <td class="px-4 py-2 text-sm text-gray-900">{{ entry.user.username if entry.user else '-' }}</td>
+                            <td class="px-4 py-2">
+                                {% if entry.action == 'CREATE' %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    {{ _('Creado') }}
+                                </span>
+                                {% elif entry.action == 'UPDATE' %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                    {{ _('Actualizado') }}
+                                </span>
+                                {% elif entry.action == 'DELETE' %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                    {{ _('Eliminado') }}
+                                </span>
+                                {% else %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                    {{ entry.action }}
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-2 text-sm text-gray-500">{{ entry.ip_address or '-' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-gray-500 text-center py-4">{{ _('No hay registros de auditoria') }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Back button -->
+    <div class="mt-6">
+        <a href="{{ url_for('clientes.listar') }}" class="text-blue-600 hover:text-blue-800">
+            <i class="fas fa-arrow-left mr-1"></i>
+            {{ _('Volver al listado') }}
+        </a>
+    </div>
+</div>
+{% endblock %}

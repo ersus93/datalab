@@ -1,0 +1,60 @@
+/* ============================================================
+   BACKGROUND ORBS - Liquid Glass
+   Orbes animados de fondo para profundidad visual
+   ============================================================ */
+
+@layer components {
+  /* Orb base */
+  .orb {
+    @apply fixed rounded-full pointer-events-none -z-10;
+    filter: blur(90px);
+  }
+
+  /* Orb Azul (esquina superior izquierda) */
+  .orb--blue {
+    @apply orb;
+    @apply w-[700px] h-[700px] -top-[200px] -left-[100px];
+    background: radial-gradient(
+      circle,
+      rgba(56, 189, 248, 0.22) 0%,
+      transparent 65%
+    );
+    animation: orb-float 12s ease-in-out infinite;
+  }
+
+  /* Orb Violet (esquina inferior derecha) */
+  .orb--violet {
+    @apply orb;
+    @apply w-[600px] h-[600px] -bottom-[100px] -right-[80px];
+    background: radial-gradient(
+      circle,
+      rgba(139, 92, 246, 0.20) 0%,
+      transparent 65%
+    );
+    animation: orb-float 15s ease-in-out infinite reverse;
+  }
+
+  /* Orb Success (decorativo, centro-derecha) */
+  .orb--success {
+    @apply orb;
+    @apply w-[500px] h-[500px] top-1/2 right-0;
+    background: radial-gradient(
+      circle,
+      rgba(52, 211, 153, 0.15) 0%,
+      transparent 65%
+    );
+    animation: orb-float 18s ease-in-out infinite;
+  }
+}
+
+@keyframes orb-float {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 30px) scale(0.9);
+  }
+}

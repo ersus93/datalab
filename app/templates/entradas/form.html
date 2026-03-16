@@ -1,0 +1,61 @@
+{% extends 'crud/base_form.html' %}
+{% from 'macros/forms.html' import render_field, render_select, render_textarea %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block form_title %}{{ titulo }}{% endblock %}
+
+{% block cancel_url %}{{ url_for('entradas.listar') }}{% endblock %}
+
+{% block form_fields %}
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <!-- Columna 1: Identificación -->
+    <div>
+        <h3 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">{{ _('Identificación') }}</h3>
+        {{ render_field(form.codigo) }}
+        {{ render_field(form.lote) }}
+        {{ render_field(form.nro_parte) }}
+    </div>
+    
+    <!-- Columna 2: Relaciones -->
+    <div>
+        <h3 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">{{ _('Relaciones') }}</h3>
+        {{ render_select(form.cliente_id) }}
+        {{ render_select(form.fabrica_id) }}
+        {{ render_select(form.producto_id) }}
+        {{ render_select(form.rama_id) }}
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+    <!-- Cantidades -->
+    <div>
+        <h3 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">{{ _('Cantidades') }}</h3>
+        {{ render_field(form.cantidad_recib) }}
+        {{ render_field(form.cantidad_muest) }}
+        {{ render_select(form.unidad_medida_id) }}
+    </div>
+    
+    <!-- Fechas -->
+    <div>
+        <h3 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">{{ _('Fechas') }}</h3>
+        {{ render_field(form.fech_fab) }}
+        {{ render_field(form.fech_venc) }}
+        {{ render_field(form.fech_muestreo) }}
+    </div>
+</div>
+
+<div class="mt-6">
+    <h3 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">{{ _('Observaciones') }}</h3>
+    {{ render_textarea(form.observaciones) }}
+</div>
+
+<div class="mt-4 p-4 bg-blue-50 rounded text-sm text-blue-700">
+    <p><i class="fas fa-info-circle mr-1"></i> <strong>{{ _('Nota') }}:</strong></p>
+    <ul class="list-disc list-inside mt-1 ml-2">
+        <li>{{ _('El formato de lote debe ser X-XXXX (ej: A-1234)') }}</li>
+        <li>{{ _('La fecha de vencimiento debe ser posterior a la de fabricación') }}</li>
+        <li>{{ _('La cantidad recibida debe ser mayor a 0') }}</li>
+    </ul>
+</div>
+{% endblock %}

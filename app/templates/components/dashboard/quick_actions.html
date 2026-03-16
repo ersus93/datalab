@@ -1,0 +1,85 @@
+{# Widget de Acciones Rápidas - Botones para acciones comunes del dashboard #}
+{# Uso: {% from 'components/dashboard/quick_actions.html' import quick_actions %}
+        {{ quick_actions() }} #}
+
+{% macro quick_actions() %}
+<div class="quick-actions-widget card">
+    <div class="card-header bg-white py-3">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-bolt text-warning me-2"></i>
+            Acciones Rápidas
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-6">
+                <a href="{{ url_for('entradas.nueva') }}" class="btn btn-primary w-100 d-flex flex-column align-items-center py-3 quick-action-btn">
+                    <i class="fas fa-plus-circle fa-2x mb-2"></i>
+                    <span class="fw-semibold">Nueva Entrada</span>
+                    <small class="text-white-50">Registrar muestra</small>
+                </a>
+            </div>
+            <div class="col-6">
+                <a href="{{ url_for('pedidos.nuevo') }}" class="btn btn-success w-100 d-flex flex-column align-items-center py-3 quick-action-btn">
+                    <i class="fas fa-clipboard-list fa-2x mb-2"></i>
+                    <span class="fw-semibold">Nuevo Pedido</span>
+                    <small class="text-white-50">Crear orden</small>
+                </a>
+            </div>
+            <div class="col-6">
+                <a href="{{ url_for('entradas.listar') }}?estado=EN_PROCESO" class="btn btn-warning w-100 d-flex flex-column align-items-center py-3 quick-action-btn">
+                    <i class="fas fa-clock fa-2x mb-2"></i>
+                    <span class="fw-semibold text-dark">Ver Pendientes</span>
+                    <small class="text-dark-50">En proceso</small>
+                </a>
+            </div>
+            <div class="col-6">
+                <a href="{{ url_for('informes.listar') }}" class="btn btn-info w-100 d-flex flex-column align-items-center py-3 quick-action-btn">
+                    <i class="fas fa-chart-bar fa-2x mb-2"></i>
+                    <span class="fw-semibold">Reportes</span>
+                    <small class="text-white-50">Ver informes</small>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.quick-actions-widget {
+    border: 1px solid rgba(0,0,0,0.08);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.quick-actions-widget .card-header {
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.quick-actions-widget .quick-action-btn {
+    transition: all 0.2s ease;
+    border: none;
+    text-decoration: none;
+}
+
+.quick-actions-widget .quick-action-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    color: white;
+}
+
+.quick-actions-widget .quick-action-btn i {
+    transition: transform 0.2s ease;
+}
+
+.quick-actions-widget .quick-action-btn:hover i {
+    transform: scale(1.1);
+}
+
+.quick-actions-widget .btn-warning {
+    color: #000;
+}
+
+.quick-actions-widget .btn-warning:hover {
+    color: #000;
+}
+</style>
+{% endmacro %}

@@ -1,0 +1,92 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Alerta de Saldo Bajo - {{ sample_code }}{% endblock %}
+
+{% block content %}
+<table role="presentation" style="width: 100%; border-collapse: collapse;">
+    <tr>
+        <td>
+            <!-- Urgent Banner -->
+            <table role="presentation" style="width: 100%; border-collapse: collapse; margin-bottom: 25px; background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); border-radius: 6px;">
+                <tr>
+                    <td style="padding: 15px 20px; text-align: center;">
+                        <span style="font-size: 14px; font-weight: 600; color: #ffffff; text-transform: uppercase; letter-spacing: 1px;">&#9888; Alerta Urgente</span>
+                    </td>
+                </tr>
+            </table>
+
+            <h2 style="margin: 0 0 20px 0; font-size: 22px; font-weight: 600; color: #1e293b;">Saldo Bajo - Accion Requerida</h2>
+
+            <p style="margin: 0 0 20px 0; font-size: 16px; color: #334155; line-height: 1.6;">
+                Hola <strong style="color: #1e293b;">{{ user_name }}</strong>,
+            </p>
+
+            <p style="margin: 0 0 25px 0; font-size: 15px; color: #475569; line-height: 1.6;">
+                Una muestra completada tiene saldo remanente pendiente de entrega. Se requiere atencion para programar la entrega al cliente.
+            </p>
+
+            <!-- Alert Details Box -->
+            <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 25px 0; background-color: #fef2f2; border-radius: 8px; border: 1px solid #fecaca;">
+                <tr>
+                    <td style="padding: 25px;">
+                        <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                            <!-- Sample Code -->
+                            <tr>
+                                <td style="padding: 8px 0; border-bottom: 1px solid #fecaca;">
+                                    <span style="font-size: 13px; color: #7f1d1d; text-transform: uppercase; letter-spacing: 0.5px;">Codigo de Muestra</span>
+                                </td>
+                                <td style="padding: 8px 0; border-bottom: 1px solid #fecaca; text-align: right;">
+                                    <span style="font-size: 16px; font-weight: 600; color: #7f1d1d; font-family: 'Courier New', monospace;">{{ sample_code }}</span>
+                                </td>
+                            </tr>
+                            <!-- Remaining Saldo -->
+                            <tr>
+                                <td style="padding: 15px 0; border-bottom: 1px solid #fecaca;">
+                                    <span style="font-size: 13px; color: #7f1d1d; text-transform: uppercase; letter-spacing: 0.5px;">Saldo Remanente</span>
+                                </td>
+                                <td style="padding: 15px 0; border-bottom: 1px solid #fecaca; text-align: right;">
+                                    <span style="display: inline-block; padding: 8px 16px; background-color: #dc2626; color: #ffffff; font-size: 20px; font-weight: 700; border-radius: 6px;">{{ saldo }}</span>
+                                </td>
+                            </tr>
+                            <!-- Days Pending -->
+                            <tr>
+                                <td style="padding: 15px 0 0 0;">
+                                    <span style="font-size: 13px; color: #7f1d1d; text-transform: uppercase; letter-spacing: 0.5px;">Dias en Espera</span>
+                                </td>
+                                <td style="padding: 15px 0 0 0; text-align: right;">
+                                    <span style="font-size: 18px; font-weight: 600; color: #dc2626;">{{ days_pending }} dias</span>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Warning Message -->
+            <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <tr>
+                    <td style="padding: 15px 20px; background-color: #fff7ed; border-left: 4px solid #f97316; border-radius: 0 6px 6px 0;">
+                        <p style="margin: 0; font-size: 14px; color: #9a3412; line-height: 1.5;">
+                            <strong>Nota:</strong> La muestra ha estado completada por {{ days_pending }} dias. Por favor coordine la entrega del saldo remanente lo antes posible.
+                        </p>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Action Button -->
+            <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 30px 0;">
+                <tr>
+                    <td style="text-align: center;">
+                        <a href="{{ sample_url }}" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 600; border-radius: 6px; box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);">Gestionar Entrega</a>
+                    </td>
+                </tr>
+            </table>
+
+            <p style="margin: 20px 0 0 0; font-size: 13px; color: #94a3b8; text-align: center;">
+                Si el boton no funciona, copie y pegue este enlace:<br>
+                <a href="{{ sample_url }}" style="color: #2563eb; text-decoration: underline; word-break: break-all;">{{ sample_url }}</a>
+            </p>
+        </td>
+    </tr>
+</table>
+{% endblock %}

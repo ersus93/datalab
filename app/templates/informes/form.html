@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% from 'components/glass_card.html' import glass_card, glass_card_header, glass_card_body, glass_card_footer %}
+{% from 'components/glass_button.html' import glass_button, glass_button_icon %}
+
+{% block title %}{{ informe.nro_oficial if informe else 'Nuevo Informe' }} — DataLab{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="flex items-center justify-between mb-6 flex-wrap gap-4">
+        <h1 class="text-2xl font-bold text-gradient">
+            {{ 'Nuevo Informe' if not informe else 'Editar Informe #' + informe.nro_oficial }}
+        </h1>
+        <a href="{{ url_for('informes.listar') }}" class="btn btn-ghost btn-sm">
+            <i class="fas fa-arrow-left mr-1"></i> {{ _('Volver') }}
+        </a>
+    </div>
+
+    <form method="POST" class="space-y-6">
+        {% if not informe %}
+        <!-- Solo en CREACIÓN -->
+        {% call glass_card(variant='lg') %}
+        {% call glass_card_header() %}
+        <h2 class="text-base font-semibold text-text-primary">{{ _('Identificación') }}</h2>
+        {% endcall %}
+        {% call glass_card_body() %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-text-secondary mb-2">{{ _('Tipo de Informe') }} <span class="text-error-500">*</span></label>
+                <select name="tipo_informe" required class="glass-input w-full">
+                    <option value="">{{ _('— Seleccionar —') }}</option>
+                    {% for val, label in tipos %}
+                    <option value="{{ val }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-text-secondary mb-2">{{ _('Entrada (Muestra)') }} <span class="text-error-500">*</span></label>
+                <select name="entrada_id" id="entrada_id" required class="glass-input w-full">
+                    <option value="">{{ _('— Seleccionar —') }}</option>
+                    {% for ent in entradas %}
+                    <option value="{{ ent.id }}">{{ ent.codigo }} — {{ ent.cliente.nombre if ent.cliente else '?' }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-text-secondary mb-2">{{ _('Cliente') }} <span class="text-error-500">*</span></label>
+                <select name="cliente_id" required class="glass-input w-full">
+                    <option value="">{{ _('— Seleccionar —') }}</option>
+                    {% for c in clientes %}
+                    <option value="{{ c.id }}">{{ c.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        {% endcall %}
+        {% endcall %}
+
+        <!-- Ensayos a incluir (carga dinámica vía JS) -->
+        <div id="ensayos-section" class="hidden">
+            {% call glass_card(variant='lg') %}
+            {% call glass_card_header() %}
+            <h2 class="text-base font-semibold text-text-primary">{{ _('Ensayos a incluir') }}</h2>
+            {% endcall %}
+            {% call glass_card_body() %}
+            <div id="ensayos-container" class="space-y-1 max-h-48 overflow-y-auto"></div>
+            {% endcall %}
+            {% endcall %}
+        </div>
+        {% else %}
+        <!-- En EDICIÓN: mostrar ensayos de la entrada -->
+        {% call glass_card(variant='lg') %}
+        {% call glass_card_header() %}
+        <h2 class="text-base font-semibold text-text-primary">{{ _('Ensayos a incluir') }}</h2>
+        {% endcall %}
+        {% call glass_card_body() %}
+        <div class="space-y-2">
+            {% for ensayo in ensayos_entrada %}
+            <label class="flex items-center gap-3 p-3 rounded-lg bg-glass-1 hover:bg-glass-2 border border-glass-border cursor-pointer transition-all">
+                <input type="checkbox" name="ensayos" value="{{ ensayo.id }}" class="w-4 h-4 rounded border-glass-border text-primary-500 focus:ring-primary-500 focus:ring-offset-0 bg-glass-1"
+                    {% if ensayo in informe.ensayos %}checked{% endif %}>
+                <span class="text-sm text-text-primary">{{ ensayo.ensayo.nombre_corto if ensayo.ensayo else '-' }}</span>
+            </label>
+            {% endfor %}
+        </div>
+        {% endcall %}
+        {% endcall %}
+        {% endif %}
+
+        <!-- Estado y Observaciones -->
+        {% call glass_card(variant='lg') %}
+        {% call glass_card_header() %}
+        <h2 class="text-base font-semibold text-text-primary">{{ _('Estado y Observaciones') }}</h2>
+        {% endcall %}
+        {% call glass_card_body() %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-text-secondary mb-2">{{ _('Estado') }} <span class="text-error-500">*</span></label>
+                <select name="estado" required class="glass-input w-full">
+                    {% for val, label in estados %}
+                    <option value="{{ val }}" {{ 'selected' if informe and informe.estado.value == val else '' }}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-text-secondary mb-2">{{ _('Fecha Generación') }}</label>
+                <input type="date" name="fecha_generacion" value="{{ informe.fecha_generacion.strftime('%Y-%m-%d') if informe and informe.fecha_generacion else '' }}" class="glass-input w-full">
+            </div>
+        </div>
+        <div class="mt-4">
+            <label class="block text-sm font-medium text-text-secondary mb-2">{{ _('Observaciones') }}</label>
+            <textarea name="observaciones" rows="4" class="glass-input w-full">{{ informe.observaciones if informe and informe.observaciones else '' }}</textarea>
+        </div>
+        {% endcall %}
+        {% endcall %}
+
+        <!-- Botones de acción -->
+        {% call glass_card(variant='md') %}
+        {% call glass_card_footer() %}
+        <div class="flex justify-end gap-3">
+            <a href="{{ url_for('informes.listar') }}" class="btn btn-secondary">
+                <i class="fas fa-times mr-1"></i> {{ _('Cancelar') }}
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save mr-1"></i> {{ _('Guardar') }}
+            </button>
+        </div>
+        {% endcall %}
+        {% endcall %}
+    </form>
+</div>
+{% endblock %}

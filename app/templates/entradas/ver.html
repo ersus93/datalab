@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+{% from 'components/glass_card.html' import glass_card, glass_card_header, glass_card_body, glass_card_footer %}
+{% from 'components/glass_button.html' import glass_button, glass_button_icon %}
+
+{% block title %}{{ entrada.codigo }} - {{ _('Entrada') }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="flex justify-between items-start mb-6 flex-wrap gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-gradient">{{ entrada.codigo }}</h1>
+            <p class="text-text-muted mt-1">
+                {{ _('Lote') }}: <span class="font-mono text-text-primary">{{ entrada.lote or '-' }}</span>
+            </p>
+        </div>
+        <div class="flex gap-2">
+            {% call glass_button(variant='secondary', icon='fas fa-edit', href=url_for('entradas.editar', id=entrada.id)) %}
+            {{ _('Editar') }}
+            {% endcall %}
+            {% call glass_button(variant='primary', icon='fas fa-print', type='button') %}
+            {{ _('Imprimir') }}
+            {% endcall %}
+        </div>
+    </div>
+
+    <!-- Estado -->
+    <div class="mb-6 flex flex-wrap gap-2">
+        {% set status_colors = {
+            'RECIBIDO': 'bg-info-50 text-info-500 border-info-500/30',
+            'EN_PROCESO': 'bg-primary-50 text-primary-400 border-primary-500/30',
+            'COMPLETADO': 'bg-success-50 text-success-500 border-success-500/30',
+            'ENTREGADO': 'bg-secondary-50 text-secondary-400 border-secondary-500/30',
+            'ANULADO': 'bg-error-50 text-error-500 border-error-500/30'
+        } %}
+        {% set status_class = status_colors.get(entrada.status, 'bg-glass-1 text-text-secondary border-glass-border') %}
+        <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full border {{ status_class }}">
+            <span class="status-dot status-dot--{{ 'active' if entrada.status != 'ANULADO' else 'inactive' }} mr-2"></span>
+            {{ _(entrada.status) }}
+        </span>
+
+        {% if entrada.en_os %}
+        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-glass-1 text-text-secondary border border-glass-border">
+            {{ _('En OS') }}
+        </span>
+        {% endif %}
+
+        {% if entrada.anulado %}
+        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-error-50 text-error-500 border border-error-500/30">
+            {{ _('Anulado') }}
+        </span>
+        {% endif %}
+    </div>
+
+    <!-- Stats Cards - Cantidades -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        {% call glass_card(variant='md', class='border-info-500/30 bg-info-50/20') %}
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-info-50 text-info-500 border border-info-500/30">
+                <i class="fas fa-box-open text-xl"></i>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-text-secondary">{{ _('Cantidad Recibida') }}</p>
+                <p class="text-2xl font-bold text-text-primary font-mono">{{ entrada.cantidad_recib }} <span class="text-sm font-normal text-text-muted">{{ entrada.unidad_medida.sigla if entrada.unidad_medida else '' }}</span></p>
+            </div>
+        </div>
+        {% endcall %}
+
+        {% call glass_card(variant='md', class='border-success-500/30 bg-success-50/20') %}
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-success-50 text-success-500 border border-success-500/30">
+                <i class="fas fa-check-circle text-xl"></i>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-text-secondary">{{ _('Cantidad Entregada') }}</p>
+                <p class="text-2xl font-bold text-text-primary font-mono">{{ entrada.cantidad_entreg or 0 }} <span class="text-sm font-normal text-text-muted">{{ entrada.unidad_medida.sigla if entrada.unidad_medida else '' }}</span></p>
+            </div>
+        </div>
+        {% endcall %}
+
+        {% call glass_card(variant='md', class='border-warning-500/30 bg-warning-50/20') %}
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-warning-50 text-warning-500 border border-warning-500/30">
+                <i class="fas fa-balance-scale text-xl"></i>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-text-secondary">{{ _('Saldo') }}</p>
+                <p class="text-2xl font-bold {{ 'text-success-500' if entrada.saldo > 0 else 'text-error-500' }} font-mono">{{ entrada.saldo or 0 }} <span class="text-sm font-normal text-text-muted">{{ entrada.unidad_medida.sigla if entrada.unidad_medida else '' }}</span></p>
+            </div>
+        </div>
+        {% endcall %}
+    </div>
+
+    <!-- Información Detallada -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <!-- Identificación -->
+        {% call glass_card(variant='md') %}
+        {% call glass_card_header() %}
+        <h3 class="text-lg font-semibold text-text-primary">
+            <i class="fas fa-id-card mr-2 text-primary-400"></i>
+            {{ _('Identificación') }}
+        </h3>
+        {% endcall %}
+        {% call glass_card_body() %}
+        <dl class="space-y-3 text-sm">
+            <div class="flex justify-between py-2 border-b border-glass-border-subtle">
+                <dt class="text-text-secondary">{{ _('Código') }}:</dt>
+                <dd class="text-text-primary font-mono font-semibold">{{ entrada.codigo }}</dd>
+            </div>
+            <div class="flex justify-between py-2 border-b border-glass-border-subtle">
+                <dt class="text-text-secondary">{{ _('Lote') }}:</dt>
+                <dd class="text-text-primary font-mono">{{ entrada.lote or '-' }}</dd>
+            </div>
+            <div class="flex justify-between py-2">
+                <dt class="text-text-secondary">{{ _('Nro. Parte') }}:</dt>
+                <dd class="text-text-primary font-mono">{{ entrada.nro_parte or '-' }}</dd>
+            </div>
+        </dl>
+        {% endcall %}
+        {% endcall %}
+
+        <!-- Relaciones -->
+        {% call glass_card(variant='md') %}
+        {% call glass_card_header() %}
+        <h3 class="text-lg font-semibold text-text-primary">
+            <i class="fas fa-link mr-2 text-secondary-400"></i>
+            {{ _('Relaciones') }}
+        </h3>
+        {% endcall %}
+        {% call glass_card_body() %}
+        <dl class="space-y-3 text-sm">
+            <div class="flex justify-between py-2 border-b border-glass-border-subtle">
+                <dt class="text-text-secondary">{{ _('Cliente') }}:</dt>
+                <dd class="text-text-primary">{{ entrada.cliente.nombre if entrada.cliente else '-' }}</dd>
+            </div>
+            <div class="flex justify-between py-2 border-b border-glass-border-subtle">
+                <dt class="text-text-secondary">{{ _('Fábrica') }}:</dt>
+                <dd class="text-text-primary">{{ entrada.fabrica.nombre if entrada.fabrica else '-' }}</dd>
+            </div>
+            <div class="flex justify-between py-2">
+                <dt class="text-text-secondary">{{ _('Producto') }}:</dt>
+                <dd class="text-text-primary">{{ entrada.producto.nombre if entrada.producto else '-' }}</dd>
+            </div>
+        </dl>
+        {% endcall %}
+        {% endcall %}
+
+        <!-- Fechas -->
+        {% call glass_card(variant='md') %}
+        {% call glass_card_header() %}
+        <h3 class="text-lg font-semibold text-text-primary">
+            <i class="fas fa-calendar mr-2 text-success-500"></i>
+            {{ _('Fechas') }}
+        </h3>
+        {% endcall %}
+        {% call glass_card_body() %}
+        <dl class="space-y-3 text-sm">
+            <div class="flex justify-between py-2 border-b border-glass-border-subtle">
+                <dt class="text-text-secondary">{{ _('Fabricación') }}:</dt>
+                <dd class="text-text-primary font-mono">{{ entrada.fech_fab.strftime('%d/%m/%Y') if entrada.fech_fab else '-' }}</dd>
+            </div>
+            <div class="flex justify-between py-2 border-b border-glass-border-subtle">
+                <dt class="text-text-secondary">{{ _('Vencimiento') }}:</dt>
+                <dd class="text-text-primary font-mono {{ 'text-error-500 font-bold' if entrada.vencido else 'text-text-primary' }}">{{ entrada.fech_venc.strftime('%d/%m/%Y') if entrada.fech_venc else '-' }}</dd>
+            </div>
+            <div class="flex justify-between py-2">
+                <dt class="text-text-secondary">{{ _('Muestreo') }}:</dt>
+                <dd class="text-text-primary font-mono">{{ entrada.fech_muestreo.strftime('%d/%m/%Y') if entrada.fech_muestreo else '-' }}</dd>
+            </div>
+        </dl>
+        {% endcall %}
+        {% endcall %}
+
+        <!-- Observaciones -->
+        {% call glass_card(variant='md') %}
+        {% call glass_card_header() %}
+        <h3 class="text-lg font-semibold text-text-primary">
+            <i class="fas fa-comment-dots mr-2 text-warning-500"></i>
+            {{ _('Observaciones') }}
+        </h3>
+        {% endcall %}
+        {% call glass_card_body() %}
+        {% if entrada.observaciones %}
+        <p class="text-sm text-text-secondary leading-relaxed">{{ entrada.observaciones }}</p>
+        {% else %}
+        <p class="text-sm text-text-muted italic">{{ _('Sin observaciones registradas') }}</p>
+        {% endif %}
+        {% endcall %}
+        {% endcall %}
+    </div>
+
+    <!-- Ensayos -->
+    {% call glass_card(variant='lg') %}
+    {% call glass_card_header() %}
+    <div class="flex items-center justify-between">
+        <h3 class="text-lg font-semibold text-text-primary">
+            <i class="fas fa-flask mr-2 text-primary-400"></i>
+            {{ _('Ensayos Asociados') }}
+        </h3>
+        <span class="text-sm text-text-muted">{{ entrada.ensayos|length }} {{ _('ensayos') }}</span>
+    </div>
+    {% endcall %}
+    {% call glass_card_body() %}
+    {% if entrada.ensayos %}
+    <div class="overflow-x-auto">
+        <table class="glass-table w-full">
+            <thead>
+                <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">{{ _('Ensayo') }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">{{ _('Estado') }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">{{ _('Fecha') }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">{{ _('Acciones') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ensayo in entrada.ensayos %}
+                <tr class="hover:bg-glass-1 transition-colors">
+                    <td class="px-4 py-3 text-sm text-text-primary font-medium">{{ ensayo.ensayo.nombre_corto if ensayo.ensayo else '-' }}</td>
+                    <td class="px-4 py-3 text-sm">
+                        {% set estado_colors = {'PENDIENTE': 'bg-warning-50 text-warning-500', 'EN_PROCESO': 'bg-primary-50 text-primary-400', 'COMPLETADO': 'bg-success-50 text-success-500'} %}
+                        {% set estado_class = estado_colors.get(ensayo.estado, 'bg-glass-1 text-text-secondary') %}
+                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ estado_class }}">
+                            {{ _(ensayo.estado) }}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-text-secondary font-mono">{{ ensayo.fecha_asignacion.strftime('%d/%m/%Y') if ensayo.fecha_asignacion else '-' }}</td>
+                    <td class="px-4 py-3 text-sm">
+                        <a href="#" class="btn btn-ghost btn-sm">
+                            <i class="fas fa-eye"></i> {{ _('Ver') }}
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="text-center py-8 text-text-muted">
+        <i class="fas fa-flask text-4xl mb-3 opacity-50"></i>
+        <p>{{ _('No hay ensayos asociados') }}</p>
+    </div>
+    {% endif %}
+    {% endcall %}
+    {% endcall %}
+</div>
+{% endblock %}
