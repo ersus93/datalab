@@ -16,12 +16,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-    <!-- TailwindCSS Output (Liquid Glass Design System) -->
+    <!-- 1) Tailwind compiled output (utilities + components) -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
-    
-    <!-- Liquid Glass Custom Styles -->
+
+    <!-- 2) Liquid Glass custom system (sidebar, header, buttons, forms, alerts, etc.)
+            MUST load AFTER output.css so custom overrides win -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- 3) Liquid Glass ambient layers -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/liquid-glass/background-orbs.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/liquid-glass/svg-filters.css') }}">
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -32,9 +35,9 @@
 </head>
 <body class="min-h-dvh flex flex-col relative overflow-x-hidden">
 
-    <!-- Background Orbs (Liquid Glass) -->
-    <div class="orb orb--blue"></div>
-    <div class="orb orb--violet"></div>
+    <!-- Background Orbs (Liquid Glass ambient depth) -->
+    <div class="orb orb--blue" aria-hidden="true"></div>
+    <div class="orb orb--violet" aria-hidden="true"></div>
 
     <!-- Navbar -->
     {% include 'partials/navbar.html' %}
@@ -45,7 +48,7 @@
     <!-- Main Content -->
     <main class="flex-grow main-content relative z-10">
         <div class="container mx-auto px-4 py-6">
-        {% block content %}{% endblock %}
+            {% block content %}{% endblock %}
         </div>
     </main>
 
@@ -56,16 +59,6 @@
     {% if current_user.is_authenticated %}
     <script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
     {% endif %}
-
-    <!-- SVG Filters for Liquid Glass (Chrome/Edge only) -->
-    <svg class="fixed inset-0 w-0 h-0 pointer-events-none" aria-hidden="true">
-      <defs>
-        <filter id="liquid-glass-refraction">
-          <feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="3" result="noise"/>
-          <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G"/>
-        </filter>
-      </defs>
-    </svg>
 
     {% block extra_js %}{% endblock %}
 </body>
