@@ -1,132 +1,141 @@
-{% extends "base/base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Dashboard - DataLab{% endblock %}
 {% block description %}Panel de control principal con métricas y análisis en tiempo real{% endblock %}
 {% block keywords %}dashboard, métricas, análisis, estadísticas, tiempo real{% endblock %}
 
-{% block body_class %}dashboard-page{% endblock %}
-
-{# Importar macros de widgets #}
-{% from 'components/dashboard/status_count_widget.html' import status_count_widget %}
-{% from 'components/dashboard/status_trend_chart.html' import status_trend_chart %}
-{% from 'components/dashboard/quick_actions.html' import quick_actions %}
-{% from 'componentes/ui/metrics-macros.html' import metric_card, icon_users, icon_revenue, icon_sessions, icon_conversion %}
+{# Importar macros de componentes glass #}
+{% from 'components/glass_card.html' import glass_card, glass_card_header, glass_card_body, glass_card_footer %}
+{% from 'components/dashboard/status_count_glass.html' import status_count_glass %}
+{% from 'components/dashboard/actions_panel.html' import actions_panel %}
 
 {% block extra_css %}
-<!-- Bootstrap 5 CSS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+{# Eliminar Bootstrap CSS - no longer needed #}
 {% endblock %}
 
 {% block content %}
-<div class="dashboard-container container-fluid py-4">
-
-    <!-- Header del Dashboard -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h1 class="h3 mb-1">
-                        <i class="fas fa-tachometer-alt text-primary me-2"></i>
-                        Dashboard
-                    </h1>
-                    <p class="text-muted mb-0">Panel de control con métricas en tiempo real</p>
-                </div>
-                <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-light text-dark border" id="last-update-badge">
-                        <i class="fas fa-sync-alt me-1"></i>
-                        <span id="last-update-time">Actualizando...</span>
-                    </span>
-                    <button class="btn btn-outline-primary btn-sm" onclick="DataLabDashboard.refresh()">
-                        <i class="fas fa-refresh me-1"></i> Actualizar
-                    </button>
-                </div>
+<div class="max-w-7xl mx-auto">
+    
+    {# Header del Dashboard #}
+    <div class="mb-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-gradient">
+                    <i class="fas fa-tachometer-alt mr-2 text-primary-400"></i>
+                    Dashboard
+                </h1>
+                <p class="text-text-muted mt-1">
+                    Panel de control con métricas en tiempo real
+                </p>
             </div>
+            
+            {# MEJORA A: Pill "Entradas hoy" - dato ya disponible sin costo extra #}
+            {% if entrada_stats.hoy > 0 %}
+            <div class="flex items-center gap-2 px-4 py-2 rounded-full
+                        bg-primary-50/30 border border-primary-500/30">
+                <div class="w-2 h-2 rounded-full bg-primary-400 animate-pulse"></div>
+                <span class="text-sm text-primary-400 font-medium font-mono">
+                    {{ entrada_stats.hoy }}
+                </span>
+                <span class="text-xs text-text-muted">
+                    {{ 'entrada' if entrada_stats.hoy == 1 else 'entradas' }} hoy
+                </span>
+            </div>
+            {% endif %}
         </div>
     </div>
 
-    <!-- Widget de Conteo por Estado -->
-    <div class="row mb-4">
-        <div class="col-12">
-            {{ status_count_widget(status_counts|default({})) }}
-        </div>
+    {# Widget de Conteo por Estado - Nuevo estilo glass #}
+    {{ status_count_glass(status_counts|default({})) }}
+
+    {# Métricas Principales #}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <a href="{{ url_for('clientes.listar') }}" class="block group">
+            {% call glass_card(variant='md', class='bg-primary-50/50 border-primary-500/30 hover:border-primary-400/50') %}
+                <h5 class="text-sm font-medium text-primary-400 mb-2">Total Clientes</h5>
+                <h2 class="text-3xl font-bold text-text-primary font-mono">{{ stats.total_clientes }}</h2>
+            {% endcall %}
+        </a>
+        
+        <a href="{{ url_for('pedidos.listar') }}" class="block group">
+            {% call glass_card(variant='md', class='bg-success-50/50 border-success-500/30 hover:border-success-400/50') %}
+                <h5 class="text-sm font-medium text-success-500 mb-2">Total Pedidos</h5>
+                <h2 class="text-3xl font-bold text-text-primary font-mono">{{ total_pedidos }}</h2>
+            {% endcall %}
+        </a>
+        
+        <a href="{{ url_for('tecnico.metricas') }}" class="block group">
+            {% call glass_card(variant='md', class='bg-warning-50/50 border-warning-500/30 hover:border-warning-400/50') %}
+                <h5 class="text-sm font-medium text-warning-500 mb-2">Total Ensayos</h5>
+                <h2 class="text-3xl font-bold text-text-primary font-mono">{{ total_ensayos }}</h2>
+            {% endcall %}
+        </a>
+        
+        <a href="{{ url_for('ordenes_trabajo.listar') }}" class="block group">
+            {% call glass_card(variant='md', class='bg-info-50/50 border-info-500/30 hover:border-info-400/50') %}
+                <h5 class="text-sm font-medium text-info-500 mb-2">Órdenes de Trabajo</h5>
+                <h2 class="text-3xl font-bold text-text-primary font-mono">{{ total_ordenes }}</h2>
+            {% endcall %}
+        </a>
     </div>
 
-    <!-- Métricas Principales y Acciones Rápidas -->
-    <div class="row g-4 mb-4">
-        <!-- Métricas -->
-        <div class="col-xl-8 col-lg-7">
-            <div class="card h-100">
-                <div class="card-header bg-white py-3">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-chart-pie text-primary me-2"></i>
-                        Métricas Principales
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            {{ metric_card(
-                                title='Total de Clientes',
-                                description='Clientes registrados',
-                                value=metrics.total_clients.value|default('1,247'),
-                                change_value=metrics.total_clients.change|default('+12.5%'),
-                                change_period=metrics.total_clients.period|default('vs mes anterior'),
-                                icon_svg=icon_users(),
-                                card_type='primary',
-                                change_type='positive'
-                            ) }}
+    {# MEJORA C: Banner de pendientes de entrega - dato ya disponible del DashboardService #}
+    {% if pending_deliveries %}
+    <div class="flex items-center gap-3 px-4 py-3 rounded-xl
+                bg-warning-50/20 border border-warning-500/30 mb-8">
+        <i class="fas fa-exclamation-triangle text-warning-500"></i>
+        <span class="text-sm text-warning-400">
+            <strong class="font-mono">{{ pending_deliveries|length }}</strong>
+            muestras completadas pendientes de entrega al cliente
+        </span>
+        <a href="{{ url_for('entradas.listar') }}?estado=COMPLETADO"
+           class="ml-auto text-xs text-warning-400 hover:text-warning-300 underline">
+            Ver todas →
+        </a>
+    </div>
+    {% endif %}
+
+    {# Acciones Rápidas y Actividad Reciente #}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div class="lg:col-span-2">
+            {{ actions_panel(current_user) }}
+        </div>
+        
+        <div>
+            {# Actividad Reciente - Lista compacta tipo feed (Fase 6, NO tabla de Fase 5) #}
+            {% call glass_card(variant='md') %}
+            {% call glass_card_header() %}
+            <h3 class="text-lg font-semibold text-text-primary">
+                <i class="fas fa-clock mr-2 text-info-500"></i>
+                Entradas Recientes
+            </h3>
+            {% endcall %}
+            {% call glass_card_body() %}
+            <div class="space-y-3">
+                {% for entrada in entradas_recientes[:5] %}
+                <a href="{{ url_for('entradas.ver', id=entrada.id) }}" class="block p-3 rounded-lg bg-glass-1 hover:bg-glass-2 border border-glass-border transition-all">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-text-primary">{{ entrada.codigo }}</p>
+                            <p class="text-xs text-text-muted">{{ entrada.producto.nombre[:30] if entrada.producto else '-' }}</p>
                         </div>
-                        <div class="col-md-6">
-                            {{ metric_card(
-                                title='Total de Pedidos',
-                                description='Pedidos realizados',
-                                value=metrics.total_orders.value|default('3,456'),
-                                change_value=metrics.total_orders.change|default('+8.2%'),
-                                change_period=metrics.total_orders.period|default('vs mes anterior'),
-                                icon_svg=icon_revenue(),
-                                card_type='success',
-                                change_type='positive'
-                            ) }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ metric_card(
-                                title='Total de Ensayos',
-                                description='Ensayos completados',
-                                value=metrics.total_tests.value|default('892'),
-                                change_value=metrics.total_tests.change|default('+15.3%'),
-                                change_period=metrics.total_tests.period|default('vs mes anterior'),
-                                icon_svg=icon_sessions(),
-                                card_type='info',
-                                change_type='positive'
-                            ) }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ metric_card(
-                                title='Órdenes de Trabajo',
-                                description='Órdenes activas',
-                                value=metrics.work_orders.value|default('156'),
-                                change_value=metrics.work_orders.change|default('-2.1%'),
-                                change_period=metrics.work_orders.period|default('vs semana anterior'),
-                                icon_svg=icon_conversion(),
-                                card_type='warning',
-                                change_type='negative'
-                            ) }}
-                        </div>
+                        <span class="text-xs px-2 py-1 rounded-full 
+                            {{ 'bg-success-50 text-success-400' if entrada.status.value == 'COMPLETADO' else '' }}
+                            {{ 'bg-primary-50 text-primary-400' if entrada.status.value == 'EN_PROCESO' else '' }}
+                            {{ 'bg-gray-500/20 text-gray-400' if entrada.status.value == 'RECIBIDO' else '' }}">
+                            {{ entrada.status.value }}
+                        </span>
                     </div>
-                </div>
+                </a>
+                {% else %}
+                <p class="text-sm text-text-muted text-center py-4">No hay entradas recientes</p>
+                {% endfor %}
             </div>
-        </div>
-
-        <!-- Acciones Rápidas -->
-        <div class="col-xl-4 col-lg-5">
-            {{ quick_actions() }}
-        </div>
-    </div>
-
-    <!-- Gráfico de Tendencias -->
-    <div class="row mb-4">
-        <div class="col-12">
-            {{ status_trend_chart(trends|default([])) }}
+            <a href="{{ url_for('entradas.listar') }}" class="block mt-4 text-center text-sm text-primary-400 hover:text-primary-300">
+                Ver todas las entradas →
+            </a>
+            {% endcall %}
+            {% endcall %}
         </div>
     </div>
 
@@ -134,39 +143,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- Bootstrap 5 JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
-<!-- Dashboard JS -->
-<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
-
-<script>
-    // Actualizar timestamp de última actualización
-    function updateLastUpdateTime() {
-        const badge = document.getElementById('last-update-time');
-        if (badge && DataLabDashboard.getLastUpdate()) {
-            const time = DataLabDashboard.getLastUpdate().toLocaleTimeString('es-ES', {
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-            badge.textContent = `Actualizado: ${time}`;
-        }
-    }
-
-    // Escuchar actualizaciones del dashboard
-    document.addEventListener('DOMContentLoaded', function() {
-        const originalRefresh = DataLabDashboard.refresh;
-        DataLabDashboard.refresh = function() {
-            return originalRefresh().then(() => {
-                updateLastUpdateTime();
-            });
-        };
-
-        // Actualizar tiempo inicial después de primera carga
-        setTimeout(updateLastUpdateTime, 1000);
-    });
-</script>
+{# Eliminar Bootstrap JS - no longer needed #}
+{# Eliminar Chart.js y dashboard.js si no se usan #}
 {% endblock %}

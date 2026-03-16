@@ -1,0 +1,109 @@
+{# app/templates/components/dashboard/actions_panel.html #}
+{# Panel de Acciones Rápidas y CRUD - Glass Design System #}
+
+{# Importar macros necesarios - NOTA: el import usa / no . #}
+{% from 'components/glass_card.html' import glass_card, glass_card_header, glass_card_body %}
+
+{% macro actions_panel(user=None) %}
+{% set _current_user = user %}
+{% call glass_card(variant='lg') %}
+{% call glass_card_header() %}
+<h3 class="text-lg font-semibold text-text-primary">
+    <i class="fas fa-bolt mr-2 text-warning-500"></i>
+    Acciones Rápidas
+</h3>
+{% endcall %}
+{% call glass_card_body() %}
+
+{# Primera fila: Crear nuevos registros #}
+<div class="mb-6">
+    <h4 class="text-sm font-medium text-text-secondary mb-3 uppercase tracking-wide">
+        <i class="fas fa-plus-circle mr-1"></i> Nuevo Registro
+    </h4>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <a href="{{ url_for('entradas.nueva') }}" class="p-3 rounded-lg bg-primary-50/20 border border-primary-500/30 hover:bg-primary-50/30 transition-all text-center">
+            <i class="fas fa-vial text-primary-400 mb-1"></i>
+            <span class="text-sm text-text-primary block">Nueva Entrada</span>
+        </a>
+        <a href="{{ url_for('pedidos.nuevo') }}" class="p-3 rounded-lg bg-success-50/20 border border-success-500/30 hover:bg-success-50/30 transition-all text-center">
+            <i class="fas fa-clipboard-list text-success-400 mb-1"></i>
+            <span class="text-sm text-text-primary block">Nuevo Pedido</span>
+        </a>
+        <a href="{{ url_for('clientes.nuevo') }}" class="p-3 rounded-lg bg-secondary-50/20 border border-secondary-500/30 hover:bg-secondary-50/30 transition-all text-center">
+            <i class="fas fa-user-plus text-secondary-400 mb-1"></i>
+            <span class="text-sm text-text-primary block">Nuevo Cliente</span>
+        </a>
+        
+        {# BUG 2 CORREGIDO: Guard de permisos para Nueva Fábrica #}
+        {% if _current_user and (_current_user.is_admin() or _current_user.is_laboratory_manager()) %}
+        <a href="{{ url_for('fabricas.nueva') }}" class="p-3 rounded-lg bg-warning-50/20 border border-warning-500/30 hover:bg-warning-50/30 transition-all text-center">
+            <i class="fas fa-industry text-warning-500 mb-1"></i>
+            <span class="text-sm text-text-primary block">Nueva Fábrica</span>
+        </a>
+        {% else %}
+        <a href="{{ url_for('ordenes_trabajo.nueva') }}" class="p-3 rounded-lg bg-info-50/20 border border-info-500/30 hover:bg-info-50/30 transition-all text-center">
+            <i class="fas fa-clipboard-check text-info-400 mb-1"></i>
+            <span class="text-sm text-text-primary block">Nueva Orden</span>
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+{# Segunda fila: Gestionar registros #}
+<div class="mb-6">
+    <h4 class="text-sm font-medium text-text-secondary mb-3 uppercase tracking-wide">
+        <i class="fas fa-cogs mr-1"></i> Gestionar
+    </h4>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <a href="{{ url_for('clientes.listar') }}" class="p-3 rounded-lg bg-glass-1 border border-glass-border hover:bg-glass-2 transition-all text-center">
+            <i class="fas fa-users text-text-secondary mb-1"></i>
+            <span class="text-sm text-text-secondary block">Clientes</span>
+        </a>
+        <a href="{{ url_for('fabricas.listar') }}" class="p-3 rounded-lg bg-glass-1 border border-glass-border hover:bg-glass-2 transition-all text-center">
+            <i class="fas fa-building text-text-secondary mb-1"></i>
+            <span class="text-sm text-text-secondary block">Fábricas</span>
+        </a>
+        <a href="{{ url_for('productos.listar') }}" class="p-3 rounded-lg bg-glass-1 border border-glass-border hover:bg-glass-2 transition-all text-center">
+            <i class="fas fa-box text-text-secondary mb-1"></i>
+            <span class="text-sm text-text-secondary block">Productos</span>
+        </a>
+        <a href="{{ url_for('ordenes_trabajo.listar') }}" class="p-3 rounded-lg bg-glass-1 border border-glass-border hover:bg-glass-2 transition-all text-center">
+            <i class="fas fa-tasks text-text-secondary mb-1"></i>
+            <span class="text-sm text-text-secondary block">Órdenes</span>
+        </a>
+    </div>
+</div>
+
+{# Tercera fila: Ver listados #}
+<div>
+    <h4 class="text-sm font-medium text-text-secondary mb-3 uppercase tracking-wide">
+        <i class="fas fa-list mr-1"></i> Ver Listados
+    </h4>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <a href="{{ url_for('entradas.listar') }}" class="p-3 rounded-lg bg-glass-1 border border-glass-border hover:bg-glass-2 transition-all text-center">
+            <i class="fas fa-vials text-text-secondary mb-1"></i>
+            <span class="text-sm text-text-secondary block">Todas las entradas</span>
+        </a>
+        
+        {# MEJORA B: Botón "En proceso" con filtro #}
+        <a href="{{ url_for('entradas.listar') }}?estado=EN_PROCESO"
+           class="p-3 rounded-lg bg-warning-50/10 border border-warning-500/20
+                  hover:bg-warning-50/20 transition-all text-center">
+            <i class="fas fa-clock text-warning-500 mb-1"></i>
+            <span class="text-sm text-warning-400 block">En proceso</span>
+        </a>
+        
+        <a href="{{ url_for('informes.listar') }}" class="p-3 rounded-lg bg-glass-1 border border-glass-border hover:bg-glass-2 transition-all text-center">
+            <i class="fas fa-file-alt text-text-secondary mb-1"></i>
+            <span class="text-sm text-text-secondary block">Informes</span>
+        </a>
+        <a href="{{ url_for('lab.index') }}" class="p-3 rounded-lg bg-glass-1 border border-glass-border hover:bg-glass-2 transition-all text-center">
+            <i class="fas fa-flask text-text-secondary mb-1"></i>
+            <span class="text-sm text-text-secondary block">Laboratorio</span>
+        </a>
+    </div>
+</div>
+
+{% endcall %}
+{% endcall %}
+{% endmacro %}
