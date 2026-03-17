@@ -1,0 +1,219 @@
+# DataLab Test Suite
+# Workflow de testing ejecutable manualmente
+
+name: Test Suite
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: 'Tipo de tests a ejecutar'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - unit
+          - integration
+          - quick
+      python_version:
+        description: 'Versión de Python'
+        required: true
+        default: '3.11'
+        type: choice
+        options:
+          - '3.9'
+          - '3.10'
+          - '3.11'
+          - '3.12'
+      coverage:
+        description: 'Generar reporte de coverage'
+        required: false
+        default: 'true'
+        type: boolean
+      parallel:
+        description: 'Ejecutar en paralelo'
+        required: false
+        default: 'false'
+        type: boolean
+      database:
+        description: 'Base de datos para tests'
+        required: false
+        default: 'sqlite'
+        type: choice
+        options:
+          - sqlite
+          - postgres
+
+env:
+  FLASK_ENV: testing
+
+jobs:
+  # Tests con SQLite (más rápidos)
+  test-sqlite:
+    name: Tests SQLite (${{ github.inputs.test_type || 'all' }})
+    runs-on: ubuntu-latest
+    if: github.inputs.database == 'sqlite' || github.inputs.database == ''
+    
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python ${{ github.inputs.python_version || '3.11' }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ github.inputs.python_version || '3.11' }}
+          cache: 'pip'
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-flask pytest-cov pytest-xdist
+
+      - name: Ejecutar tests unitarios
+        if: github.inputs.test_type == 'unit' || github.inputs.test_type == 'all' || github.inputs.test_type == ''
+        env:
+          SECRET_KEY: test-secret-key
+        run: |
+          pytest tests/unit/ -v --tb=short ${{ github.inputs.coverage == 'true' && '--cov=app --cov-report=term-missing' || '' }} ${{ github.inputs.parallel == 'true' && '-n auto' || '' }}
+
+      - name: Ejecutar tests de integración
+        if: github.inputs.test_type == 'integration' || github.inputs.test_type == 'all' || github.inputs.test_type == ''
+        env:
+          SECRET_KEY: test-secret-key
+        run: |
+          pytest tests/integration/ -v --tb=short ${{ github.inputs.coverage == 'true' && '--cov=app --cov-report=term-missing' || '' }} ${{ github.inputs.parallel == 'true' && '-n auto' || '' }}
+
+      - name: Tests rápidos (solo unitarios sin coverage)
+        if: github.inputs.test_type == 'quick'
+        env:
+          SECRET_KEY: test-secret-key
+        run: |
+          pytest tests/unit/ -v --tb=line -x --no-cov
+
+  # Tests con PostgreSQL
+  test-postgres:
+    name: Tests PostgreSQL (${{ github.inputs.test_type || 'all' }})
+    runs-on: ubuntu-latest
+    if: github.inputs.database == 'postgres'
+    
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test_datalab
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python ${{ github.inputs.python_version || '3.11' }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ github.inputs.python_version || '3.11' }}
+          cache: 'pip'
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-flask pytest-cov pytest-xdist
+
+      - name: Ejecutar tests unitarios
+        if: github.inputs.test_type == 'unit' || github.inputs.test_type == 'all' || github.inputs.test_type == ''
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_datalab
+          SECRET_KEY: test-secret-key
+        run: |
+          pytest tests/unit/ -v --tb=short ${{ github.inputs.coverage == 'true' && '--cov=app --cov-report=term-missing' || '' }} ${{ github.inputs.parallel == 'true' && '-n auto' || '' }}
+
+      - name: Ejecutar tests de integración
+        if: github.inputs.test_type == 'integration' || github.inputs.test_type == 'all' || github.inputs.test_type == ''
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_datalab
+          SECRET_KEY: test-secret-key
+        run: |
+          pytest tests/integration/ -v --tb=short ${{ github.inputs.coverage == 'true' && '--cov=app --cov-report=term-missing' || '' }} ${{ github.inputs.parallel == 'true' && '-n auto' || '' }}
+
+  # Matriz de versiones de Python
+  test-matrix:
+    name: Test Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12']
+    
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-flask pytest-cov
+
+      - name: Ejecutar tests
+        env:
+          SECRET_KEY: test-secret-key
+        run: |
+          pytest tests/unit/ -v --tb=short --no-cov -x
+
+  # Tests específicos de módulo
+  test-modules:
+    name: Test Módulos
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-flask pytest-cov
+
+      # Tests de modelos
+      - name: Tests de Modelos
+        env:
+          SECRET_KEY: test-secret-key
+        run: |
+          pytest tests/unit/test_master_data_models.py -v --tb=short
+
+      # Tests de clientes
+      - name: Tests de Clientes
+        env:
+          SECRET_KEY: test-secret-key
+        run: |
+          pytest tests/unit/clientes/ -v --tb=short
+
+      # Tests de ensayos
+      - name: Tests de Ensayos
+        env:
+          SECRET_KEY: test-secret-key
+        run: |
+          pytest tests/unit/ensayos/ -v --tb=short
