@@ -1,0 +1,11 @@
+# Uploads Directory
+
+This directory is reserved for user-uploaded files.
+
+## Purpose
+- Store files uploaded by users during sample registration
+- Temporary storage for analysis documents
+- User-generated content
+
+## Note
+This directory is ignored by Git (except for this `.gitkeep` file) to prevent committing user data.
