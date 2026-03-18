@@ -2,7 +2,7 @@ name: '📋 Qwen Code Scheduled Issue Triage'
 
 on:
   schedule:
-    - cron: '0 * * * *' # Runs every hour
+    - cron: '0 9 * * *' # Runs daily at 9 AM UTC (reduced from hourly to reduce notifications)
   pull_request:
     branches:
       - 'main'
