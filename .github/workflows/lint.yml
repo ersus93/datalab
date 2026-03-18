@@ -1,5 +1,5 @@
 # DataLab Linting
-# Workflow de linting ejecutable manualmente o en cada push
+# Workflow de linting solo en push (sin PR para reducir notificaciones)
 
 name: Lint
 
@@ -10,29 +10,6 @@ on:
       - '**.py'
       - 'requirements.txt'
       - '.github/workflows/lint.yml'
-  pull_request:
-    branches: [main, develop]
-    paths:
-      - '**.py'
-      - 'requirements.txt'
-      - '.github/workflows/lint.yml'
-  workflow_dispatch:
-    inputs:
-      fix:
-        description: 'Intentar auto-corregir errores'
-        required: false
-        default: 'false'
-        type: boolean
-      tools:
-        description: 'Herramientas de linting'
-        required: false
-        default: 'all'
-        type: choice
-        options:
-          - all
-          - ruff
-          - black
-          - mypy
 
 env:
   PYTHON_VERSION: '3.11'
