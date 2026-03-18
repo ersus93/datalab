@@ -1,13 +1,11 @@
 # DataLab CI - Continuous Integration
-# Ejecuta tests y linting en cada push y pull request
+# Ejecuta tests solo en push (sin PR para reducir notificaciones)
 
 name: CI
 
 on:
   push:
     branches: [main, develop, 'feature/*', 'fix/*']
-  pull_request:
-    branches: [main, develop]
 
 env:
   PYTHON_VERSION: '3.11'
