@@ -83,10 +83,8 @@ key.pem
 *.db-journal
 *.db-wal
 *.db-shm
-data/
-data/*.db
+instance/*.db
 uploads/
-uploads/*
 !uploads/.gitkeep
 
 # =============================================================================
@@ -130,10 +128,10 @@ Thumbs.db
 *.sublime-project
 
 # =============================================================================
-# MIGRACIONES (opcional)
+# MIGRACIONES DE DATOS (desde Access RM2026)
 # =============================================================================
-# migrations/
-data/migrations/
+# data/migrations/ se incluye (scripts de migración)
+# data/*.db se ignora (bases de datos locales)
 
 # =============================================================================
 # TESTING
@@ -163,12 +161,13 @@ site/
 worktrees/
 
 # =============================================================================
-# ARCHIVOS SENSIBLES Y DATOS
+# HERRAMIENTAS AI Y LOCALES
 # =============================================================================
-utiles/
-.opencode/
-.bash_history
-.zsh_history
+.qwen/
+gha-creds-*.json
+.claude.json
+.opencode/node_modules/
+.opencode/bun.lock
 
 # =============================================================================
 # TAILWIND CSS
@@ -203,15 +202,18 @@ Dockerfile.dev
 # =============================================================================
 # CI/CD
 # =============================================================================
+# Los workflows se incluyen, solo ignorar archivos temporales
 .github/workflows/*.tmp
-!.github/workflows/*.example
 
 # =============================================================================
 # VARIOS
 # =============================================================================
 *.tmp
 *.temp
-.cache/*
-!cache/.gitkeep
+.cache
 venv.yml
 environment.yml
+
+# Historial de shells (local)
+.bash_history
+.zsh_history

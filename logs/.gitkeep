@@ -1,0 +1,18 @@
+# Logs Directory
+
+This directory is reserved for application log files.
+
+## Purpose
+- Application runtime logs
+- Error logs
+- Access logs
+- Debug information
+
+## Log Files
+- `datalab.log` - Main application log
+- `access.log` - HTTP access log
+- `error.log` - Error-specific log
+
+## Note
+This directory is ignored by Git (except for this `.gitkeep` file) to prevent committing log data.
+Logs may contain sensitive information and should not be version controlled.
